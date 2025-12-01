@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/Mike-31415/intexFall2025#readme",
   "dependencies": {
+    "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
     "express": "^5.2.0",
     "express-session": "^1.18.2",

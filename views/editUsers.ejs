@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Edit User</title>
+    </head>
+    <body>
+        <h1>Edit User</h1>
+
+        <% if (typeof error_message !== 'undefined' && error_message) { %>
+            <p style="color:red;"><%= error_message %></p>
+        <% } %>
+
+        <form action="/editUsers/<%= user.id %>" method="post" enctype="multipart/form-data">
+            <label for="username">User Name: </label>
+            <input type="text" id="username" name="username" value="<%= user.username %>" required>
+            <br><br>
+
+            <label for="password">Password: </label>
+            <input type="text" id="password" name="password" value="<%= user.password %>" required>
+            <br><br>
+
+            <% if (user.profile_image) { %>
+                <p>Current Picture:</p>
+                <img src="<%= user.profile_image %>" alt="Current profile picture" style="max-width:150px; height:auto;">
+                <br><br>
+            <% } %>
+
+            <label for="profileImage">Upload New Picture (optional): </label>
+            <input type="file" id="profileImage" name="profileImage" accept="image/*">
+            <br><br>
+
+            <input type="hidden" name="existingImage" value="<%= user.profile_image %>">
+
+            <input type="submit" value="Update User">
+        </form>
+
+        <br>
+        <a href="/users">Back to Users</a>
+        <script>
+            // Set focus to the first input field when page loads
+            window.addEventListener('DOMContentLoaded', function() {
+                const firstInput = document.querySelector('input[type="text"]');
+                if (firstInput) {
+                    firstInput.focus();
+                }
+            });
+        </script>
+    </body>
+</html>
+
+
