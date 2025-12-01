@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Milestones</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+    <div class="table-card">
+        <h1>Participant Milestones</h1>
+
+        <!-- Manager-only Add button -->
+        <% if (isManager) { %>
+            <div class="table-actions">
+                <a href="/milestones/add" class="btn btn-primary">Add Milestones</a>
+            </div>
+        <% } %>
+
+        <table class="event-table">
+            <thead>
+                <tr>
+                    <th>Participant</th>
+                    <th>Milestone Titles</th>
+                    <th>Milestone Dates</th>
+                    <% if (isManager) { %>
+                        <th>Actions</th>
+                    <% } %>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% if (milestones && milestones.length > 0) { %>
+                    <% milestones.forEach(m => { %>
+                        <tr>
+                            <td><%= m.participantname %></td>
+                            <td><%= m.milestonetitles %></td>
+                            <td><%= m.milestonedates %></td>
+
+                            <% if (isManager) { %>
+                                <td class="actions">
+                                    <!-- These buttons don’t do anything yet; routes will come later -->
+                                    <a href="/milestones/edit/<%= m.milestoneid %>" class="btn btn-secondary">
+                                        Edit
+                                    </a>
+                                    <form action="/milestones/delete/<%= m.milestoneid %>" method="POST" style="display:inline;">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            <% } %>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="<%= isManager ? 4 : 3 %>" class="text-center">
+                            No milestones found.
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

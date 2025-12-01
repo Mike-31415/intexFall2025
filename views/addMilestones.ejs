@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Milestones</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+
+    <div class="form-card">
+        <h2>Add Milestones</h2>
+
+        <% if (error_message) { %>
+            <div class="error-message"><%= error_message %></div>
+        <% } %>
+
+        <!-- 
+            EXPECTED DATA PASSED IN:
+            participants = [ { participantid, participantname }, ... ]
+        -->
+
+        <form action="/milestones/add" method="POST">
+
+            <!-- Participant dropdown -->
+            <div class="form-row">
+                <label for="participantid">Participant</label>
+                <select id="participantid" name="participantid" required>
+                    <option value="">-- Select a participant --</option>
+                    <% participants.forEach(p => { %>
+                        <option value="<%= p.participantid %>">
+                            <%= p.participantname %>
+                        </option>
+                    <% }) %>
+                </select>
+            </div>
+
+            <!-- Milestone titles -->
+            <div class="form-row">
+                <label for="milestonetitles">Milestone Titles (separated by semicolons)</label>
+                <textarea
+                    id="milestonetitles"
+                    name="milestonetitles"
+                    rows="3"
+                    placeholder="First Day;Completed Workshop;Earned Certificate"
+                    required
+                ></textarea>
+            </div>
+
+            <!-- Milestone dates -->
+            <div class="form-row">
+                <label for="milestonedates">Milestone Dates (same order, separated by semicolons)</label>
+                <textarea
+                    id="milestonedates"
+                    name="milestonedates"
+                    rows="3"
+                    placeholder="2025-01-15;2025-02-10;2025-02-28"
+                    required
+                ></textarea>
+            </div>
+
+            <!-- Buttons -->
+            <div class="form-row" style="margin-top: 20px;">
+                <button type="submit" class="btn btn-primary">Add Milestones</button>
+            </div>
+
+            <div class="form-row" style="margin-top: 10px;">
+                <a href="/milestones" class="btn btn-secondary">Cancel</a>
+            </div>
+
+        </form>
+    </div>
+
+</body>
+</html>
