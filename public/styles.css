@@ -1,0 +1,329 @@
+/* =====================================
+   Ella Rises–inspired Theme
+   ===================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+:root {
+  --peach: #f9c7c3;
+  --peach-light: #ffe0dc;
+  --peach-dark: #f5a29a;
+  --cream: #fff8f4;
+  --text-main: #333333;
+  --text-muted: #777777;
+  --accent-blue: #99c7d8;   /* donate button */
+  --accent-blue-dark: #76a8bc;
+  --black: #222222;
+  --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  --radius-pill: 999px;
+}
+
+/* ===== Global ===== */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--peach);
+  color: var(--text-main);
+}
+
+/* Wrapper so content is centered on big screens */
+.page-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Anchor defaults */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* =====================================
+   Header / Nav
+   ===================================== */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo img {
+  height: 60px;
+  width: 60px;
+  border-radius: 50%;
+}
+
+/* Faux “tab” nav like the screenshot */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-link {
+  padding: 6px 18px;
+  border-radius: var(--radius-pill);
+  background: #ffffff;
+  border: 1px solid transparent;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.06);
+}
+
+.nav-link--active {
+  background: var(--peach-light);
+  border-color: #ffffff;
+}
+
+.nav-donate {
+  margin-left: 10px;
+  padding: 8px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-blue);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: var(--card-shadow);
+}
+
+/* =====================================
+   Hero section (WELCOME TO + circles)
+   ===================================== */
+
+.hero {
+  text-align: center;
+  padding: 40px 20px 30px;
+}
+
+.hero-title {
+  font-size: 2.6rem;
+  letter-spacing: 0.18em;
+  font-weight: 700;
+  margin-bottom: 26px;
+}
+
+.hero-carousel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 26px;
+  margin-bottom: 26px;
+}
+
+/* Circle image cards */
+.hero-circle {
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+}
+
+.hero-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Subtitle paragraph under circles */
+.hero-subtitle {
+  max-width: 720px;
+  margin: 0 auto;
+  font-size: 1.05rem;
+  color: var(--text-main);
+}
+
+/* =====================================
+   White “content” section
+   ===================================== */
+
+.section-white {
+  background: #ffffff;
+  border-radius: 36px 36px 0 0;
+  margin-top: 40px;
+  padding: 40px 24px 80px;
+}
+
+/* CTA like “Enroll today…” */
+.section-cta {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.section-cta-title {
+  font-size: 2.1rem;
+  margin-bottom: 18px;
+}
+
+.section-cta-sub {
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+/* Big rounded dark button */
+.btn-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 32px;
+  border-radius: var(--radius-pill);
+  background: var(--black);
+  color: #ffffff;
+  font-size: 1rem;
+  box-shadow: var(--card-shadow);
+}
+
+/* =====================================
+   Generic Buttons (for forms/tables)
+   ===================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background: var(--accent-blue);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--accent-blue-dark);
+}
+
+.btn-secondary {
+  background: #eeeeee;
+  color: var(--text-main);
+}
+
+.btn-danger {
+  background: #f25f5c;
+  color: #fff;
+}
+
+/* =====================================
+   Cards for Forms (login/add/edit)
+   ===================================== */
+
+.form-card {
+  background: #ffffff;
+  max-width: 480px;
+  margin: 60px auto;
+  padding: 28px 24px 32px;
+  border-radius: 24px;
+  box-shadow: var(--card-shadow);
+}
+
+.form-card h2 {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+  gap: 4px;
+}
+
+.form-row label {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.form-row input[type="text"],
+.form-row input[type="password"],
+.form-row input[type="number"],
+.form-row textarea {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #dddddd;
+  font-size: 0.95rem;
+}
+
+.form-row textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.error-message {
+  background: #ffe1e1;
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-bottom: 14px;
+  color: #b3261e;
+  font-size: 0.9rem;
+}
+
+/* =====================================
+   Tables (events, surveys)
+   ===================================== */
+
+.table-card {
+  background: #ffffff;
+  max-width: 960px;
+  margin: 40px auto;
+  padding: 24px 24px 30px;
+  border-radius: 24px;
+  box-shadow: var(--card-shadow);
+}
+
+.table-card h1 {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.table-actions {
+  margin-bottom: 12px;
+}
+
+.event-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.event-table th,
+.event-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: left;
+}
+
+.event-table th {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.event-table tr:last-child td {
+  border-bottom: none;
+}
+
+.event-table .actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* Small helper for centered empty-state row */
+.text-center {
+  text-align: center;
+}
