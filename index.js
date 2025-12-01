@@ -98,13 +98,38 @@ app.get("/login", (req, res) => {
     }
 });
 
+app.post("/login", (req, res) => {
+    let sName = req.body.username;
+    let sPassword = req.body.password;
+    console.log('Post Login')
+    knex.select("userid","username", "password")
+    .from('users')
+    .where("username", sName)
+    .andWhere("password", sPassword)
+    .then(users => {
+        //check if a user was found with matchin g username AND password
+        if (users.length > 0){
+            req.session.isLoggedIn = true;
+            req.session.username = sName;
+            req.session.userid = users[0].userid
+            req.session.permissions = users[0].permissions
+            console.log('Login successful')
+            res.redirect("/");
+        } else {
+            // No matching user found
+            res.render("login", { error_message: "Invalid login"});
+        }
+    })
+    .catch(err => {
+        console.error("Login error:", err);
+        res.render("login", { error_message: "Invalid login"});
+    });
+
+});
+
 app.get("/", (req, res) => {
     console.log("GET /");
-    if (req.session.isLoggedIn) {
-        res.render("index");
-    } else {
-        res.redirect("/login");
-    }
+    res.render("index")
 });
 
 app.listen(port, () => {
