@@ -1,0 +1,258 @@
+/* ==========================================================
+   ELLA RISES BRAND STYLESHEET
+   Based on provided brand guide (fonts + colors)
+   ========================================================== */
+
+/* -----------------------------
+   IMPORT FONTS
+   ----------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap');
+
+/* NOTE: TT Milk Script is not a free Google Font.
+   We will mock it using a soft script font for now.
+*/
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+
+
+/* -----------------------------
+   COLOR PALETTE VARIABLES
+   ----------------------------- */
+:root {
+  --blue: #99B7C6;
+  --lavender: #97BEC4;
+  --cream: #F9F5EA;
+  --peach-light: #FFD8D1;
+  --pink: #F9AFB1;
+  --sage: #9AB59D;
+  --charcoal: #3A3F3B;
+  --coral: #F4B092;
+  --raspberry: #CE325B;
+
+  --text-dark: #3A3F3B;
+  --text-light: #ffffff;
+
+  --radius-pill: 999px;
+  --shadow-card: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+
+/* -----------------------------
+   GLOBAL STYLES
+   ----------------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--peach-light);
+  font-family: 'Montserrat', sans-serif;
+  color: var(--text-dark);
+  padding-bottom: 50px;
+}
+
+/* Page wrapper */
+.page-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* -----------------------------
+   TYPOGRAPHY
+   ----------------------------- */
+h1, h2, h3, .title {
+  font-family: 'DM Serif Display', serif !important;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+.script-accent {
+  font-family: 'Pacifico', cursive;
+  font-size: 1.4rem;
+}
+
+
+/* -----------------------------
+   NAV / HEADER (if used later)
+   ----------------------------- */
+.nav-link {
+  background: white;
+  padding: 8px 20px;
+  border-radius: var(--radius-pill);
+  font-size: 0.9rem;
+  box-shadow: var(--shadow-card);
+}
+
+.nav-donate {
+  background: var(--coral);
+  color: white;
+  font-weight: 600;
+  box-shadow: var(--shadow-card);
+}
+
+
+
+
+/* -----------------------------
+   FORMS (Login, Register, Edit/Add Pages)
+   ----------------------------- */
+.form-card {
+  background: var(--cream);
+  padding: 30px 28px;
+  border-radius: 22px;
+  max-width: 480px;
+  margin: 60px auto;
+  box-shadow: var(--shadow-card);
+}
+
+.form-card h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.form-row label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.form-row input,
+.form-row select,
+.form-row textarea {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--blue);
+  font-size: 1rem;
+  background: #ffffff;
+}
+
+textarea {
+  resize: vertical;
+}
+
+
+
+/* -----------------------------
+   BUTTONS
+   ----------------------------- */
+.btn {
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+  display: inline-block;
+}
+
+/* Primary coral button */
+.btn-primary {
+  background: var(--coral);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--raspberry);
+}
+
+/* Secondary light button */
+.btn-secondary {
+  background: var(--blue);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: var(--lavender);
+}
+
+/* Delete / danger button */
+.btn-danger {
+  background: var(--raspberry);
+  color: white;
+}
+
+
+
+/* -----------------------------
+   ERROR MESSAGE
+   ----------------------------- */
+.error-message {
+  background: var(--pink);
+  padding: 10px;
+  border-radius: 10px;
+  color: var(--raspberry);
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+
+
+/* -----------------------------
+   TABLES (Events, Surveys)
+   ----------------------------- */
+.table-card {
+  background: var(--cream);
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 24px 24px 30px;
+  border-radius: 22px;
+  box-shadow: var(--shadow-card);
+}
+
+.table-card h1 {
+  margin-bottom: 12px;
+}
+
+.event-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.event-table th {
+  text-align: left;
+  font-weight: 600;
+  padding: 10px 8px;
+  border-bottom: 2px solid var(--blue);
+}
+
+.event-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #e4e4e4;
+}
+
+.event-table tr:last-child td {
+  border-bottom: none;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+
+
+/* -----------------------------
+   HERO CIRCLES (if you use them later)
+   ----------------------------- */
+.hero-circle {
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.hero-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

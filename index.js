@@ -30,6 +30,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 app.use("/images", express.static(uploadRoot));
+app.use(express.static(path.join(__dirname, "public")));
 
 const port = process.env.PORT || 3001;
 

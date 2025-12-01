@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Survey</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+
+    <div class="form-card">
+        <h2>Edit Survey</h2>
+
+        <% if (error_message) { %>
+            <div class="error-message"><%= error_message %></div>
+        <% } %>
+
+        <!-- 
+            EXPECTED DATA PASSED IN:
+            survey = {
+                surveyid,
+                eventname,
+                eventdatetimestart,
+                participantname,
+                rating,
+                comments
+            }
+        -->
+
+        <form action="/postsurveys/edit" method="POST">
+
+            <!-- Hidden ID -->
+            <input type="hidden" name="surveyid" value="<%= survey.surveyid %>">
+
+            <!-- Event Name (readonly) -->
+            <div class="form-row">
+                <label>Event Name</label>
+                <input type="text" value="<%= survey.eventname %>" readonly>
+            </div>
+
+            <!-- Event Date (readonly) -->
+            <div class="form-row">
+                <label>Event Date/Time</label>
+                <input type="text" value="<%= survey.eventdatetimestart %>" readonly>
+            </div>
+
+            <!-- Participant Name (readonly) -->
+            <div class="form-row">
+                <label>Participant</label>
+                <input type="text" value="<%= survey.participantname %>" readonly>
+            </div>
+
+            <!-- Rating -->
+            <div class="form-row">
+                <label for="rating">Rating (1–5)</label>
+                <input 
+                    type="number" 
+                    id="rating" 
+                    name="rating" 
+                    min="1" max="5"
+                    value="<%= survey.rating %>"
+                    required
+                >
+            </div>
+
+            <!-- Comments -->
+            <div class="form-row">
+                <label for="comments">Comments</label>
+                <textarea 
+                    id="comments" 
+                    name="comments"
+                    rows="4"
+                ><%= survey.comments %></textarea>
+            </div>
+
+            <!-- Buttons -->
+            <div class="form-row" style="margin-top: 20px;">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+
+            <div class="form-row" style="margin-top: 10px;">
+                <a href="/postsurveys" class="btn btn-secondary">Cancel</a>
+            </div>
+
+        </form>
+    </div>
+
+</body>
+</html>
