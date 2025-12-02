@@ -15,9 +15,8 @@
         <!-- Logged-in status -->
         <p style="text-align:center; margin-top:10px;">
             <% 
-                let roleLabel = (permissions === 'manager' || permissions === 'Manager') 
-                    ? 'Manager' 
-                    : 'User';
+                // role will be "manager" or "user"
+                let roleLabel = (role === 'manager') ? 'Manager' : 'User';
             %>
             Logged in as <strong><%= roleLabel %></strong>
             <% if (username) { %>
@@ -40,7 +39,7 @@
             <a href="/postsurveys" class="btn btn-primary">Post Surveys</a>
 
             <!-- Users page – manager only -->
-            <% if (permissions === 'manager' || permissions === 'Manager') { %>
+            <% if (role === 'manager') { %>
                 <a href="/users" class="btn btn-primary">Users</a>
             <% } %>
         </div>

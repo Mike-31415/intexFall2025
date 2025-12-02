@@ -7,57 +7,66 @@
 </head>
 
 <body>
-    <div class="table-card">
-        <h1>Post-Event Surveys</h1>
 
-        <!-- Only show Add button if user is a manager -->
-        <% if (isManager) { %>
-            <div class="table-actions">
-                <button class="btn btn-primary">Add Survey</button>
-            </div>
-        <% } %>
+    <h1>Post-Event Surveys</h1>
 
-        <table class="event-table">
-            <thead>
-                <tr>
-                    <th>Event Name</th>
-                    <th>Event Date/Time</th>
-                    <th>Participant</th>
-                    <th>Rating</th>
-                    <th>Comments</th>
-                    <% if (isManager) { %>
-                        <th>Actions</th>
-                    <% } %>
-                </tr>
-            </thead>
+    <%
+        // Determine if user is a manager
+        let isManager = (role === 'manager' || role === 'Manager' || role === 'M');
+    %>
 
-            <tbody>
-                <% if (surveys && surveys.length > 0) { %>
-                    <% surveys.forEach(survey => { %>
-                        <tr>
-                            <td><%= survey.eventname %></td>
-                            <td><%= survey.eventdatetimestart %></td>
-                            <td><%= survey.participantname %></td>
-                            <td><%= survey.rating %></td>
-                            <td><%= survey.comments %></td>
+    <!-- Add Survey button (MANAGERS ONLY) -->
+    <% if (isManager) { %>
+        <a href="/postsurveys/add" class="btn btn-add">Add Survey</a>
+    <% } %>
 
-                            <% if (isManager) { %>
-                                <td class="actions">
-                                    <button class="btn btn-secondary">Edit</button>
-                                    <button class="btn btn-danger">Delete</button>
-                                </td>
-                            <% } %>
-                        </tr>
-                    <% }) %>
-                <% } else { %>
-                    <tr>
-                        <td colspan="<%= isManager ? 6 : 5 %>" style="text-align:center; padding: 16px;">
-                            No surveys found.
-                        </td>
-                    </tr>
+    <table class="event-list">
+        <thead>
+            <tr>
+                <th>Event Name</th>
+                <th>Event Date/Time</th>
+                <th>Participant</th>
+                <th>Rating</th>
+                <th>Comments</th>
+
+                <!-- Only show Actions column for managers -->
+                <% if (isManager) { %>
+                    <th>Actions</th>
                 <% } %>
-            </tbody>
-        </table>
-    </div>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% if (surveys && surveys.length > 0) { %>
+                <% surveys.forEach(survey => { %>
+                    <tr>
+                        <td><%= survey.eventname %></td>
+                        <td><%= survey.eventdatetimestart %></td>
+                        <td><%= survey.participantname %></td>
+                        <td><%= survey.rating %></td>
+                        <td><%= survey.comments %></td>
+
+                        <% if (isManager) { %>
+                            <td class="actions">
+                                <a href="/postsurveys/edit/<%= survey.surveyid %>" class="btn btn-edit">
+                                    Edit
+                                </a>
+                                <a href="/postsurveys/delete/<%= survey.surveyid %>" class="btn btn-delete">
+                                    Delete
+                                </a>
+                            </td>
+                        <% } %>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="<%= isManager ? 6 : 5 %>" style="text-align:center; padding:20px;">
+                        No surveys found.
+                    </td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+
 </body>
 </html>

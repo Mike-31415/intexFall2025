@@ -63,7 +63,7 @@ const knex = require("knex")({
         host : process.env.RDS_HOSTNAME || "localhost",
         user : process.env.RDS_USERNAME || "postgres",
         password : process.env.RDS_PASSWORD || "admin",
-        database : process.env.RDS_DB_NAME || "foodisus",
+        database : process.env.RDS_DB_NAME || "assignment 3",
         port : process.env.RDS_PORT || 5432,
         ssl: process.env.DB_SSL ? {rejectUnauthorized: false}: false
     }
@@ -99,37 +99,86 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-    let sName = req.body.username;
-    let sPassword = req.body.password;
-    console.log('Post Login')
-    knex.select("userid","username", "password")
-    .from('users')
-    .where("username", sName)
-    .andWhere("password", sPassword)
-    .then(users => {
-        //check if a user was found with matchin g username AND password
-        if (users.length > 0){
-            req.session.isLoggedIn = true;
-            req.session.username = sName;
-            req.session.userid = users[0].userid
-            req.session.permissions = users[0].permissions
-            console.log('Login successful')
-            res.redirect("/");
-        } else {
-            // No matching user found
-            res.render("login", { error_message: "Invalid login"});
-        }
-    })
-    .catch(err => {
-        console.error("Login error:", err);
-        res.render("login", { error_message: "Invalid login"});
-    });
+    const sName = req.body.username;
+    const sPassword = req.body.password;
+    console.log("Post Login");
 
+    knex
+        .select("id", "username", "password", "level") 
+        .from("users")
+        .where("username", sName)
+        .andWhere("password", sPassword)
+        .then(users => {
+            if (users.length > 0) {
+                const user = users[0];
+
+                req.session.isLoggedIn = true;
+                req.session.username = user.username;
+                req.session.userid = user.id;
+
+                // Map DB level -> role string
+                // assume: 'M' = manager, anything else = user
+                req.session.role = user.level === "M" ? "manager" : "user";
+
+                console.log("Login successful, role =", req.session.role);
+                res.redirect("/homepage");
+            } else {
+                res.render("login", { error_message: "Invalid login" });
+            }
+        })
+        .catch(err => {
+            console.error("Login error:", err);
+            res.render("login", { error_message: "Invalid login" });
+        });
 });
 
 app.get("/", (req, res) => {
     console.log("GET /");
     res.render("index")
+});
+
+app.get("/homepage", (req, res) => {
+    if (!req.session.isLoggedIn) {
+        return res.redirect("/login");
+    }
+
+    res.render("homepage", {
+        username: req.session.username,
+        role: req.session.role
+    });
+});
+
+app.get("/events", (req, res) => {
+    if (!req.session.isLoggedIn) {
+        return res.redirect("/login");
+    }
+
+    // Temporary placeholder until DB is connected
+    const events = [];
+
+    res.render("events", {
+        username: req.session.username,
+        permissions: req.session.permissions,
+        events: events
+    });
+});
+
+app.get("/postsurveys", (req, res) => {
+    if (!req.session.isLoggedIn) {
+        return res.redirect("/login");
+    }
+
+    // Placeholder until DB added
+    const surveys = [];
+
+    const isManager = req.session.role === "manager" || req.session.role === "Manager";
+
+    res.render("postsurveys", {
+        username: req.session.username,
+        role: req.session.role,
+        isManager: isManager,
+        surveys: surveys
+    });
 });
 
 app.listen(port, () => {

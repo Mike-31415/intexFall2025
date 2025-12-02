@@ -10,10 +10,16 @@
 
     <h1>Event Management</h1>
 
-    <!-- ADD EVENT BUTTON -->
-    <button class="btn btn-add">Add Event</button>
+    <% 
+        // Determine if user is a manager or regular user
+        let isManager = (role === 'manager' || role === 'Manager' || role === 'M');
+    %>
 
-    <!-- EVENTS TABLE -->
+    <!-- Add Event button (MANAGERS ONLY) -->
+    <% if (isManager) { %>
+        <a href="/events/add" class="btn btn-add">Add Event</a>
+    <% } %>
+
     <table class="event-list">
         <thead>
             <tr>
@@ -22,7 +28,11 @@
                 <th>Description</th>
                 <th>Default Capacity</th>
                 <th>Recurrence</th>
-                <th>Actions</th>
+
+                <!-- Only show Actions column for managers -->
+                <% if (isManager) { %>
+                    <th>Actions</th>
+                <% } %>
             </tr>
         </thead>
 
@@ -36,15 +46,18 @@
                         <td><%= event.eventdefaultcapacity %></td>
                         <td><%= event.eventrecurrencepattern %></td>
 
-                        <td class="actions">
-                            <button class="btn btn-edit">Edit</button>
-                            <button class="btn btn-delete">Delete</button>
-                        </td>
+                        <!-- Manager-only actions -->
+                        <% if (isManager) { %>
+                            <td class="actions">
+                                <a href="/events/edit/<%= event.eventid %>" class="btn btn-edit">Edit</a>
+                                <a href="/events/delete/<%= event.eventid %>" class="btn btn-delete">Delete</a>
+                            </td>
+                        <% } %>
                     </tr>
                 <% }) %>
             <% } else { %>
                 <tr>
-                    <td colspan="6" style="text-align:center; padding: 20px;">
+                    <td colspan="<%= isManager ? 6 : 5 %>" style="text-align:center; padding:20px;">
                         No events available.
                     </td>
                 </tr>
