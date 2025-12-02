@@ -84,7 +84,13 @@ const requireManager = requireAdmin;
 // Global authentication middleware
 app.use((req, res, next) => {
     console.log("Auth middleware: checking path:", req.path);
-    if (req.path === '/' || req.path === '/login' || req.path === '/logout' || req.path === '/register') {
+    if (
+        req.path === '/' ||
+        req.path === '/login' ||
+        req.path === '/logout' ||
+        req.path === '/register' ||
+        (req.method === 'GET' && req.path === '/donations') // public donations page
+    ) {
         return next();
     }
 
