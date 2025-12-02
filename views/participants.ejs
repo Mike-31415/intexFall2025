@@ -38,17 +38,15 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Email</th>
                             <th>First Name</th>
                             <th>Last Name</th>
-                            <th>Date of Birth</th>
+                            <th>DOB</th>
                             <th>Phone</th>
                             <th>City</th>
                             <th>State</th>
                             <th>Zip</th>
                             <th>School or Employer</th>
                             <th>Field of Interest</th>
-                            <th>Role</th>
                             
                             <!-- Admin-only columns -->
                             <% if (role === "admin") { %>
@@ -62,17 +60,17 @@
                     <tbody>
                         <% participants.forEach(participant => { %>
                             <tr>
-                                <td><%= participant.participant_email %></td>
                                 <td><%= participant.participant_first_name %></td>
                                 <td><%= participant.participant_last_name %></td>
-                                <td><%= participant.participant_dob %></td>
+                                <td>
+                                    <%= new Date(participant.participant_dob).toISOString().split('T')[0] %>
+                                </td>
                                 <td><%= participant.participant_phone %></td>
                                 <td><%= participant.participant_city %></td>
                                 <td><%= participant.participant_state %></td>
                                 <td><%= participant.participant_zip %></td>
                                 <td><%= participant.participant_school_or_employer %></td>
                                 <td><%= participant.participant_field_of_interest %></td>
-                                <td><%= participant.participant_role %></td>
 
                                 <!-- EDIT: Admins only -->
                                 <% if (role === "admin") { %>
