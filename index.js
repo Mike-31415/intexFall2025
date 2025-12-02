@@ -1,6 +1,7 @@
 // Load environment variables from .env file into memory
 require('dotenv').config();
 
+const bcrypt = require("bcrypt");
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
@@ -98,32 +99,42 @@ app.get("/login", (req, res) => {
     }
 });
 
-app.post("/login", (req, res) => {
-    let sEmail = req.body.email;
-    let sPassword = req.body.password;
-    console.log('Post Login')
-    knex.select("participant_id","participant_email", "password", "participant_role")
-    .from('participants')
-    .where("participant_email", sEmail)
-    .andWhere("password", sPassword)
-    .then(participants => {
-        //check if a user was found with matchin g username AND password
-        if (participants.length > 0){
-            req.session.isLoggedIn = true;
-            req.session.email = sEmail;
-            req.session.participant_id = participants[0].participant_id
-            req.session.role = participants[0].participant_role
-            console.log('Login successful')
-            res.redirect("/homepage");
-        } else {
-            // No matching user found
-            res.render("login", { error_message: "Invalid login"});
+app.post("/login", async (req, res) => {
+    try {
+        const sEmail = req.body.email;
+        const enteredPassword = req.body.password;
+
+        // 1. Get participant by email
+        const participants = await knex("participants")
+            .select("participant_id", "participant_email", "password", "participant_role")
+            .where("participant_email", sEmail);
+
+        if (participants.length === 0) {
+            return res.render("login", { error_message: "Invalid login" });
         }
-    })
-    .catch(err => {
+
+        const user = participants[0];
+
+        // 2. Compare entered password with stored hash
+        const isValid = await bcrypt.compare(enteredPassword, user.password);
+
+        if (!isValid) {
+            return res.render("login", { error_message: "Invalid login" });
+        }
+
+        // 3. Create session
+        req.session.isLoggedIn = true;
+        req.session.email = sEmail;
+        req.session.participant_id = user.participant_id;
+        req.session.participant_role = user.participant_role;
+
+        console.log("Login successful");
+        res.redirect("/homepage");
+
+    } catch (err) {
         console.error("Login error:", err);
-        res.render("login", { error_message: "Invalid login"});
-    });
+        res.render("login", { error_message: "Invalid login" });
+    }
 });
 
 app.get("/", (req, res) => {
