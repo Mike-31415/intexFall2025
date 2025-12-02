@@ -8,14 +8,14 @@
 
 <body>
 
-    <h1>Event Management</h1>
+    <h1 style="text-align:center;">Event Management</h1>
 
     <% 
-        // Determine if user is a manager or regular user
-        let isManager = (role === 'manager' || role === 'Manager' || role === 'M');
+        // FIX: Using participant_role to match the server-side variable name
+        // UPDATE: Change check from 'manager' to 'admin'
+        let isManager = (participant_role === 'admin' || participant_role === 'Admin' || participant_role === 'A');
     %>
 
-    <!-- Add Event button (MANAGERS ONLY) -->
     <% if (isManager) { %>
         <a href="/events/add" class="btn btn-add">Add Event</a>
     <% } %>
@@ -29,7 +29,6 @@
                 <th>Default Capacity</th>
                 <th>Recurrence</th>
 
-                <!-- Only show Actions column for managers -->
                 <% if (isManager) { %>
                     <th>Actions</th>
                 <% } %>
@@ -46,7 +45,6 @@
                         <td><%= event.eventdefaultcapacity %></td>
                         <td><%= event.eventrecurrencepattern %></td>
 
-                        <!-- Manager-only actions -->
                         <% if (isManager) { %>
                             <td class="actions">
                                 <a href="/events/edit/<%= event.eventid %>" class="btn btn-edit">Edit</a>

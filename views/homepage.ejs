@@ -12,11 +12,12 @@
 
         <h1 style="text-align:center; margin-top:40px;">Ella Rises Admin Home</h1>
 
-        <!-- Logged-in status -->
         <p style="text-align:center; margin-top:10px;">
             <% 
-                // role will be "manager" or "user"
-                let roleLabel = (role === 'manager') ? 'Manager' : 'User';
+                // UPDATE: Change role strings to 'Admin' and 'Participant'
+                let roleLabel = (participant_role === 'admin' || participant_role === 'Admin' || participant_role === 'A') 
+                    ? 'Admin' 
+                    : 'Participant';
             %>
             Logged in as <strong><%= roleLabel %></strong>
             <% if (username) { %>
@@ -24,7 +25,6 @@
             <% } %>
         </p>
 
-        <!-- Navigation buttons -->
         <div style="
             display:flex;
             flex-wrap:wrap;
@@ -38,8 +38,10 @@
             <a href="/events" class="btn btn-primary">Events</a>
             <a href="/postsurveys" class="btn btn-primary">Post Surveys</a>
 
-            <!-- Users page – manager only -->
-            <% if (role === 'manager') { %>
+            <% 
+                // UPDATE: Check participant_role for Admin status
+                if (participant_role === 'admin' || participant_role === 'Admin' || participant_role === 'A') { 
+            %>
                 <a href="/users" class="btn btn-primary">Users</a>
             <% } %>
         </div>
