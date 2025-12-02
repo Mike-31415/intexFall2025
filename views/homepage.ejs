@@ -20,8 +20,8 @@
                     : 'Participant';
             %>
             Logged in as <strong><%= roleLabel %></strong>
-            <% if (username) { %>
-                ( <%= username %> )
+            <% if (email) { %>
+                ( <%= email %> )
             <% } %>
         </p>
 
@@ -37,6 +37,7 @@
             <a href="/participants" class="btn btn-primary">Participants</a>
             <a href="/events" class="btn btn-primary">Events</a>
             <a href="/postsurveys" class="btn btn-primary">Post Surveys</a>
+            <a href="/users" class="btn btn-primary">Users</a>
 
             <% 
                 // UPDATE: Check participant_role for Admin status

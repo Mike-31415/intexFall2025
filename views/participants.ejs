@@ -1,91 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Participants List</title>
-        <link rel="stylesheet" href="/styles.css">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participants List</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
 
-    <body>
-        <div class="container mt-5">
+<body>
+    <div class="container mt-5">
 
-            <h1 class="mb-4">Participants List</h1>
+        <h1 class="mb-4">Participants List</h1>
 
-            <!-- MANAGERS SEE ADD BUTTON -->
-            <% if (role === "manager") { %>
-                <form action="/addParticipants" method="GET" class="mb-3">
-                    <button class="btn btn-success" type="submit">Add Participant</button>
-                </form>
-            <% } %>
+        <!-- ADMIN / MANAGER CAN ADD PARTICIPANTS -->
+        <% if (role === "admin") { %>
+            <form action="/addParticipants" method="GET" class="mb-3">
+                <button class="btn btn-success" type="submit">Add Participant</button>
+            </form>
+        <% } %>
 
-            <!-- ERROR MESSAGE -->
-            <% if (error_message) { %>
-                <div class="alert alert-danger">
-                    <%= error_message %>
-                </div>
-            <% } %>
+        <!-- ERROR MESSAGE -->
+        <% if (error_message) { %>
+            <div class="alert alert-danger">
+                <%= error_message %>
+            </div>
+        <% } %>
 
-            <!-- NO USERS -->
-            <% if (participants.length === 0) { %>
-                <div class="alert alert-warning">
-                    No participants found in the database.
-                </div>
-            <% } else { %>
+        <!-- SEARCH BAR -->
+        <form method="GET" action="/participants" class="mb-4">
+            <div class="input-group">
+                <input 
+                    type="text"
+                    name="search"
+                    class="form-control"
+                    placeholder="Search by name, email, city, etc..."
+                    value="<%= search %>"
+                />
+                <button class="btn btn-primary" type="submit">Search</button>
+                <a href="/participants" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
 
-                <table class="table table-striped">
-                    <thead>
+        <% if (participants.length === 0) { %>
+            <div class="alert alert-warning">
+                No participants found in the database.
+            </div>
+        <% } else { %>
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Date of Birth</th>
+                        <th>Phone</th>
+                        <th>City</th>
+                        <th>State</th>
+                        <th>Zip</th>
+                        <th>School or Employer</th>
+                        <th>Field of Interest</th>
+
+                        <% if (role === "admin") { %>
+                            <th>Edit</th>
+                            <th>Delete</th>
+                        <% } %>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <% participants.forEach(p => { %>
                         <tr>
-                            <th>Email</th>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Date of Birth</th>
-                            <th>Phone</th>
-                            <th>City</th>
-                            <th>State</th>
-                            <th>Zip</th>
-                            <th>School or Employer</th>
-                            <th>Field of Interest</th>
-                            
-                            <!-- Manager-only columns -->
-                            <% if (role === "manager") { %>
-                                <th>Edit</th>
-                                <th>Delete</th>
-                            <% } %>
+                            <td><%= p.participant_email || "Unknown" %></td>
+                            <td><%= p.participant_first_name || "Unknown" %></td>
+                            <td><%= p.participant_last_name || "Unknown" %></td>
 
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <% participants.forEach(user => { %>
-                            <tr>
-                                <td><%= participant.username %></td>
-                                <td><%= participant.password %></td>
-
-                                <!-- EDIT: Managers only -->
-                                <% if (role === "manager") { %>
-                                    <td>
-                                        <form action="/editParticipants/<%= participant.id %>" method="GET">
-                                            <button class="btn btn-primary btn-sm">Edit</button>
-                                        </form>
-                                    </td>
-
-                                    <!-- DELETE: Managers only -->
-                                    <td>
-                                        <form action="/deleteParticipants/<%= participant.id %>" method="POST">
-                                            <button class="btn btn-danger btn-sm">Delete</button>
-                                        </form>
-                                    </td>
+                            <!-- Format DOB -->
+                            <td>
+                                <% if (!p.participant_dob) { %>
+                                    Unknown Date
+                                <% } else { %>
+                                    <%= new Date(p.participant_dob).toLocaleDateString("en-US", {
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric"
+                                    }) %>
                                 <% } %>
-                            </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-            <% } %>
+                            </td>
 
-            <a href="/" class="btn btn-primary mt-3">Back to Dashboard</a>
-            <a href="/logout" class="btn btn-secondary mt-3">Logout</a>
-        </div>
-    </body>
+                            <td><%= p.participant_phone || "Unknown" %></td>
+                            <td><%= p.participant_city || "Unknown" %></td>
+                            <td><%= p.participant_state || "Unknown" %></td>
+                            <td><%= p.participant_zip || "Unknown" %></td>
+                            <td><%= p.participant_school_or_employer || "Unknown" %></td>
+                            <td><%= p.participant_field_of_interest || "Unknown" %></td>
+
+                            <% if (role === "admin") { %>
+                                <td>
+                                    <form action="/editParticipants/<%= p.participant_id %>" method="GET">
+                                        <button class="btn btn-primary btn-sm">Edit</button>
+                                    </form>
+                                </td>
+
+                                <td>
+                                    <form action="/deleteParticipants/<%= p.participant_id %>" method="POST">
+                                        <button class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            <% } %>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+
+        <% } %>
+
+        <a href="/" class="btn btn-primary mt-3">Back to Dashboard</a>
+        <a href="/logout" class="btn btn-secondary mt-3">Logout</a>
+
+    </div>
+</body>
 </html>

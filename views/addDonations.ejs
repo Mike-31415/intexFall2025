@@ -2,44 +2,99 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Donation</title>
     <link rel="stylesheet" href="/styles.css">
 </head>
-
 <body>
-    <h1>Add New Donation</h1>
+    <div class="container mt-5">
+        <h1 class="mb-4">Add Donation</h1>
 
-    <% if (error_message) { %>
-        <div class="error-message"><%= error_message %></div>
-    <% } %>
+        <% if (error_message) { %>
+            <div class="alert alert-danger">
+                <%= error_message %>
+            </div>
+        <% } %>
 
-    <!-- The form sends data to the route you'll build later: POST /events/add -->
-    <form class="event-form" action="/addDonations" method="POST">
+        <form action="/addDonations" method="POST">
+            <!-- Searchable Participant Dropdown with unique names -->
+            <div class="mb-3">
+                <label for="participant" class="form-label">Participant</label>
+                <input 
+                    list="participantsList" 
+                    id="participant" 
+                    class="form-control" 
+                    placeholder="Start typing participant name..."
+                    autocomplete="off"
+                    required
+                >
+                <input type="hidden" name="participant_id" id="participant_id">
+                <datalist id="participantsList">
+                    <% 
+                        const seenNames = new Set();
+                        participants.forEach(p => {
+                            const fullName = `${p.participant_first_name} ${p.participant_last_name}`;
+                            if (!seenNames.has(fullName)) {
+                                seenNames.add(fullName);
+                    %>
+                        <option data-id="<%= p.participant_id %>" value="<%= fullName %> (<%= p.participant_email %>)">
+                    <%      
+                            }
+                        });
+                    %>
+                </datalist>
+            </div>
 
-        <div class="form-row">
-            <label for="donationDate">Donation Date</label>
-            <input type="text" id="donationDate" name="donationDate" required>
-        </div>
+            <!-- Donation Date -->
+            <div class="mb-3">
+                <label for="donation_date" class="form-label">Donation Date</label>
+                <input 
+                    type="date" 
+                    id="donation_date" 
+                    name="donation_date" 
+                    class="form-control" 
+                    value="<%= new Date().toISOString().split('T')[0] %>" 
+                    required
+                >
+            </div>
 
-        <div class="form-row">
-            <label for="donationAmount">Donation Amount</label>
-            <input type="text" id="donationAmount" name="donationAmount" required>
-        </div>
+            <!-- Donation Amount -->
+            <div class="mb-3">
+                <label for="donation_amount" class="form-label">Donation Amount</label>
+                <input 
+                    type="number" 
+                    step="0.01" 
+                    id="donation_amount" 
+                    name="donation_amount" 
+                    class="form-control" 
+                    placeholder="Enter donation amount" 
+                    required
+                >
+            </div>
 
-        <div class="form-row">
-            <label for="firstName">First Name</label>
-            <textarea id="firstName" name="firstName" required></textarea>
-        </div>
+            <button type="submit" class="btn btn-primary">Add Donation</button>
+            <a href="/donations" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
 
-        <div class="form-row">
-            <label for="lastName">Last Name</label>
-            <input type="text" id="lastName" name="lastName" required>
-        </div>
+    <script>
+        const participants = Array.from(document.querySelectorAll('#participantsList option'));
+        const participantInput = document.getElementById('participant');
+        const participantIdInput = document.getElementById('participant_id');
 
-        <div class="buttons">
-            <button type="submit" class="btn btn-save">Add Donation</button>
-            <a href="/donations" class="btn btn-cancel">Cancel</a>
-        </div>
-    </form>
+        participantInput.addEventListener('input', () => {
+            const val = participantInput.value;
+
+            // Find the option that matches the input value
+            const match = participants.find(opt => opt.value === val);
+
+            if (match) {
+                participantIdInput.value = match.dataset.id; // set the hidden input
+            } else {
+                participantIdInput.value = ''; // clear if no match
+            }
+        });
+    </script>
 </body>
 </html>

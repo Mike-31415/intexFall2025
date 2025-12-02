@@ -137,9 +137,8 @@ app.get("/homepage", (req, res) => {
     }
 
     res.render("homepage", {
-        username: req.session.email,
-        
-        participant_role: req.session.participant_role 
+        email: req.session.email,
+        role: req.session.participant_role
     });
 });
 
@@ -233,55 +232,265 @@ app.get("/postsurveys", async (req, res) => {
 // DONATIONS PAGE
 app.get("/donations", async (req, res) => {
     try {
-        const donations = await knex("donations as d")
-            .join("participants as p", "d.participant_id", "p.id")
+        const search = req.query.search || "";
+        let query = knex("donations as d")
+            .join("participants as p", "d.participant_id", "p.participant_id")
             .select(
-                "d.id",
+                "d.donation_id",
                 "d.donation_date",
                 "d.donation_amount",
-                "p.first_name",
-                "p.last_name"
-            )
-            .orderBy("d.donation_date", "desc");
+                "p.participant_first_name",
+                "p.participant_last_name"
+            );
+
+        if (search.trim() !== "") {
+            const s = `%${search}%`;
+
+            query.where(function () {
+                this.whereILike("p.participant_first_name", s)
+                    .orWhereILike("p.participant_last_name", s)
+                    .orWhereRaw("CAST(d.donation_amount AS TEXT) ILIKE ?", [s])
+                    .orWhereRaw("CAST(d.donation_date AS TEXT) ILIKE ?", [s]);
+            });
+        }
+
+        query.orderBy("d.donation_date", "asc");
+
+        const donations = await query;
 
         res.render("donations", {
             donations,
-            role: req.session.permissions,
-            error_message: null
+            role: req.session.participant_role,
+            error_message: null,
+            search
         });
 
     } catch (err) {
         console.error(err);
         res.render("donations", {
             donations: [],
-            role: req.session.permissions,
-            error_message: "Error loading donations"
+            role: req.session.participant_role,
+            error_message: "Error loading donations",
+            search: ""
         });
     }
 });
 
-
-// PARTICIPANTS PAGE
+// Participants Route
 app.get("/participants", async (req, res) => {
     try {
-        const participants = await knex("participants").select("*");
+        const search = req.query.search || "";
+
+        let query = knex("participants as p")
+            .select(
+                "p.participant_id",
+                "p.participant_first_name",
+                "p.participant_last_name",
+                "p.participant_email",
+                "p.participant_dob",
+                "p.participant_phone",
+                "p.participant_city",
+                "p.participant_state",
+                "p.participant_zip",
+                "p.participant_school_or_employer",
+                "p.participant_field_of_interest"
+            );
+
+        // Apply search filters only when search is not blank
+        if (search.trim() !== "") {
+            const s = `%${search}%`;
+
+            query.where(function () {
+                this.whereILike("p.participant_first_name", s)
+                    .orWhereILike("p.participant_last_name", s)
+                    .orWhereILike("p.participant_email", s)
+                    .orWhereILike("p.participant_city", s)
+                    .orWhereILike("p.participant_state", s)
+                    .orWhereILike("p.participant_school_or_employer", s)
+                    .orWhereRaw("p.participant_dob", s);
+            });
+        }
+
+        query.orderBy("p.participant_last_name", "asc");
+
+        const participants = await query;
 
         res.render("participants", {
             participants,
-            role: req.session.permissions,
-            error_message: null
+            role: req.session.participant_role,
+            error_message: null,
+            search
         });
 
     } catch (err) {
         console.error(err);
         res.render("participants", {
             participants: [],
-            role: req.session.permissions,
-            error_message: "Error loading participants"
+            role: req.session.participant_role,
+            error_message: "Error loading participants",
+            search: ""
         });
     }
 });
 
+// Users Page
+// USERS ROUTE (Displays participants as users with only email, first name, last name)
+app.get("/users", async (req, res) => {
+    try {
+        const search = req.query.search || "";
+
+        let query = knex("participants as p")
+            .select(
+                "p.participant_email",
+                "p.participant_first_name",
+                "p.participant_last_name"
+            );
+
+        // Apply search filters only when search is not blank
+        if (search.trim() !== "") {
+            const s = `%${search}%`;
+            query.where(function () {
+                this.whereILike("p.participant_first_name", s)
+                    .orWhereILike("p.participant_last_name", s)
+                    .orWhereILike("p.participant_email", s);
+            });
+        }
+
+        query.orderBy("p.participant_last_name", "asc");
+
+        const participants = await query;
+
+        res.render("users", {
+            participants,
+            role: req.session.participant_role,
+            error_message: null,
+            search
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.render("users", {
+            participants: [],
+            role: req.session.participant_role,
+            error_message: "Error loading users",
+            search: ""
+        });
+    }
+});
+
+
+// LOGOUT ROUTE
+app.get("/logout", (req, res) => {
+    // Destroy the session
+    req.session.destroy(err => {
+        if (err) {
+            console.error("Error destroying session:", err);
+            // Optionally, render an error page or redirect with a message
+            return res.render("homepage", { 
+                email: req.session?.email,
+                role: req.session?.participant_role,
+                error_message: "Error logging out"
+            });
+        }
+
+        // Clear the cookie if you're using cookies
+        res.clearCookie("connect.sid");
+
+        // Redirect to login page
+        res.redirect("/login");
+    });
+});
+
+// GET route to display the Add Donation form
+app.get("/addDonations", async (req, res) => {
+    try {
+        // Ensure only admins can access
+        if (req.session.participant_role !== "admin") {
+            return res.render("donations", {
+                donations: [],
+                role: req.session.participant_role,
+                error_message: "You do not have permission to add donations",
+                search: ""
+            });
+        }
+
+        // Fetch all participants to populate the dropdown
+        const participants = await knex("participants").select(
+            "participant_id",
+            "participant_first_name",
+            "participant_last_name",
+            "participant_email"
+        );
+
+        res.render("addDonations", {
+            participants,
+            error_message: null
+        });
+
+    } catch (err) {
+        console.error("Error loading add donation form:", err);
+        res.render("addDonations", {
+            participants: [],
+            error_message: "Error loading form"
+        });
+    }
+});
+
+// POST route to handle form submission
+app.post("/addDonations", async (req, res) => {
+    try {
+        // Ensure only admins can submit
+        if (req.session.participant_role !== "admin") {
+            return res.render("donations", {
+                donations: [],
+                role: req.session.participant_role,
+                error_message: "You do not have permission to add donations",
+                search: ""
+            });
+        }
+
+        const { participant_id, donation_date, donation_amount } = req.body;
+
+        // Basic validation
+        if (!participant_id || !donation_date || !donation_amount) {
+            const participants = await knex("participants").select(
+                "participant_id",
+                "participant_first_name",
+                "participant_last_name",
+                "participant_email"
+            );
+
+            return res.render("addDonations", {
+                participants,
+                error_message: "All fields are required"
+            });
+        }
+
+        // Insert donation into the database
+        await knex("donations").insert({
+            participant_id,
+            donation_date,
+            donation_amount
+        });
+
+        // Redirect back to donations page
+        res.redirect("/donations");
+
+    } catch (err) {
+        console.error("Error adding donation:", err);
+        const participants = await knex("participants").select(
+            "participant_id",
+            "participant_first_name",
+            "participant_last_name",
+            "participant_email"
+        );
+
+        res.render("addDonations", {
+            participants,
+            error_message: "Error adding donation"
+        });
+    }
+});
 
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
