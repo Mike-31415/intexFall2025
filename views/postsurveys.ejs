@@ -7,15 +7,20 @@
 </head>
 
 <body>
+    <%- include('partials/header') %>
 
     <h1>Post-Event Surveys</h1>
 
+    <% if (typeof error_message !== 'undefined' && error_message) { %>
+        <div class="error-message"><%= error_message %></div>
+    <% } %>
+
     <%
-        // Determine if user is a manager
-        let isManager = (role === 'manager' || role === 'Manager' || role === 'M');
+        // Determine if user is an admin
+        let isManager = (role === 'admin' || role === 'Admin');
     %>
 
-    <!-- Add Survey button (MANAGERS ONLY) -->
+    <!-- Add Survey button (ADMINS ONLY) -->
     <% if (isManager) { %>
         <a href="/postsurveys/add" class="btn btn-add">Add Survey</a>
     <% } %>
@@ -29,7 +34,7 @@
                 <th>Rating</th>
                 <th>Comments</th>
 
-                <!-- Only show Actions column for managers -->
+                <!-- Only show Actions column for admins -->
                 <% if (isManager) { %>
                     <th>Actions</th>
                 <% } %>
@@ -51,9 +56,9 @@
                                 <a href="/postsurveys/edit/<%= survey.surveyid %>" class="btn btn-edit">
                                     Edit
                                 </a>
-                                <a href="/postsurveys/delete/<%= survey.surveyid %>" class="btn btn-delete">
-                                    Delete
-                                </a>
+                                <form action="/postsurveys/delete/<%= survey.surveyid %>" method="POST" style="display:inline;">
+                                    <button class="btn btn-delete" type="submit">Delete</button>
+                                </form>
                             </td>
                         <% } %>
                     </tr>

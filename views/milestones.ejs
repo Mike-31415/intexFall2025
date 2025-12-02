@@ -7,10 +7,11 @@
 </head>
 
 <body>
+    <%- include('partials/header') %>
     <div class="table-card">
         <h1>Participant Milestones</h1>
 
-        <!-- Manager-only Add button -->
+        <!-- Admin-only Add button -->
         <% if (isManager) { %>
             <div class="table-actions">
                 <a href="/milestones/add" class="btn btn-primary">Add Milestones</a>

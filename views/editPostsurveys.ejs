@@ -8,6 +8,8 @@
 
 <body>
 
+    <%- include('partials/header') %>
+
     <div class="form-card">
         <h2>Edit Survey</h2>
 
@@ -15,22 +17,7 @@
             <div class="error-message"><%= error_message %></div>
         <% } %>
 
-        <!-- 
-            EXPECTED DATA PASSED IN:
-            survey = {
-                surveyid,
-                eventname,
-                eventdatetimestart,
-                participantname,
-                rating,
-                comments
-            }
-        -->
-
-        <form action="/postsurveys/edit" method="POST">
-
-            <!-- Hidden ID -->
-            <input type="hidden" name="surveyid" value="<%= survey.surveyid %>">
+        <form action="/postsurveys/edit/<%= survey.surveyid %>" method="POST">
 
             <!-- Event Name (readonly) -->
             <div class="form-row">
@@ -52,7 +39,7 @@
 
             <!-- Rating -->
             <div class="form-row">
-                <label for="rating">Rating (1–5)</label>
+                <label for="rating">Rating (1-5)</label>
                 <input 
                     type="number" 
                     id="rating" 

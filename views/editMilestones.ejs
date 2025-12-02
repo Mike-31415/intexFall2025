@@ -8,6 +8,8 @@
 
 <body>
 
+    <%- include('partials/header') %>
+
     <div class="form-card">
         <h2>Edit Milestones</h2>
 
@@ -25,10 +27,7 @@
             }
         -->
 
-        <form action="/milestones/edit" method="POST">
-
-            <!-- Hidden ID -->
-            <input type="hidden" name="milestoneid" value="<%= milestone.milestoneid %>">
+        <form action="/milestones/edit/<%= milestone.milestoneid %>" method="POST">
 
             <!-- Participant Name (readonly) -->
             <div class="form-row">

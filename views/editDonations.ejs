@@ -4,35 +4,41 @@
         <title>Edit Donation</title>
         <link rel="stylesheet" href="/styles.css">
     </head>
-    <body>
+<body>
+        <%- include('partials/header') %>
         <h1>Edit Donation</h1>
 
         <% if (typeof error_message !== 'undefined' && error_message) { %>
             <p style="color:red;"><%= error_message %></p>
         <% } %>
 
-        <form action="/editDonations/<%= donation.id %>" method="post" enctype="multipart/form-data">
-            <label for="username">donation Name: </label>
-            <input type="text" id="username" name="username" value="<%= donation.username %>" required>
+        <form action="/editDonations/<%= donation.donation_id %>" method="post">
+            <label for="donation_date">Donation Date: </label>
+            <% 
+                let donationDateVal = "";
+                if (donation.donation_date) {
+                    const d = new Date(donation.donation_date);
+                    if (!isNaN(d)) donationDateVal = d.toISOString().slice(0,10);
+                }
+            %>
+            <input type="date" id="donation_date" name="donation_date" value="<%= donationDateVal %>">
             <br><br>
 
-            <label for="password">Password: </label>
-            <input type="text" id="password" name="password" value="<%= donation.password %>" required>
+            <label for="donation_amount">Donation Amount: </label>
+            <input type="number" step="0.01" id="donation_amount" name="donation_amount" value="<%= donation.donation_amount %>" required>
             <br><br>
 
-            <% if (donation.profile_image) { %>
-                <p>Current Picture:</p>
-                <img src="<%= donation.profile_image %>" alt="Current profile picture" style="max-width:150px; height:auto;">
-                <br><br>
-            <% } %>
-
-            <label for="profileImage">Upload New Picture (optional): </label>
-            <input type="file" id="profileImage" name="profileImage" accept="image/*">
+            <label for="participant_id">Participant: </label>
+            <select id="participant_id" name="participant_id" required>
+                <% participants.forEach(p => { %>
+                    <option value="<%= p.participant_id %>" <%= p.participant_id === donation.participant_id ? 'selected' : '' %>>
+                        <%= p.participant_first_name %> <%= p.participant_last_name %>
+                    </option>
+                <% }) %>
+            </select>
             <br><br>
 
-            <input type="hidden" name="existingImage" value="<%= donation.profile_image %>">
-
-            <input type="submit" value="Update User">
+            <input type="submit" value="Update Donation">
         </form>
 
         <br>

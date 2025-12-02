@@ -9,12 +9,13 @@
     </head>
 
     <body>
+        <%- include('partials/header') %>
         <div class="container mt-5">
 
             <h1 class="mb-4">Participants List</h1>
 
-            <!-- MANAGERS SEE ADD BUTTON -->
-            <% if (role === "manager") { %>
+            <!-- ADMINS SEE ADD BUTTON -->
+            <% if (role === "admin") { %>
                 <form action="/addParticipants" method="GET" class="mb-3">
                     <button class="btn btn-success" type="submit">Add Participant</button>
                 </form>
@@ -27,7 +28,7 @@
                 </div>
             <% } %>
 
-            <!-- NO USERS -->
+            <!-- NO PARTICIPANTS -->
             <% if (participants.length === 0) { %>
                 <div class="alert alert-warning">
                     No participants found in the database.
@@ -47,9 +48,10 @@
                             <th>Zip</th>
                             <th>School or Employer</th>
                             <th>Field of Interest</th>
+                            <th>Role</th>
                             
-                            <!-- Manager-only columns -->
-                            <% if (role === "manager") { %>
+                            <!-- Admin-only columns -->
+                            <% if (role === "admin") { %>
                                 <th>Edit</th>
                                 <th>Delete</th>
                             <% } %>
@@ -58,22 +60,31 @@
                     </thead>
 
                     <tbody>
-                        <% participants.forEach(user => { %>
+                        <% participants.forEach(participant => { %>
                             <tr>
-                                <td><%= participant.username %></td>
-                                <td><%= participant.password %></td>
+                                <td><%= participant.participant_email %></td>
+                                <td><%= participant.participant_first_name %></td>
+                                <td><%= participant.participant_last_name %></td>
+                                <td><%= participant.participant_dob %></td>
+                                <td><%= participant.participant_phone %></td>
+                                <td><%= participant.participant_city %></td>
+                                <td><%= participant.participant_state %></td>
+                                <td><%= participant.participant_zip %></td>
+                                <td><%= participant.participant_school_or_employer %></td>
+                                <td><%= participant.participant_field_of_interest %></td>
+                                <td><%= participant.participant_role %></td>
 
-                                <!-- EDIT: Managers only -->
-                                <% if (role === "manager") { %>
+                                <!-- EDIT: Admins only -->
+                                <% if (role === "admin") { %>
                                     <td>
-                                        <form action="/editParticipants/<%= participant.id %>" method="GET">
+                                        <form action="/editParticipants/<%= participant.participant_id %>" method="GET">
                                             <button class="btn btn-primary btn-sm">Edit</button>
                                         </form>
                                     </td>
 
-                                    <!-- DELETE: Managers only -->
+                                    <!-- DELETE: Admins only -->
                                     <td>
-                                        <form action="/deleteParticipants/<%= participant.id %>" method="POST">
+                                        <form action="/deleteParticipants/<%= participant.participant_id %>" method="POST">
                                             <button class="btn btn-danger btn-sm">Delete</button>
                                         </form>
                                     </td>

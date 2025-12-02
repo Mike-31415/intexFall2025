@@ -9,12 +9,13 @@
     </head>
 
     <body>
+        <%- include('partials/header') %>
         <div class="container mt-5">
 
             <h1 class="mb-4">Donations List</h1>
 
-            <!-- MANAGERS SEE ADD BUTTON -->
-            <% if (role === "manager") { %>
+            <!-- ADMINS SEE ADD BUTTON -->
+            <% if (role === "admin") { %>
                 <form action="/addDonations" method="GET" class="mb-3">
                     <button class="btn btn-success" type="submit">Add Donation</button>
                 </form>
@@ -42,8 +43,8 @@
                             <th>First Name</th>
                             <th>Last Name</th>
                             
-                            <!-- Manager-only columns -->
-                            <% if (role === "manager") { %>
+                            <!-- Admin-only columns -->
+                            <% if (role === "admin") { %>
                                 <th>Edit</th>
                                 <th>Delete</th>
                             <% } %>
@@ -59,15 +60,15 @@
                                 <td><%= donation.first_name %></td>
                                 <td><%= donation.last_name %></td>
 
-                                <!-- EDIT: Managers only -->
-                                <% if (role === "manager") { %>
+                                <!-- EDIT: Admins only -->
+                                <% if (role === "admin") { %>
                                     <td>
                                         <form action="/editDonations/<%= donation.id %>" method="GET">
                                             <button class="btn btn-primary btn-sm">Edit</button>
                                         </form>
                                     </td>
 
-                                    <!-- DELETE: Managers only -->
+                                    <!-- DELETE: Admins only -->
                                     <td>
                                         <form action="/deleteDonations/<%= donation.id %>" method="POST">
                                             <button class="btn btn-danger btn-sm">Delete</button>

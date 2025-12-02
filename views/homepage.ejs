@@ -3,20 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ella Rises – Home</title>
+    <title>Ella Rises - Home</title>
     <link rel="stylesheet" href="/styles.css">
 </head>
 
 <body>
     <div class="page-wrapper">
 
-        <h1 style="text-align:center; margin-top:40px;">Ella Rises Admin Home</h1>
+        <%- include('partials/header') %>
+
+        <h1 style="text-align:center; margin-top:20px;">Ella Rises Admin Home</h1>
 
         <!-- Logged-in status -->
         <p style="text-align:center; margin-top:10px;">
             <% 
-                // role will be "manager" or "user"
-                let roleLabel = (role === 'manager') ? 'Manager' : 'User';
+                // role will be "admin" or "participant"
+                let roleLabel = (role === 'admin') ? 'Admin' : 'Participant';
             %>
             Logged in as <strong><%= roleLabel %></strong>
             <% if (username) { %>
@@ -38,8 +40,8 @@
             <a href="/events" class="btn btn-primary">Events</a>
             <a href="/postsurveys" class="btn btn-primary">Post Surveys</a>
 
-            <!-- Users page – manager only -->
-            <% if (role === 'manager') { %>
+            <!-- Users page — admin only -->
+            <% if (role === 'admin') { %>
                 <a href="/users" class="btn btn-primary">Users</a>
             <% } %>
         </div>

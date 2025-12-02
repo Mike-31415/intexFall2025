@@ -8,18 +8,14 @@
 
 <body>
 
+    <%- include('partials/header') %>
+
     <div class="form-card">
         <h2>Add Post-Event Survey</h2>
 
         <% if (error_message) { %>
             <div class="error-message"><%= error_message %></div>
         <% } %>
-
-        <!-- 
-            EXPECTED DATA PASSED IN:
-            events = [ { eventid, eventname, eventdatetimestart }, ... ]
-            participants = [ { participantid, participantname }, ... ]
-        -->
 
         <form action="/postsurveys/add" method="POST">
 
@@ -28,9 +24,9 @@
                 <label for="eventid">Event</label>
                 <select id="eventid" name="eventid" required>
                     <option value="">-- Select an Event --</option>
-                    <% events.forEach(event => { %>
+                    <% (events || []).forEach(event => { %>
                         <option value="<%= event.eventid %>">
-                            <%= event.eventname %> — <%= event.eventdatetimestart %>
+                            <%= event.eventname %> - <%= event.eventdatetimestart %>
                         </option>
                     <% }); %>
                 </select>
@@ -41,7 +37,7 @@
                 <label for="participantid">Participant</label>
                 <select id="participantid" name="participantid" required>
                     <option value="">-- Select a Participant --</option>
-                    <% participants.forEach(part => { %>
+                    <% (participants || []).forEach(part => { %>
                         <option value="<%= part.participantid %>">
                             <%= part.participantname %>
                         </option>
@@ -51,7 +47,7 @@
 
             <!-- Rating -->
             <div class="form-row">
-                <label for="rating">Rating (1–5)</label>
+                <label for="rating">Rating (1-5)</label>
                 <input 
                     type="number" 
                     id="rating" 

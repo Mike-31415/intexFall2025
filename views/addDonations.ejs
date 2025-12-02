@@ -7,33 +7,35 @@
 </head>
 
 <body>
+    <%- include('partials/header') %>
     <h1>Add New Donation</h1>
 
     <% if (error_message) { %>
         <div class="error-message"><%= error_message %></div>
     <% } %>
 
-    <!-- The form sends data to the route you'll build later: POST /events/add -->
     <form class="event-form" action="/addDonations" method="POST">
 
         <div class="form-row">
             <label for="donationDate">Donation Date</label>
-            <input type="text" id="donationDate" name="donationDate" required>
+            <input type="date" id="donationDate" name="donation_date">
         </div>
 
         <div class="form-row">
             <label for="donationAmount">Donation Amount</label>
-            <input type="text" id="donationAmount" name="donationAmount" required>
+            <input type="number" step="0.01" id="donationAmount" name="donation_amount" required>
         </div>
 
         <div class="form-row">
-            <label for="firstName">First Name</label>
-            <textarea id="firstName" name="firstName" required></textarea>
-        </div>
-
-        <div class="form-row">
-            <label for="lastName">Last Name</label>
-            <input type="text" id="lastName" name="lastName" required>
+            <label for="participant_id">Participant</label>
+            <select id="participant_id" name="participant_id" required>
+                <option value="">-- Select Participant --</option>
+                <% (participants || []).forEach(p => { %>
+                    <option value="<%= p.participant_id %>">
+                        <%= p.participant_first_name %> <%= p.participant_last_name %>
+                    </option>
+                <% }) %>
+            </select>
         </div>
 
         <div class="buttons">

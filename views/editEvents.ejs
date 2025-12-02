@@ -7,6 +7,7 @@
 </head>
 
 <body>
+    <%- include('partials/header') %>
     <h1>Edit Event</h1>
 
     <% if (error_message) { %>
@@ -17,7 +18,7 @@
         Expecting an "event" object passed in from index.js, e.g.:
         res.render("editEvents", { event: someEventRow });
     -->
-    <form class="event-form" action="/events/edit" method="POST">
+    <form class="event-form" action="/events/edit/<%= event.eventid %>" method="POST">
         <!-- If you later use an ID from the database -->
         <input type="hidden" name="eventid" value="<%= event.eventid %>">
 

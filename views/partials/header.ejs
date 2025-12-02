@@ -1,0 +1,26 @@
+<header class="site-header">
+    <div class="site-header__inner">
+        <div class="site-brand">Ella Rises</div>
+        <nav class="site-nav">
+            <a href="/">Home</a>
+            <% if (isLoggedIn) { %>
+                <a href="/homepage">Dashboard</a>
+            <% } %>
+            <a href="/donations">Donations</a>
+            <% if (isLoggedIn) { %>
+                <a href="/events">Events</a>
+                <a href="/participants">Participants</a>
+                <a href="/postsurveys">Surveys</a>
+                <a href="/milestones">Milestones</a>
+                <% if ((currentRole || '').toLowerCase() === 'admin') { %>
+                    <a href="/users">Users</a>
+                <% } %>
+                <a class="nav-accent" href="/logout">Logout</a>
+                <span class="user-chip"><%= currentRole || '' %></span>
+            <% } else { %>
+                <a href="/login">Login</a>
+                <a class="nav-accent" href="/register">Register</a>
+            <% } %>
+        </nav>
+    </div>
+</header>
