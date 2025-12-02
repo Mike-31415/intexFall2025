@@ -7,7 +7,10 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install-deps": "nmp install",
+    "setup": "npm install",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
