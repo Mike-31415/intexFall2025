@@ -15,7 +15,7 @@
         <p style="text-align:center; margin-top:10px;">
             <% 
                 // UPDATE: Change role strings to 'Admin' and 'Participant'
-                let roleLabel = (participant_role === 'admin' || participant_role === 'Admin' || participant_role === 'A') 
+                let roleLabel = (role === 'admin' || role === 'Admin' || role === 'A') 
                     ? 'Admin' 
                     : 'Participant';
             %>
@@ -41,7 +41,7 @@
 
             <% 
                 // UPDATE: Check participant_role for Admin status
-                if (participant_role === 'admin' || participant_role === 'Admin' || participant_role === 'A') { 
+                if (role === 'admin' || role === 'Admin' || role === 'A') { 
             %>
                 <a href="/users" class="btn btn-primary">Users</a>
             <% } %>

@@ -112,7 +112,7 @@ app.post("/login", (req, res) => {
             req.session.isLoggedIn = true;
             req.session.email = sEmail;
             req.session.participant_id = participants[0].participant_id
-            req.session.participant_role = participants[0].participant_role
+            req.session.role = participants[0].participant_role
             console.log('Login successful')
             res.redirect("/homepage");
         } else {
@@ -138,7 +138,7 @@ app.get("/homepage", (req, res) => {
 
     res.render("homepage", {
         email: req.session.email,
-        role: req.session.participant_role
+        role: req.session.role
     });
 });
 
@@ -164,7 +164,7 @@ app.get("/events", async (req, res) => {
         // 2. Render the template with the fetched data
         res.render("events", {
             username: req.session.email,
-            participant_role: req.session.participant_role, 
+            participant_role: req.session.role, 
             events: events
         });
 
@@ -173,7 +173,7 @@ app.get("/events", async (req, res) => {
         // Render the page with an empty array if the query fails, to prevent a crash
         res.render("events", {
             username: req.session.email,
-            participant_role: req.session.participant_role,
+            participant_role: req.session.role,
             events: [],
             error_message: "Error loading events from the database."
         });
@@ -203,12 +203,12 @@ app.get("/postsurveys", async (req, res) => {
             .orderBy("survey_id", "asc");
 
         // Determine if manager using the correct session variable
-        const isManager = req.session.participant_role === "manager" || req.session.participant_role === "Manager";
+        const isManager = req.session.role === "manager" || req.session.role === "Manager";
 
         // Render the template with the fetched data and correct role variable
         res.render("postsurveys", {
             username: req.session.email,
-            participant_role: req.session.participant_role,
+            participant_role: req.session.role,
             isManager: isManager,
             surveys: surveys,
             error_message: null
@@ -219,7 +219,7 @@ app.get("/postsurveys", async (req, res) => {
         // Ensure the page still renders on error
         res.render("postsurveys", {
             username: req.session.email,
-            participant_role: req.session.participant_role,
+            participant_role: req.session.role,
             isManager: false,
             surveys: [],
             error_message: "Error loading surveys from the database."
@@ -260,7 +260,7 @@ app.get("/donations", async (req, res) => {
 
         res.render("donations", {
             donations,
-            role: req.session.participant_role,
+            role: req.session.role,
             error_message: null,
             search
         });
@@ -269,7 +269,7 @@ app.get("/donations", async (req, res) => {
         console.error(err);
         res.render("donations", {
             donations: [],
-            role: req.session.participant_role,
+            role: req.session.role,
             error_message: "Error loading donations",
             search: ""
         });
@@ -317,7 +317,7 @@ app.get("/participants", async (req, res) => {
 
         res.render("participants", {
             participants,
-            role: req.session.participant_role,
+            role: req.session.role,
             error_message: null,
             search
         });
@@ -326,7 +326,7 @@ app.get("/participants", async (req, res) => {
         console.error(err);
         res.render("participants", {
             participants: [],
-            role: req.session.participant_role,
+            role: req.session.role,
             error_message: "Error loading participants",
             search: ""
         });
@@ -362,7 +362,7 @@ app.get("/users", async (req, res) => {
 
         res.render("users", {
             participants,
-            role: req.session.participant_role,
+            role: req.session.role,
             error_message: null,
             search
         });
@@ -371,7 +371,7 @@ app.get("/users", async (req, res) => {
         console.error(err);
         res.render("users", {
             participants: [],
-            role: req.session.participant_role,
+            role: req.session.role,
             error_message: "Error loading users",
             search: ""
         });
@@ -388,7 +388,7 @@ app.get("/logout", (req, res) => {
             // Optionally, render an error page or redirect with a message
             return res.render("homepage", { 
                 email: req.session?.email,
-                role: req.session?.participant_role,
+                role: req.session?.role,
                 error_message: "Error logging out"
             });
         }
@@ -405,10 +405,10 @@ app.get("/logout", (req, res) => {
 app.get("/addDonations", async (req, res) => {
     try {
         // Ensure only admins can access
-        if (req.session.participant_role !== "admin") {
+        if (req.session.role !== "admin") {
             return res.render("donations", {
                 donations: [],
-                role: req.session.participant_role,
+                role: req.session.role,
                 error_message: "You do not have permission to add donations",
                 search: ""
             });
@@ -440,10 +440,10 @@ app.get("/addDonations", async (req, res) => {
 app.post("/addDonations", async (req, res) => {
     try {
         // Ensure only admins can submit
-        if (req.session.participant_role !== "admin") {
+        if (req.session.role !== "admin") {
             return res.render("donations", {
                 donations: [],
-                role: req.session.participant_role,
+                role: req.session.role,
                 error_message: "You do not have permission to add donations",
                 search: ""
             });
