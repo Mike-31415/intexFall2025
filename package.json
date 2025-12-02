@@ -10,7 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "install-deps": "nmp install",
     "setup": "npm install",
-    "start": "node index.js"
+    "start": "node index.js",
     "dev": "nodemon index.js"
   },
   "repository": {
