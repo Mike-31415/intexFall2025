@@ -126,7 +126,7 @@ app.post("/login", async (req, res) => {
         req.session.isLoggedIn = true;
         req.session.email = sEmail;
         req.session.participant_id = user.participant_id;
-        req.session.participant_role = user.participant_role;
+        req.session.role = user.participant_role;
 
         console.log("Login successful");
         res.redirect("/homepage");
@@ -286,6 +286,51 @@ app.get("/donations", async (req, res) => {
         });
     }
 });
+
+// DELETE DONATION ROUTE
+app.post("/deleteDonations/:donation_id", async (req, res) => {
+    try {
+        // Only admins can delete donations
+        if (req.session.role !== "admin") {
+            return res.render("donations", {
+                donations: [],
+                role: req.session.role,
+                error_message: "You do not have permission to delete donations",
+                search: ""
+            });
+        }
+
+        const donationId = req.params.donation_id;
+
+        // Validate donation ID
+        if (!donationId) {
+            return res.render("donations", {
+                donations: [],
+                role: req.session.role,
+                error_message: "Invalid donation ID",
+                search: ""
+            });
+        }
+
+        // Delete the donation from the database
+        await knex("donations")
+            .where("donation_id", donationId)
+            .del();
+
+        // Redirect back to donations page
+        res.redirect("/donations");
+
+    } catch (err) {
+        console.error("Error deleting donation:", err);
+        res.render("donations", {
+            donations: [],
+            role: req.session.role,
+            error_message: "Error deleting donation",
+            search: ""
+        });
+    }
+});
+
 
 // Participants Route
 app.get("/participants", async (req, res) => {
