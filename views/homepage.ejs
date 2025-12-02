@@ -15,13 +15,13 @@
         <p style="text-align:center; margin-top:10px;">
             <% 
                 // UPDATE: Change role strings to 'Admin' and 'Participant'
-                let roleLabel = (participant_role === 'admin' || participant_role === 'Admin' || participant_role === 'A') 
+                let roleLabel = (role === 'admin' || role === 'Admin' || role === 'A') 
                     ? 'Admin' 
                     : 'Participant';
             %>
             Logged in as <strong><%= roleLabel %></strong>
-            <% if (username) { %>
-                ( <%= username %> )
+            <% if (email) { %>
+                ( <%= email %> )
             <% } %>
         </p>
 
@@ -37,10 +37,11 @@
             <a href="/participants" class="btn btn-primary">Participants</a>
             <a href="/events" class="btn btn-primary">Events</a>
             <a href="/postsurveys" class="btn btn-primary">Post Surveys</a>
+            <a href="/users" class="btn btn-primary">Users</a>
 
             <% 
                 // UPDATE: Check participant_role for Admin status
-                if (participant_role === 'admin' || participant_role === 'Admin' || participant_role === 'A') { 
+                if (role === 'admin' || role === 'Admin' || role === 'A') { 
             %>
                 <a href="/users" class="btn btn-primary">Users</a>
             <% } %>
