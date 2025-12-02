@@ -99,37 +99,31 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-    const sName = req.body.username;
-    const sPassword = req.body.password;
-    console.log("Post Login");
-
-    knex
-        .select("id", "username", "password", "level") 
-        .from("users")
-        .where("username", sName)
-        .andWhere("password", sPassword)
-        .then(users => {
-            if (users.length > 0) {
-                const user = users[0];
-
-                req.session.isLoggedIn = true;
-                req.session.username = user.username;
-                req.session.userid = user.id;
-
-                // Map DB level -> role string
-                // assume: 'M' = manager, anything else = user
-                req.session.role = user.level === "M" ? "manager" : "user";
-
-                console.log("Login successful, role =", req.session.role);
-                res.redirect("/homepage");
-            } else {
-                res.render("login", { error_message: "Invalid login" });
-            }
-        })
-        .catch(err => {
-            console.error("Login error:", err);
-            res.render("login", { error_message: "Invalid login" });
-        });
+    let sEmail = req.body.email;
+    let sPassword = req.body.password;
+    console.log('Post Login')
+    knex.select("participant_id","participant_email", "password", "participant_role")
+    .from('participants')
+    .where("participant_email", sEmail)
+    .andWhere("password", sPassword)
+    .then(participants => {
+        //check if a user was found with matchin g username AND password
+        if (participants.length > 0){
+            req.session.isLoggedIn = true;
+            req.session.email = sEmail;
+            req.session.participant_id = participants[0].participant_id
+            req.session.participant_role = participants[0].participant_role
+            console.log('Login successful')
+            res.redirect("/");
+        } else {
+            // No matching user found
+            res.render("login", { error_message: "Invalid login"});
+        }
+    })
+    .catch(err => {
+        console.error("Login error:", err);
+        res.render("login", { error_message: "Invalid login"});
+    });
 });
 
 app.get("/", (req, res) => {
@@ -180,6 +174,58 @@ app.get("/postsurveys", (req, res) => {
         surveys: surveys
     });
 });
+// DONATIONS PAGE
+app.get("/donations", async (req, res) => {
+    try {
+        const donations = await knex("donations as d")
+            .join("participants as p", "d.participant_id", "p.id")
+            .select(
+                "d.id",
+                "d.donation_date",
+                "d.donation_amount",
+                "p.first_name",
+                "p.last_name"
+            )
+            .orderBy("d.donation_date", "desc");
+
+        res.render("donations", {
+            donations,
+            role: req.session.permissions,
+            error_message: null
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.render("donations", {
+            donations: [],
+            role: req.session.permissions,
+            error_message: "Error loading donations"
+        });
+    }
+});
+
+
+// PARTICIPANTS PAGE
+app.get("/participants", async (req, res) => {
+    try {
+        const participants = await knex("participants").select("*");
+
+        res.render("participants", {
+            participants,
+            role: req.session.permissions,
+            error_message: null
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.render("participants", {
+            participants: [],
+            role: req.session.permissions,
+            error_message: "Error loading participants"
+        });
+    }
+});
+
 
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);

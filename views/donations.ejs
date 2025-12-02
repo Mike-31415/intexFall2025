@@ -37,9 +37,10 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Username</th>
-                            <th>Password</th>
-                            <th>Profile Picture</th>
+                            <th>Donation Date</th>
+                            <th>Donation Amount</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
                             
                             <!-- Manager-only columns -->
                             <% if (role === "manager") { %>
@@ -53,18 +54,10 @@
                     <tbody>
                         <% donations.forEach(donation => { %>
                             <tr>
-                                <td><%= donation.username %></td>
-                                <td><%= donation.password %></td>
-
-                                <td>
-                                    <% if (donation.profile_image) { %>
-                                        <img src="<%= user.profile_image %>" 
-                                             alt="Profile picture" 
-                                             style="max-width: 100px;">
-                                    <% } else { %>
-                                        <span>No image</span>
-                                    <% } %>
-                                </td>
+                                <td><%= donation.donation_date %></td>
+                                <td><%= donation.donation_amount %></td>
+                                <td><%= donation.first_name %></td>
+                                <td><%= donation.last_name %></td>
 
                                 <!-- EDIT: Managers only -->
                                 <% if (role === "manager") { %>

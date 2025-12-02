@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Participant</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+    <h1>Add New Participant</h1>
+
+    <% if (error_message) { %>
+        <div class="error-message"><%= error_message %></div>
+    <% } %>
+
+    <!-- The form sends data to the route you'll build later: POST /events/add -->
+    <form class="event-form" action="/addParticipants" method="POST">
+
+        <div class="form-row">
+            <label for="donationDate">Donation Date</label>
+            <input type="text" id="donationDate" name="donationDate" required>
+        </div>
+
+        <div class="form-row">
+            <label for="donationAmount">Donation Amount</label>
+            <input type="text" id="donationAmount" name="donationAmount" required>
+        </div>
+
+        <div class="form-row">
+            <label for="firstName">First Name</label>
+            <textarea id="firstName" name="firstName" required></textarea>
+        </div>
+
+        <div class="form-row">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" name="lastName" required>
+        </div>
+
+        <div class="buttons">
+            <button type="submit" class="btn btn-save">Add Donation</button>
+            <a href="/donations" class="btn btn-cancel">Cancel</a>
+        </div>
+    </form>
+</body>
+</html>
