@@ -6,6 +6,7 @@ const session = require("express-session");
 const path = require("path");
 const bodyParser = require("body-parser");
 
+const bcrypt = require("bcrypt");
 const app = express();
 app.set("view engine", "ejs");
 
@@ -121,14 +122,14 @@ app.post("/register", async (req, res) => {
         // Basic split of name into first/last (best-effort)
         const [first, ...rest] = (username || "").split(" ");
         const last = rest.join(" ");
-
+        const hashed = await bcrypt.hash(password, 10);
         // Insert participant as the auth user record
         const [created] = await knex("participants")
             .insert({
                 participant_email: username,
                 participant_first_name: first || username,
                 participant_last_name: last || "",
-                password: password,
+                password: hashed,
                 participant_role: "participant"
             })
             .returning(["participant_id", "participant_email", "participant_role", "participant_first_name", "participant_last_name"]);
@@ -157,23 +158,24 @@ app.post("/login", (req, res) => {
     let sPassword = req.body.password;
     console.log('Post Login')
     knex("participants")
-        .select("participant_id","participant_email", "password", "participant_role", "participant_first_name", "participant_last_name")
+        .select("participant_id","participant_email","password","participant_role","participant_first_name","participant_last_name")
         .where("participant_email", sEmail)
-        .andWhere("password", sPassword)
-        .then(participants => {
-            if (participants.length > 0){
-                const user = participants[0];
-                const normalizedRole = (user.participant_role || "").toLowerCase() === "manager" ? "admin" : (user.participant_role || "");
-                req.session.isLoggedIn = true;
-                req.session.participant_id = user.participant_id;
-                req.session.email = user.participant_email;
-                req.session.role = normalizedRole || "participant";
-                req.session.username = `${user.participant_first_name} ${user.participant_last_name}`;
-                console.log('Login successful');
-                res.redirect("/");
-            } else {
-                res.render("login", { error_message: "Invalid login"});
+        .then(async participants => {
+            if (participants.length === 0) {
+                return res.render("login", { error_message: "Invalid login" });
             }
+            const user = participants[0];
+            const isValid = await bcrypt.compare(sPassword, user.password);
+            if (!isValid) {
+                return res.render("login", { error_message: "Invalid login" });
+            }
+            const normalizedRole = (user.participant_role || "").toLowerCase() === "manager" ? "admin" : (user.participant_role || "");
+            req.session.isLoggedIn = true;
+            req.session.participant_id = user.participant_id;
+            req.session.email = user.participant_email;
+            req.session.role = normalizedRole || "participant";
+            req.session.username = `${user.participant_first_name} ${user.participant_last_name}`;
+            res.redirect("/");
         })
         .catch(err => {
             console.error("Login error:", err);
@@ -799,9 +801,10 @@ app.post("/addParticipants", requireManager, async (req, res) => {
     } = req.body;
 
     try {
+        const hashed = await bcrypt.hash(password, 10);
         await knex("participants").insert({
             participant_email,
-            password,
+            password: hashed,
             participant_first_name,
             participant_last_name,
             participant_dob,
@@ -856,11 +859,15 @@ app.post("/editParticipants/:id", requireManager, async (req, res) => {
     } = req.body;
 
     try {
+        let newPw = null;
+        if (password && password.trim() !== "") {
+            newPw = await bcrypt.hash(password, 10);
+        }
         await knex("participants")
             .where("participant_id", id)
             .update({
                 participant_email,
-                password,
+                password: newPw || undefined,
                 participant_first_name,
                 participant_last_name,
                 participant_dob,
