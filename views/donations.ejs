@@ -55,7 +55,19 @@
                     <tbody>
                         <% donations.forEach(donation => { %>
                             <tr>
-                                <td><%= donation.donation_date %></td>
+                                <td>
+                                    <% if (!donation.donation_date) { %>
+                                        <!-- Show empty instead of 1970 -->
+                                        <%= "Unkown Date" %>
+                                    <% } else { %>
+                                        <%= new Date(donation.donation_date).toLocaleDateString("en-US", {
+                                            weekday: "long",
+                                            month: "long",
+                                            day: "numeric",
+                                            year: "numeric"
+                                        }) %>
+                                    <% } %>
+                                </td>
                                 <td><%= donation.donation_amount %></td>
                                 <td><%= donation.first_name %></td>
                                 <td><%= donation.last_name %></td>
