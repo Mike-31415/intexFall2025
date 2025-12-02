@@ -14,7 +14,7 @@
             <h1 class="mb-4">Donations List</h1>
 
             <!-- MANAGERS SEE ADD BUTTON -->
-            <% if (role === "manager") { %>
+            <% if (role === "admin") { %>
                 <form action="/addDonations" method="GET" class="mb-3">
                     <button class="btn btn-success" type="submit">Add Donation</button>
                 </form>
@@ -27,13 +27,27 @@
                 </div>
             <% } %>
 
+                <form method="GET" action="/donations" class="mb-4">
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            name="search" 
+                            class="form-control"
+                            placeholder="Search by date, name, or amount..."
+                            value="<%= search %>"
+                        />
+
+                        <button class="btn btn-primary" type="submit">Search</button>
+                        <a href="/donations" class="btn btn-secondary">Clear</a>
+                    </div>
+                </form>
+
             <!-- NO USERS -->
             <% if (donations.length === 0) { %>
                 <div class="alert alert-warning">
                     No donations found in the database.
                 </div>
             <% } else { %>
-
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -43,7 +57,7 @@
                             <th>Last Name</th>
                             
                             <!-- Manager-only columns -->
-                            <% if (role === "manager") { %>
+                            <% if (role === "admin") { %>
                                 <th>Edit</th>
                                 <th>Delete</th>
                             <% } %>
@@ -54,15 +68,27 @@
                     <tbody>
                         <% donations.forEach(donation => { %>
                             <tr>
-                                <td><%= donation.donation_date %></td>
+                                <td>
+                                    <% if (!donation.donation_date) { %>
+                                        <!-- Show empty instead of 1970 -->
+                                        <%= "Unkown Date" %>
+                                    <% } else { %>
+                                        <%= new Date(donation.donation_date).toLocaleDateString("en-US", {
+                                            weekday: "long",
+                                            month: "long",
+                                            day: "numeric",
+                                            year: "numeric"
+                                        }) %>
+                                    <% } %>
+                                </td>
                                 <td><%= donation.donation_amount %></td>
-                                <td><%= donation.first_name %></td>
-                                <td><%= donation.last_name %></td>
+                                <td><%= donation.participant_first_name %></td>
+                                <td><%= donation.participant_last_name %></td>
 
                                 <!-- EDIT: Managers only -->
-                                <% if (role === "manager") { %>
+                                <% if (role === "admin") { %>
                                     <td>
-                                        <form action="/editDonations/<%= donation.id %>" method="GET">
+                                        <form action="/editDonations/<%= donation.donation_id %>" method="GET">
                                             <button class="btn btn-primary btn-sm">Edit</button>
                                         </form>
                                     </td>
