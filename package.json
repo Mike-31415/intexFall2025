@@ -11,6 +11,7 @@
     "install-deps": "nmp install",
     "setup": "npm install",
     "start": "node index.js"
+    "dev": "nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
   },
   "homepage": "https://github.com/Mike-31415/intexFall2025#readme",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
     "env": "^0.0.2",
@@ -31,5 +33,8 @@
     "knex": "^3.1.0",
     "multer": "^2.0.2",
     "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
   }
 }

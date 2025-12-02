@@ -137,8 +137,9 @@ h1, h2, h3, .title {
   box-shadow: 0 10px 24px rgba(0,0,0,0.08);
 }
 
-.nav-accent {
-  background: var(--coral);
+.nav-accent,
+.site-nav a.nav-accent {
+  background: var(--raspberry);
   color: white !important;
   border-color: transparent;
 }
