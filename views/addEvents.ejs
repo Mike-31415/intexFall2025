@@ -30,7 +30,13 @@ Add Event page: Allows admin/managers to create a new event template.
 
             <div class="form-row">
                 <label for="eventtype">Event Type</label>
-                <input type="text" id="eventtype" name="eventtype" required>
+                <select id="eventtype" name="eventtype" required>
+                    <option value="">Select an event type</option>
+                    <option value="STEM">STEM</option>
+                    <option value="Arts">Arts</option>
+                    <option value="Leadership">Leadership</option>
+                    <option value="Annual Conference">Annual Conference</option>
+                </select>
             </div>
 
             <div class="form-row">
@@ -40,7 +46,12 @@ Add Event page: Allows admin/managers to create a new event template.
 
             <div class="form-row">
                 <label for="eventrecurrencepattern">Recurrence Pattern</label>
-                <input type="text" id="eventrecurrencepattern" name="eventrecurrencepattern" required>
+                <select id="eventrecurrencepattern" name="eventrecurrencepattern" required>
+                    <option value="">Select recurrence</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="annual">Annual</option>
+                </select>
             </div>
 
             <div class="form-row">
