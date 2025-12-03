@@ -47,6 +47,7 @@
             <p id="modal-description" class="modal-body"></p>
             <div class="modal-actions">
                 <a id="modal-register" class="btn btn-primary" href="#">Register</a>
+                <a id="modal-surveys" class="btn btn-secondary" href="#">View Surveys</a>
             </div>
         </div>
     </div>
@@ -81,6 +82,7 @@
             const modalDescription = document.getElementById('modal-description');
             const modalClose = document.getElementById('modal-close');
             const modalRegister = document.getElementById('modal-register');
+            const modalSurveys = document.getElementById('modal-surveys');
 
             function formatDateTime(dateStr) {
                 const d = new Date(dateStr);
@@ -101,6 +103,11 @@
                 modalCapacity.textContent = evt.capacity ? `Capacity: ${evt.capacity}` : '';
                 modalDescription.textContent = evt.description || 'No description provided.';
                 modalRegister.href = `/events/register/${evt.id}`;
+                const searchTerm = (() => {
+                    const d = new Date(evt.start);
+                    return isNaN(d) ? '' : d.toISOString().slice(0, 10);
+                })();
+                modalSurveys.href = `/postsurveys?search=${encodeURIComponent(searchTerm)}`;
                 modal.classList.remove('hidden');
                 modal.setAttribute('aria-hidden', 'false');
             }
