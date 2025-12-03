@@ -8,70 +8,70 @@
 
 <body>
     <%- include('partials/header') %>
+    <div class="table-card">
+        <h1>Post-Event Surveys</h1>
 
-    <h1>Post-Event Surveys</h1>
+        <% if (typeof error_message !== 'undefined' && error_message) { %>
+            <div class="error-message"><%= error_message %></div>
+        <% } %>
 
-    <% if (typeof error_message !== 'undefined' && error_message) { %>
-        <div class="error-message"><%= error_message %></div>
-    <% } %>
+        <%
+            // Determine if user is an admin
+            let isManager = (role === 'admin' || role === 'Admin');
+        %>
 
-    <%
-        // Determine if user is an admin
-        let isManager = (role === 'admin' || role === 'Admin');
-    %>
+        <!-- Add Survey button (ADMINS ONLY) -->
+        <% if (isManager) { %>
+            <a href="/postsurveys/add" class="btn btn-add">Add Survey</a>
+        <% } %>
 
-    <!-- Add Survey button (ADMINS ONLY) -->
-    <% if (isManager) { %>
-        <a href="/postsurveys/add" class="btn btn-add">Add Survey</a>
-    <% } %>
-
-    <table class="event-list">
-        <thead>
-            <tr>
-                <th>Event Name</th>
-                <th>Event Date/Time</th>
-                <th>Participant</th>
-                <th>Rating</th>
-                <th>Comments</th>
-
-                <!-- Only show Actions column for admins -->
-                <% if (isManager) { %>
-                    <th>Actions</th>
-                <% } %>
-            </tr>
-        </thead>
-
-        <tbody>
-            <% if (surveys && surveys.length > 0) { %>
-                <% surveys.forEach(survey => { %>
-                    <tr>
-                        <td><%= survey.eventname %></td>
-                        <td><%= survey.eventdatetimestart %></td>
-                        <td><%= survey.participantname %></td>
-                        <td><%= survey.rating %></td>
-                        <td><%= survey.comments %></td>
-
-                        <% if (isManager) { %>
-                            <td class="actions">
-                                <a href="/postsurveys/edit/<%= survey.surveyid %>" class="btn btn-edit">
-                                    Edit
-                                </a>
-                                <form action="/postsurveys/delete/<%= survey.surveyid %>" method="POST" style="display:inline;">
-                                    <button class="btn btn-delete" type="submit">Delete</button>
-                                </form>
-                            </td>
-                        <% } %>
-                    </tr>
-                <% }) %>
-            <% } else { %>
+        <table class="event-table">
+            <thead>
                 <tr>
-                    <td colspan="<%= isManager ? 6 : 5 %>" style="text-align:center; padding:20px;">
-                        No surveys found.
-                    </td>
-                </tr>
-            <% } %>
-        </tbody>
-    </table>
+                    <th>Event Name</th>
+                    <th>Event Date/Time</th>
+                    <th>Participant</th>
+                    <th>Rating</th>
+                    <th>Comments</th>
 
+                    <!-- Only show Actions column for admins -->
+                    <% if (isManager) { %>
+                        <th>Actions</th>
+                    <% } %>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% if (surveys && surveys.length > 0) { %>
+                    <% surveys.forEach(survey => { %>
+                        <tr>
+                            <td><%= survey.eventname %></td>
+                            <td><%= survey.eventdatetimestart %></td>
+                            <td><%= survey.participantname %></td>
+                            <td><%= survey.rating %></td>
+                            <td><%= survey.comments %></td>
+
+                            <% if (isManager) { %>
+                                <td class="actions">
+                                    <a href="/postsurveys/edit/<%= survey.surveyid %>" class="btn btn-edit">
+                                        Edit
+                                    </a>
+                                    <form action="/postsurveys/delete/<%= survey.surveyid %>" method="POST" style="display:inline;">
+                                        <button class="btn btn-delete" type="submit">Delete</button>
+                                    </form>
+                                </td>
+                            <% } %>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="<%= isManager ? 6 : 5 %>" style="text-align:center; padding:20px;">
+                            No surveys found.
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
