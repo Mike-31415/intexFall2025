@@ -101,7 +101,7 @@ information (name, DOB, phone, city, etc). Admin/Managers can edit and delete.
                                 <td><%= participant.participant_first_name %></td>
                                 <td><%= participant.participant_last_name %></td>
                                 <td>
-                                    <%= new Date(participant.participant_dob).toISOString().split('T')[0] %>
+                                    <%= participant.participant_dob ? new Date(participant.participant_dob).toISOString().split('T')[0] : '' %>
                                 </td>
                                 <td><%= participant.participant_phone %></td>
                                 <td><%= participant.participant_city %></td>

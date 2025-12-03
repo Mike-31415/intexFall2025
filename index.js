@@ -790,10 +790,12 @@ app.get("/donations", async (req, res) => {
 
         if (search.trim() !== "") {
             query = query.where(function () {
-                this.whereILike("p.participant_first_name", `%${search}%`)
-                    .orWhereILike("p.participant_last_name", `%${search}%`)
-                    .orWhereRaw("CAST(d.donation_amount AS TEXT) ILIKE ?", [`%${search}%`])
-                    .orWhereRaw("CAST(d.donation_date AS TEXT) ILIKE ?", [`%${search}%`]);
+                this.orWhereRaw(
+                    "concat(coalesce(p.participant_first_name,''),' ',coalesce(p.participant_last_name,'')) ILIKE ?",
+                    [`%${search}%`]
+                )
+                .orWhereRaw("CAST(d.donation_amount AS TEXT) ILIKE ?", [`%${search}%`])
+                .orWhereRaw("CAST(d.donation_date AS TEXT) ILIKE ?", [`%${search}%`]);
             });
         }
 
@@ -922,8 +924,7 @@ app.get("/users", requireManager, async (req, res) => {
             const s = `%${search}%`;
 
             query.where(function () {
-                this.whereILike("p.participant_first_name", s)
-                    .orWhereILike("p.participant_last_name", s)
+                this.orWhereILike(knex.raw("concat(coalesce(p.participant_first_name,''),' ',coalesce(p.participant_last_name,''))"), s)
                     .orWhereILike("p.participant_email", s)
                     .orWhereILike("p.participant_role", s);
             });
@@ -1121,8 +1122,7 @@ app.get("/participants", async (req, res) => {
         if (search.trim() !== "") {
             const s = `%${search}%`;
             query.where(function () {
-                this.whereILike("p.participant_first_name", s)
-                    .orWhereILike("p.participant_last_name", s)
+                this.orWhereILike(knex.raw("concat(coalesce(p.participant_first_name,''),' ',coalesce(p.participant_last_name,''))"), s)
                     .orWhereILike("p.participant_email", s)
                     .orWhereILike("p.participant_city", s)
                     .orWhereILike("p.participant_state", s)
