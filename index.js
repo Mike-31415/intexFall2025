@@ -83,6 +83,27 @@ const requireAdmin = (req, res, next) => {
 // alias for older references
 const requireManager = requireAdmin;
 
+// Normalize phone numbers to a consistent (XXX)XXX-XXXX format, with optional country code prefix.
+const normalizePhoneNumber = (raw, { required = false } = {}) => {
+    const input = (raw || "").trim();
+    if (!input) {
+        return required ? { error: "Phone number is required." } : { value: null };
+    }
+
+    // Keep only digits so international numbers like +44 20 7946 0958 are accepted.
+    const digits = input.replace(/\D/g, "");
+    if (digits.length < 10) {
+        return { error: "Phone number must include at least 10 digits." };
+    }
+
+    const national = digits.slice(-10);
+    const country = digits.slice(0, -10);
+    const formattedLocal = `(${national.slice(0,3)})${national.slice(3,6)}-${national.slice(6)}`;
+    const formatted = country ? `+${country} ${formattedLocal}` : formattedLocal;
+
+    return { value: formatted };
+};
+
 // Global authentication middleware
 app.use((req, res, next) => {
     console.log("Auth middleware: checking path:", req.path);
@@ -140,6 +161,11 @@ app.post("/register", async (req, res) => {
     } = req.body;
 
     try {
+        const phoneResult = normalizePhoneNumber(participant_phone, { required: true });
+        if (phoneResult.error) {
+            return res.render("register", { error_message: phoneResult.error });
+        }
+
         // Check if user already exists
         const existingUser = await knex("participants")
             .where({ participant_email: participant_email })
@@ -159,7 +185,7 @@ app.post("/register", async (req, res) => {
                 password: hashed,
                 participant_role: "participant",
                 participant_dob: participant_dob || null,
-                participant_phone,
+                participant_phone: phoneResult.value,
                 participant_city,
                 participant_state,
                 participant_zip,
@@ -1281,6 +1307,10 @@ app.post("/addParticipants", requireManager, async (req, res) => {
     } = req.body;
 
     try {
+        const phoneResult = normalizePhoneNumber(participant_phone, { required: !!participant_phone });
+        if (phoneResult.error) {
+            return res.render("addParticipants", { error_message: phoneResult.error, participant: req.body });
+        }
         const hashed = await bcrypt.hash(password, 10);
         await knex("participants").insert({
             participant_email,
@@ -1289,7 +1319,7 @@ app.post("/addParticipants", requireManager, async (req, res) => {
             participant_last_name,
             participant_dob,
             participant_role: participant_role || "user",
-            participant_phone,
+            participant_phone: phoneResult.value,
             participant_city,
             participant_state,
             participant_zip,
@@ -1339,6 +1369,10 @@ app.post("/editParticipants/:id", requireManager, async (req, res) => {
     } = req.body;
 
     try {
+        const phoneResult = normalizePhoneNumber(participant_phone, { required: !!participant_phone });
+        if (phoneResult.error) {
+            return res.render("editParticipants", { error_message: phoneResult.error, participant: { ...req.body, participant_id: id } });
+        }
         let newPw = null;
         if (password && password.trim() !== "") {
             newPw = await bcrypt.hash(password, 10);
@@ -1352,7 +1386,7 @@ app.post("/editParticipants/:id", requireManager, async (req, res) => {
                 participant_last_name,
                 participant_dob,
                 participant_role: participant_role || "user",
-                participant_phone,
+                participant_phone: phoneResult.value,
                 participant_city,
                 participant_state,
                 participant_zip,

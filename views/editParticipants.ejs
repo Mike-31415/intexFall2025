@@ -56,7 +56,15 @@ a certain participant.
 
             <div class="form-row">
                 <label for="participant_phone">Phone</label>
-                <input type="text" id="participant_phone" name="participant_phone" value="<%= participant.participant_phone %>">
+                <input
+                    type="tel"
+                    id="participant_phone"
+                    name="participant_phone"
+                    value="<%= participant.participant_phone %>"
+                    placeholder="(509)234-1234 or +44 (207)946-0958"
+                    pattern="[0-9+()\\-\\s]{10,}"
+                    inputmode="tel"
+                >
             </div>
 
             <div class="form-row">
