@@ -338,38 +338,57 @@ app.post("/events/register/:id", (req, res) => {
         });
 });
 
-app.get("/events", (req, res) => {
+app.get("/events", async (req, res) => {
     if (!req.session.isLoggedIn) {
         return res.redirect("/login");
     }
 
-    knex("event_templates")
-        .select(
-            "event_template_id as eventid",
-            "event_name as eventname",
-            "event_type as eventtype",
-            "event_description as eventdescription",
-            "event_default_capacity as eventdefaultcapacity",
-            "event_recurrence_pattern as eventrecurrencepattern"
-        )
-        .orderBy("event_template_id", "asc")
-        .then(events => {
-            res.render("events", {
-                username: req.session.username,
-                role: req.session.role,
-                events
+    const search = req.query.search || "";
+
+    try {
+        let query = knex("event_templates")
+            .select(
+                "event_template_id as eventid",
+                "event_name as eventname",
+                "event_type as eventtype",
+                "event_description as eventdescription",
+                "event_default_capacity as eventdefaultcapacity",
+                "event_recurrence_pattern as eventrecurrencepattern"
+            )
+            .orderBy("event_template_id", "asc");
+
+        if (search.trim() !== "") {
+            query = query.where(builder => {
+                builder
+                    .whereILike("event_name", `%${search}%`)
+                    .orWhereILike("event_type", `%${search}%`)
+                    .orWhereILike("event_description", `%${search}%`)
+                    .orWhereILike("event_recurrence_pattern", `%${search}%`)
+                    .orWhereRaw("CAST(event_default_capacity AS TEXT) ILIKE ?", [`%${search}%`])
             });
-        })
-        .catch(err => {
-            console.error("Error loading events:", err);
-            res.render("events", {
-                username: req.session.username,
-                role: req.session.role,
-                events: [],
-                error_message: "Error loading events"
-            });
+        }
+
+        const events = await query;
+
+        res.render("events", {
+            username: req.session.username,
+            role: req.session.role,
+            events,
+            search
         });
+
+    } catch (err) {
+        console.error("Error loading events:", err);
+        res.render("events", {
+            username: req.session.username,
+            role: req.session.role,
+            events: [],
+            error_message: "Error loading events",
+            search
+        });
+    }
 });
+
 
 // Add Event - form
 app.get("/events/add", requireManager, (req, res) => {
@@ -464,46 +483,61 @@ app.post("/events/delete/:id", requireManager, (req, res) => {
             res.redirect("/events");
         });
 });
+app.get("/postsurveys", async (req, res) => {
+    if (!req.session.isLoggedIn) return res.redirect("/login");
 
-app.get("/postsurveys", (req, res) => {
-    if (!req.session.isLoggedIn) {
-        return res.redirect("/login");
-    }
-
+    const search = req.query.search || "";
     const isManager = (req.session.role || "").toLowerCase() === "admin";
 
-    knex("surveys as s")
-        .leftJoin("participants as p", "s.participant_id", "p.participant_id")
-        .leftJoin("event_occurrences as eo", "s.event_occurrence_id", "eo.event_occurrence_id")
-        .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
-        .select(
-            "s.survey_id as surveyid",
-            "et.event_name as eventname",
-            "eo.event_date_time_start as eventdatetimestart",
-            knex.raw("concat(coalesce(p.participant_first_name,''),' ', coalesce(p.participant_last_name,'')) as participantname"),
-            "s.survey_overall_score as rating",
-            "s.survey_comments as comments"
-        )
-        .orderBy("s.survey_id", "desc")
-        .then(surveys => {
-            res.render("postsurveys", {
-                username: req.session.username,
-                role: req.session.role,
-                isManager,
-                surveys
+    try {
+        let query = knex("surveys as s")
+            .leftJoin("participants as p", "s.participant_id", "p.participant_id")
+            .leftJoin("event_occurrences as eo", "s.event_occurrence_id", "eo.event_occurrence_id")
+            .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
+            .select(
+                "s.survey_id as surveyid",
+                "et.event_name as eventname",
+                "eo.event_date_time_start as eventdatetimestart",
+                knex.raw("concat(coalesce(p.participant_first_name,''), ' ', coalesce(p.participant_last_name,'')) as participantname"),
+                "s.survey_overall_score as rating",
+                "s.survey_comments as comments"
+            )
+            .orderBy("s.survey_id", "desc");
+
+        if (search.trim() !== "") {
+            query = query.where(builder => {
+                builder
+                    .whereILike("et.event_name", `%${search}%`)
+                    .orWhereILike("s.survey_comments", `%${search}%`)
+                    .orWhereILike(knex.raw("concat(coalesce(p.participant_first_name,''), ' ', coalesce(p.participant_last_name,''))"), `%${search}%`)
+                    .orWhereRaw("CAST(s.survey_overall_score AS TEXT) ILIKE ?", [`%${search}%`])
+                    .orWhereRaw("CAST(eo.event_date_time_start AS TEXT) ILIKE ?", [`%${search}%`]);
             });
-        })
-        .catch(err => {
-            console.error("Error loading surveys:", err);
-            res.render("postsurveys", {
-                username: req.session.username,
-                role: req.session.role,
-                isManager,
-                surveys: [],
-                error_message: "Error loading surveys"
-            });
+        }
+
+        const surveys = await query;
+
+        res.render("postsurveys", {
+            username: req.session.username,
+            role: req.session.role,
+            isManager,
+            surveys,
+            search
         });
+
+    } catch (err) {
+        console.error("Error loading surveys:", err);
+        res.render("postsurveys", {
+            username: req.session.username,
+            role: req.session.role,
+            isManager,
+            surveys: [],
+            error_message: "Error loading surveys",
+            search
+        });
+    }
 });
+
 
 // Add Survey - form
 app.get("/postsurveys/add", requireManager, async (req, res) => {
@@ -971,32 +1005,52 @@ app.get("/participants", async (req, res) => {
 
 // MILESTONES PAGE
 app.get("/milestones", async (req, res) => {
-    if (!req.session.isLoggedIn) {
-        return res.redirect("/login");
-    }
+    if (!req.session.isLoggedIn) return res.redirect("/login");
+
+    const search = req.query.search || "";
     const isManager = (req.session.role || "").toLowerCase() === "admin";
+
     try {
-        const milestones = await knex("milestones as m")
+        let query = knex("milestones as m")
             .leftJoin("participants as p", "m.participant_id", "p.participant_id")
             .select(
-                "m.participant_id",
-                knex.raw("min(m.milestone_id) as milestoneid"),
-                knex.raw("concat(coalesce(p.participant_first_name,''),' ', coalesce(p.participant_last_name,'')) as participantname"),
-                knex.raw("string_agg(m.milestone_title, '; ' order by m.milestone_date) as milestonetitles"),
-                knex.raw("string_agg(to_char(m.milestone_date, 'YYYY-MM-DD'), '; ' order by m.milestone_date) as milestonedates")
+                "m.milestone_id",
+                "m.milestone_title",
+                "m.milestone_date",
+                knex.raw("concat(coalesce(p.participant_first_name,''), ' ', coalesce(p.participant_last_name,'')) as participant_name")
             )
-            .groupBy("m.participant_id", "p.participant_first_name", "p.participant_last_name");
+            .orderBy("m.milestone_date", "desc");
+
+        if (search.trim() !== "") {
+            const like = `%${search}%`;
+
+            query.where(builder => {
+                builder
+                    .whereILike("m.milestone_title", like)
+                    .orWhereILike(knex.raw("concat(coalesce(p.participant_first_name,''), ' ', coalesce(p.participant_last_name,''))"), like)
+                    .orWhereRaw("CAST(m.milestone_date AS TEXT) ILIKE ?", [like]);
+            });
+        }
+
+        const milestones = await query;
 
         res.render("milestones", {
+            username: req.session.username,
+            role: req.session.role,
             milestones,
-            isManager
+            isManager,
+            search
         });
+
     } catch (err) {
         console.error("Error loading milestones:", err);
         res.render("milestones", {
+            username: req.session.username,
+            role: req.session.role,
             milestones: [],
             isManager,
-            error_message: "Error loading milestones"
+            error_message: "Error loading milestones",
+            search
         });
     }
 });

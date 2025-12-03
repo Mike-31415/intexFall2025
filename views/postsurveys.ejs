@@ -27,6 +27,22 @@
             </div>
         <% } %>
 
+        <!-- SEARCH BAR -->
+        <form method="GET" action="/postsurveys" class="mb-3">
+            <div class="search-bar-wrapper" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                <input 
+                    type="text"
+                    name="search"
+                    class="form-control"
+                    placeholder="Search by name, event name, event date, or comments..."
+                    value="<%= search %>"
+                    style="flex: 1; min-width: 250px; border-radius: 8px; height: 35px; padding: 0 12px;"
+                />
+                <button class="btn btn-secondary" type="submit">Search</button>
+                <button class="btn btn-secondary" type="button" onclick="window.location.href='/postsurveys'">Clear</button>
+            </div>
+        </form>
+
         <table class="event-table table-striped">
             <thead>
                 <tr>

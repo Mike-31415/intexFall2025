@@ -18,6 +18,22 @@
             </div>
         <% } %>
 
+        <!-- SEARCH BAR -->
+        <form method="GET" action="/milestones" class="mb-3">
+            <div class="search-bar-wrapper" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                <input 
+                    type="text"
+                    name="search"
+                    class="form-control"
+                    placeholder="Search by name or milestone"
+                    value="<%= search %>"
+                    style="flex: 1; min-width: 250px; border-radius: 8px; height: 35px; padding: 0 12px;"
+                />
+                <button class="btn btn-secondary" type="submit">Search</button>
+                <button class="btn btn-secondary" type="button" onclick="window.location.href='/milestones'">Clear</button>
+            </div>
+        </form>
+
         <table class="event-table table-striped">
             <thead>
                 <tr>
@@ -35,18 +51,18 @@
                 <% if (milestones && milestones.length > 0) { %>
                     <% milestones.forEach(m => { %>
                         <tr>
-                            <td><%= m.participantname %></td>
-                            <td><%= m.milestonetitles %></td>
-                            <td><%= m.milestonedates %></td>
+                            <td><%= m.participant_name %></td>
+                            <td><%= m.milestone_title %></td>
+                            <td><%= m.milestone_date %></td>
 
                             <% if (isManager) { %>
                                 <td>
-                                    <a href="/milestones/edit/<%= m.milestoneid %>" class="btn btn-primary btn-sm">
+                                    <a href="/milestones/edit/<%= m.milestone_id %>" class="btn btn-primary btn-sm">
                                         Edit
                                     </a>
                                 </td>
                                 <td>
-                                    <form action="/milestones/delete/<%= m.milestoneid %>" method="POST" style="display:inline;">
+                                    <form action="/milestones/delete/<%= m.milestone_id %>" method="POST" style="display:inline;">
                                         <button type="submit" class="btn btn-danger">Delete</button>
                                     </form>
                                 </td>
