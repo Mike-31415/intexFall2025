@@ -334,6 +334,14 @@ h1, h2, h3, .title {
   background: #ffffff;
 }
 
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 10px;
+}
+
 textarea {
   resize: vertical;
 }
