@@ -263,112 +263,185 @@ app.get("/homepage", (req, res) => {
     });
 });
 
-app.get("/calendar", (req, res) => {
+app.get("/calendar", async (req, res) => {
     if (!req.session.isLoggedIn) {
         return res.redirect("/login");
     }
-    knex("event_occurrences as eo")
-        .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
-        .select(
-            "eo.event_occurrence_id as id",
-            "et.event_name as name",
-            "eo.event_date_time_start as start",
-            "et.event_type as type",
-            "et.event_description as description",
-            "et.event_default_capacity as capacity"
-        )
-        .orderBy("eo.event_date_time_start", "asc")
-        .then(events => {
-            res.render("calendar", {
-                username: req.session.username,
-                role: req.session.role,
-                events
-            });
-        })
-        .catch(err => {
-            console.error("Error loading events for calendar:", err);
-            res.render("calendar", {
-                username: req.session.username,
-                role: req.session.role,
-                events: []
-            });
+    const participantId = req.session.participant_id;
+    try {
+        const registeredEventIds = participantId
+            ? await knex("registrations").where("participant_id", participantId).pluck("event_occurrence_id")
+            : [];
+
+        const events = await knex("event_occurrences as eo")
+            .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
+            .select(
+                "eo.event_occurrence_id as id",
+                "et.event_name as name",
+                "eo.event_date_time_start as start",
+                "et.event_type as type",
+                "et.event_description as description",
+                "et.event_default_capacity as capacity"
+            )
+            .orderBy("eo.event_date_time_start", "asc");
+
+        const eventTemplates = await knex("event_templates")
+            .select("event_template_id as id", "event_name as name")
+            .orderBy("event_name", "asc");
+
+        res.render("calendar", {
+            username: req.session.username,
+            role: req.session.role,
+            events,
+            eventTemplates,
+            registeredEventIds
         });
+    } catch (err) {
+        console.error("Error loading events for calendar:", err);
+        res.render("calendar", {
+            username: req.session.username,
+            role: req.session.role,
+            events: [],
+            eventTemplates: [],
+            registeredEventIds: []
+        });
+    }
 });
 
-// Event registration page (basic capture)
-app.get("/events/register/:id", (req, res) => {
+// Event registration page
+app.get("/events/register/:id", async (req, res) => {
     if (!req.session.isLoggedIn) {
         return res.redirect("/login");
     }
     const id = req.params.id;
-    knex("event_occurrences as eo")
-        .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
-        .select(
-            "eo.event_occurrence_id as id",
-            "et.event_name as name",
-            "eo.event_date_time_start as start",
-            "et.event_type as type",
-            "et.event_description as description",
-            "et.event_default_capacity as capacity"
-        )
-        .where("eo.event_occurrence_id", id)
-        .first()
-        .then(event => {
-            if (!event) return res.redirect("/homepage");
-            res.render("registerEvent", {
-                event,
-                success_message: "",
-                error_message: "",
-                username: req.session.username,
-                email: req.session.email
-            });
-        })
-        .catch(err => {
-            console.error("Error loading event for registration:", err);
-            res.redirect("/homepage");
+    try {
+        const event = await knex("event_occurrences as eo")
+            .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
+            .select(
+                "eo.event_occurrence_id as id",
+                "et.event_name as name",
+                "eo.event_date_time_start as start",
+                "et.event_type as type",
+                "et.event_description as description",
+                "et.event_default_capacity as capacity"
+            )
+            .where("eo.event_occurrence_id", id)
+            .first();
+
+        if (!event) return res.redirect("/homepage");
+
+        res.render("registerEvent", {
+            event,
+            success_message: "",
+            error_message: ""
         });
+    } catch (err) {
+        console.error("Error loading event for registration:", err);
+        res.redirect("/homepage");
+    }
 });
 
-app.post("/events/register/:id", (req, res) => {
+app.post("/events/register/:id", async (req, res) => {
     if (!req.session.isLoggedIn) {
         return res.redirect("/login");
     }
     const id = req.params.id;
-    const { name, email, notes } = req.body;
-    knex("event_occurrences as eo")
-        .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
-        .select(
-            "eo.event_occurrence_id as id",
-            "et.event_name as name",
-            "eo.event_date_time_start as start",
-            "et.event_type as type",
-            "et.event_description as description",
-            "et.event_default_capacity as capacity"
-        )
-        .where("eo.event_occurrence_id", id)
-        .first()
-        .then(event => {
-            if (!event) return res.redirect("/homepage");
-            // Placeholder capture: in a real app we'd save to registrations table
-            console.log("Event registration submitted:", { eventId: id, name, email, notes });
-            res.render("registerEvent", {
+    const participantId = req.session.participant_id;
+
+    try {
+        const event = await knex("event_occurrences as eo")
+            .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
+            .select(
+                "eo.event_occurrence_id as id",
+                "et.event_name as name",
+                "eo.event_date_time_start as start",
+                "et.event_type as type",
+                "et.event_description as description",
+                "et.event_default_capacity as capacity"
+            )
+            .where("eo.event_occurrence_id", id)
+            .first();
+
+        if (!event) return res.redirect("/homepage");
+
+        if (!participantId) {
+            return res.render("registerEvent", {
                 event,
-                success_message: "Registration submitted! We'll confirm shortly.",
-                error_message: "",
-                username: req.session.username,
-                email: req.session.email
-            });
-        })
-        .catch(err => {
-            console.error("Error registering for event:", err);
-            res.render("registerEvent", {
-                event: null,
                 success_message: "",
-                error_message: "Unable to register right now. Please try again.",
-                username: req.session.username,
-                email: req.session.email
+                error_message: "You must be logged in as a participant to register."
             });
+        }
+
+        // Avoid duplicate registrations
+        const existing = await knex("registrations")
+            .where({
+                participant_id: participantId,
+                event_occurrence_id: id
+            })
+            .first();
+
+        if (!existing) {
+            await knex("registrations").insert({
+                participant_id: participantId,
+                event_occurrence_id: id,
+                registration_status: "registered",
+                registration_attended_flag: false,
+                registration_check_in_time: null,
+                registration_created_at: new Date().toISOString()
+            });
+        }
+
+        res.render("registerEvent", {
+            event,
+            success_message: existing ? "You are already registered for this event." : "Registration submitted! We'll confirm shortly.",
+            error_message: ""
         });
+    } catch (err) {
+        console.error("Error registering for event:", err);
+        res.render("registerEvent", {
+            event: null,
+            success_message: "",
+            error_message: "Unable to register right now. Please try again."
+        });
+    }
+});
+
+// Create event occurrence from calendar (admin only)
+app.post("/calendar/occurrences", requireManager, async (req, res) => {
+    const { date, templateId, startTime, endTime } = req.body;
+    if (!date || !templateId || !startTime || !endTime) {
+        return res.status(400).send("Missing date, template, or times");
+    }
+    const start = new Date(`${date}T${startTime}`);
+    const end = new Date(`${date}T${endTime}`);
+    if (isNaN(start) || isNaN(end) || end <= start) {
+        return res.status(400).send("Invalid start/end time");
+    }
+    try {
+        await knex("event_occurrences").insert({
+            event_template_id: templateId,
+            event_date_time_start: start.toISOString(),
+            event_date_time_end: end.toISOString(),
+            event_location: "",
+            event_registration_deadline: start.toISOString()
+        });
+        res.redirect("/calendar");
+    } catch (err) {
+        console.error("Error creating event occurrence:", err);
+        res.status(500).send("Failed to create occurrence");
+    }
+});
+
+// Delete event occurrence (admin only)
+app.delete("/calendar/occurrences/:id", requireManager, async (req, res) => {
+    const id = req.params.id;
+    try {
+        await knex("event_occurrences").where("event_occurrence_id", id).del();
+        res.status(204).send();
+    } catch (err) {
+        console.error("Error deleting event occurrence:", err);
+        res.status(500).send("Failed to delete occurrence");
+    }
 });
 
 app.get("/events", async (req, res) => {

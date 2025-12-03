@@ -17,7 +17,7 @@ Calendar page: allows users to view events on a calendar.
     <%- include('partials/header') %>
     <div class="page-wrapper">
 
-        <div class="table-card" style="margin-top:24px;">
+            <div class="table-card" style="margin-top:24px;">
             <div class="table-header">
                 <div>
                     <h1 style="margin-bottom:4px;">Events Calendar</h1>
@@ -42,6 +42,40 @@ Calendar page: allows users to view events on a calendar.
 
     </div>
 
+    <% const isAdmin = (role || '').toLowerCase() === 'admin'; %>
+
+    <% if (isAdmin) { %>
+    <div id="add-occurrence-modal" class="modal-overlay hidden" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="add-occurrence-title">
+            <button id="add-occurrence-close" class="modal-close" type="button" aria-label="Close">&times;</button>
+            <h3 id="add-occurrence-title">Add Event Occurrence</h3>
+            <p id="add-occurrence-date" class="modal-meta" style="margin-bottom:12px;"></p>
+            <div class="form-row">
+                <label for="template-select">Event Template</label>
+                <select id="template-select">
+                    <option value="">Select a template</option>
+                    <% (eventTemplates || []).forEach(t => { %>
+                        <option value="<%= t.id %>"><%= t.name %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="occurrence-start">Start time</label>
+                <input type="time" id="occurrence-start" value="12:00">
+            </div>
+            <div class="form-row">
+                <label for="occurrence-end">End time</label>
+                <input type="time" id="occurrence-end" value="13:00">
+            </div>
+            <div class="modal-actions">
+                <button id="add-occurrence-save" class="btn btn-primary" type="button">Create</button>
+                <button id="add-occurrence-cancel" class="btn btn-secondary" type="button">Cancel</button>
+            </div>
+            <div id="add-occurrence-error" class="error-message" style="display:none; margin-top:10px;"></div>
+        </div>
+    </div>
+    <% } %>
+
     <!-- Event detail modal -->
     <div id="event-modal" class="modal-overlay hidden" aria-hidden="true">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -54,14 +88,20 @@ Calendar page: allows users to view events on a calendar.
             <div class="modal-actions">
                 <a id="modal-register" class="btn btn-primary" href="#">Register</a>
                 <a id="modal-surveys" class="btn btn-secondary" href="#">View Surveys</a>
+                <% if (isAdmin) { %>
+                    <button id="modal-delete" class="btn btn-danger" type="button">Delete Event</button>
+                <% } %>
             </div>
+            <div id="modal-error" class="error-message" style="display:none; margin-top:8px;"></div>
         </div>
     </div>
 
     <script>
         (function() {
             const events = <%- JSON.stringify(events || []) %>;
-
+            const registeredEventIds = new Set((<%- JSON.stringify(registeredEventIds || []) %>).map(id => String(id)));
+            const eventTemplates = <%- JSON.stringify(eventTemplates || []) %>;
+            const isAdmin = "<%= (role || '').toLowerCase() === 'admin' %>" === "true";
             const monthLabel = document.getElementById('calendar-month');
             const grid = document.getElementById('calendar-grid');
             const weekdaysRow = document.getElementById('calendar-weekdays');
@@ -70,7 +110,7 @@ Calendar page: allows users to view events on a calendar.
             const weekdayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
             weekdaysRow.innerHTML = weekdayLabels.map(d => '<div>' + d + '</div>').join('');
 
-            const eventMap = events.reduce((acc, evt, idx) => {
+            const buildEventMap = (sourceEvents) => sourceEvents.reduce((acc, evt, idx) => {
                 if (!evt.start) return acc;
                 const d = new Date(evt.start);
                 if (isNaN(d)) return acc;
@@ -89,6 +129,10 @@ Calendar page: allows users to view events on a calendar.
             const modalClose = document.getElementById('modal-close');
             const modalRegister = document.getElementById('modal-register');
             const modalSurveys = document.getElementById('modal-surveys');
+            const modalDelete = document.getElementById('modal-delete');
+            const modalError = document.getElementById('modal-error');
+            let activeEvents = events;
+            let eventMap = buildEventMap(activeEvents);
 
             function formatDateTime(dateStr) {
                 const d = new Date(dateStr);
@@ -116,6 +160,7 @@ Calendar page: allows users to view events on a calendar.
                 modalSurveys.href = `/postsurveys?search=${encodeURIComponent(searchTerm)}`;
                 modal.classList.remove('hidden');
                 modal.setAttribute('aria-hidden', 'false');
+                modalError.style.display = 'none';
             }
 
             function closeModal() {
@@ -156,7 +201,7 @@ Calendar page: allows users to view events on a calendar.
                         return `<button type="button" class="calendar-event" data-evt-index="${idx}">${evt.name || 'Event'}</button>`;
                     }).join('');
                     return `
-                        <div class="calendar-day">
+                        <div class="calendar-day" data-date="${year}-${String(month + 1).padStart(2, '0')}-${String(cell.day).padStart(2, '0')}">
                             <div class="calendar-day-number">${cell.day}</div>
                             <div class="calendar-events">${eventsHtml}</div>
                         </div>
@@ -178,11 +223,17 @@ Calendar page: allows users to view events on a calendar.
 
             grid.addEventListener('click', (e) => {
                 const btn = e.target.closest('.calendar-event');
-                if (!btn) return;
-                const idx = parseInt(btn.dataset.evtIndex, 10);
-                const evt = events[idx];
-                if (!evt) return;
-                openModal(evt);
+                if (btn) {
+                    const idx = parseInt(btn.dataset.evtIndex, 10);
+                    const evt = activeEvents[idx];
+                    if (!evt) return;
+                    openModal(evt);
+                    return;
+                }
+                const day = e.target.closest('.calendar-day');
+                if (!day || !isAdmin) return;
+                const dayDate = day.getAttribute('data-date');
+                openAddModal(dayDate);
             });
 
             modalClose.addEventListener('click', closeModal);
@@ -194,6 +245,98 @@ Calendar page: allows users to view events on a calendar.
             });
 
             renderCalendar();
+
+            const deleteEvent = async (evtId) => {
+                try {
+                    const res = await fetch(`/calendar/occurrences/${evtId}`, { method: 'DELETE' });
+                    if (!res.ok) throw new Error('Failed');
+                    window.location.reload();
+                } catch (err) {
+                    modalError.textContent = "Failed to delete event.";
+                    modalError.style.display = 'block';
+                }
+            };
+
+            if (modalDelete) {
+                modalDelete.addEventListener('click', () => {
+                    const currentId = modalRegister.href.split('/').pop();
+                    deleteEvent(currentId);
+                });
+            }
+
+            // Admin add occurrence modal handling
+            if (isAdmin) {
+                const addModal = document.getElementById('add-occurrence-modal');
+                const addDate = document.getElementById('add-occurrence-date');
+                const addClose = document.getElementById('add-occurrence-close');
+                const addCancel = document.getElementById('add-occurrence-cancel');
+                const addSave = document.getElementById('add-occurrence-save');
+                const templateSelect = document.getElementById('template-select');
+                const addError = document.getElementById('add-occurrence-error');
+                const startInput = document.getElementById('occurrence-start');
+                const endInput = document.getElementById('occurrence-end');
+
+                const closeAddModal = () => {
+                    addModal.classList.add('hidden');
+                    addModal.setAttribute('aria-hidden', 'true');
+                    addError.style.display = 'none';
+                    templateSelect.value = "";
+                };
+
+                window.openAddModal = (dateStr) => {
+                    addDate.textContent = `Selected date: ${dateStr}`;
+                    addModal.classList.remove('hidden');
+                    addModal.setAttribute('aria-hidden', 'false');
+                };
+
+                const createOccurrence = async () => {
+                    const templateId = templateSelect.value;
+                    const startTime = (startInput?.value || '').trim();
+                    const endTime = (endInput?.value || '').trim();
+                    if (!templateId) {
+                        addError.textContent = "Please select a template.";
+                        addError.style.display = 'block';
+                        return;
+                    }
+                    if (!startTime || !endTime) {
+                        addError.textContent = "Start and end times are required.";
+                        addError.style.display = 'block';
+                        return;
+                    }
+                    const selectedDate = addDate.textContent.replace('Selected date: ', '').trim();
+                    const params = new URLSearchParams();
+                    params.append('date', selectedDate);
+                    params.append('templateId', templateId);
+                    params.append('startTime', startTime);
+                    params.append('endTime', endTime);
+                    try {
+                        const res = await fetch('/calendar/occurrences', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: params.toString()
+                        });
+                        if (!res.ok) {
+                            throw new Error('Request failed');
+                        }
+                        window.location.reload();
+                    } catch (err) {
+                        addError.textContent = "Failed to create event. Try again.";
+                        addError.style.display = 'block';
+                    }
+                };
+
+                addSave?.addEventListener('click', createOccurrence);
+                addClose?.addEventListener('click', closeAddModal);
+                addCancel?.addEventListener('click', closeAddModal);
+                addModal?.addEventListener('click', (e) => {
+                    if (e.target === addModal) closeAddModal();
+                });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && !addModal.classList.contains('hidden')) {
+                        closeAddModal();
+                    }
+                });
+            }
         })();
     </script>
 </body>

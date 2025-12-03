@@ -41,21 +41,9 @@ Register Event page: This is page allows participants to register for events.
         <% } %>
 
         <form action="/events/register/<%= event ? event.id : '' %>" method="POST">
-            <div class="form-row">
-                <label for="name">Your name</label>
-                <input type="text" id="name" name="name" value="<%= username || '' %>" required>
-            </div>
-            <div class="form-row">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" value="<%= email || '' %>" required>
-            </div>
-            <div class="form-row">
-                <label for="notes">Notes (optional)</label>
-                <textarea id="notes" name="notes" rows="3" placeholder="Accessibility needs or other info"></textarea>
-            </div>
-            <div class="form-row" style="margin-top:16px;">
-                <button type="submit" class="btn btn-primary">Submit Registration</button>
-                <a href="/homepage" class="btn btn-secondary" style="margin-left:10px;">Back to Home</a>
+            <div class="form-row" style="margin-top:16px; display:flex; gap:10px; align-items:center;">
+                <button type="submit" class="btn btn-primary">Register</button>
+                <a href="/calendar" class="btn btn-secondary">Back to Calendar</a>
             </div>
         </form>
     </div>
