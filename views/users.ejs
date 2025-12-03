@@ -12,7 +12,21 @@
         <%- include('partials/header') %>
         <div class="container mt-5">
 
-            <h1 class="mb-4">Users List</h1>
+            <div class="table-header-row">
+                <h1 class="mb-4">Users List</h1>
+                <% if (pagination && pagination.totalPages > 1) { %>
+                    <% const searchQS = search ? '&search=' + encodeURIComponent(search) : ''; %>
+                    <div class="pagination-top">
+                        <div class="pagination">
+                            <a class="page-link <%= pagination.page === 1 ? 'disabled' : '' %>"
+                               href="?page=<%= pagination.page - 1 %><%= searchQS %>">Previous</a>
+                            <span class="page-info">Page <%= pagination.page %> of <%= pagination.totalPages %></span>
+                            <a class="page-link <%= pagination.page >= pagination.totalPages ? 'disabled' : '' %>"
+                               href="?page=<%= pagination.page + 1 %><%= searchQS %>">Next</a>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
 
             <!-- ADMINS SEE ADD BUTTON -->
             <% if (role === "admin") { %>
@@ -102,8 +116,20 @@
                 </table>
             <% } %>
 
-            <a href="/" class="btn btn-primary mt-3">Back to Dashboard</a>
-            <a href="/logout" class="btn btn-secondary mt-3">Logout</a>
+            <div class="table-footer">
+                <div class="footer-left">
+                    <% if (pagination && pagination.totalPages > 1) { %>
+                        <% const searchQS = search ? '&search=' + encodeURIComponent(search) : ''; %>
+                        <div class="pagination">
+                            <a class="page-link <%= pagination.page === 1 ? 'disabled' : '' %>"
+                               href="?page=<%= pagination.page - 1 %><%= searchQS %>">Previous</a>
+                            <span class="page-info">Page <%= pagination.page %> of <%= pagination.totalPages %></span>
+                            <a class="page-link <%= pagination.page >= pagination.totalPages ? 'disabled' : '' %>"
+                               href="?page=<%= pagination.page + 1 %><%= searchQS %>">Next</a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
         </div>
     </body>
 </html>

@@ -535,6 +535,65 @@ textarea {
   margin-top: 4px;
 }
 
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-link {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  background: var(--blue);
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  box-shadow: var(--shadow-card);
+}
+
+.page-link:hover {
+  background: var(--lavender);
+}
+
+.page-link.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.page-info {
+  font-weight: 700;
+}
+
+.pagination-top {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.table-footer .footer-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.table-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .card-button-row {
   display: flex;
   flex-wrap: wrap;
