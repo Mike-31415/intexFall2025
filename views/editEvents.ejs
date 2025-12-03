@@ -1,3 +1,10 @@
+<!-- Group 2-11
+ 
+Edit Events page: allows admin/managers to edit information (name, type, description, etc)
+about a certain event. 
+
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,6 +23,10 @@
         <% } %>
 
         <form action="/events/edit/<%= event.eventid %>" method="POST">
+            <% 
+                const eventTypeValue = (event.eventtype || '').toLowerCase();
+                const recurrenceValue = (event.eventrecurrencepattern || '').toLowerCase();
+            %>
             <div class="form-row">
                 <label for="eventname">Event Name</label>
                 <input type="text" id="eventname" name="eventname" value="<%= event.eventname %>" required>
@@ -23,7 +34,13 @@
 
             <div class="form-row">
                 <label for="eventtype">Event Type</label>
-                <input type="text" id="eventtype" name="eventtype" value="<%= event.eventtype %>" required>
+                <select id="eventtype" name="eventtype" required>
+                    <option value="">Select an event type</option>
+                    <option value="STEM" <%= eventTypeValue === 'stem' ? 'selected' : '' %>>STEM</option>
+                    <option value="Arts" <%= eventTypeValue === 'arts' ? 'selected' : '' %>>Arts</option>
+                    <option value="Leadership" <%= eventTypeValue === 'leadership' ? 'selected' : '' %>>Leadership</option>
+                    <option value="Annual Conference" <%= eventTypeValue === 'annual conference' ? 'selected' : '' %>>Annual Conference</option>
+                </select>
             </div>
 
             <div class="form-row">
@@ -33,7 +50,12 @@
 
             <div class="form-row">
                 <label for="eventrecurrencepattern">Recurrence Pattern</label>
-                <input type="text" id="eventrecurrencepattern" name="eventrecurrencepattern" value="<%= event.eventrecurrencepattern %>" required>
+                <select id="eventrecurrencepattern" name="eventrecurrencepattern" required>
+                    <option value="">Select recurrence</option>
+                    <option value="weekly" <%= recurrenceValue === 'weekly' ? 'selected' : '' %>>Weekly</option>
+                    <option value="monthly" <%= recurrenceValue === 'monthly' ? 'selected' : '' %>>Monthly</option>
+                    <option value="annual" <%= recurrenceValue === 'annual' ? 'selected' : '' %>>Annual</option>
+                </select>
             </div>
 
             <div class="form-row">

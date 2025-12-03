@@ -1,3 +1,10 @@
+<!-- Group 2-11
+ 
+Header page: This is a header that appears at the top of all the pages. It has buttons
+to go to different pages in the website.
+
+-->
+
 <header class="site-header">
     <div class="site-header__inner">
         <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="site-sidebar">
@@ -47,6 +54,18 @@
 
 <script>
     (() => {
+        // Ensure favicon uses Ella Rises logo across all pages
+        try {
+            const existing = document.querySelector("link[rel*='icon']");
+            const link = existing || document.createElement("link");
+            link.rel = "icon";
+            link.type = "image/png";
+            link.href = "/ella-rises-logo.png";
+            if (!existing) document.head.appendChild(link);
+        } catch (e) {
+            console.error("Favicon setup failed", e);
+        }
+
         const sidebar = document.getElementById('site-sidebar');
         const toggleBtn = document.querySelector('.menu-toggle');
         const closeBtn = document.querySelector('.menu-close');

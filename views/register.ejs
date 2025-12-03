@@ -1,3 +1,11 @@
+<!-- Group 2-11
+ 
+Register page: This page is similar to the login page. It has a
+'create account' box that has lines for users to fill in information to
+register as a user.
+
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -81,6 +89,9 @@
           type="tel" 
           id="participant_phone" 
           name="participant_phone"
+          placeholder="(509)234-1234 or +44 (207)946-0958"
+          pattern="[0-9+()\\-\\s]{10,}"
+          inputmode="tel"
           required
         >
       </div>
