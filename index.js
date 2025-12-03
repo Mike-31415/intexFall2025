@@ -89,7 +89,7 @@ app.use((req, res, next) => {
         req.path === '/login' ||
         req.path === '/logout' ||
         req.path === '/register' ||
-        (req.method === 'GET' && req.path === '/donations') // public donations page
+        (req.method === 'GET' && req.path === '/donations')
     ) {
         return next();
     }
@@ -107,8 +107,8 @@ app.use((req, res, next) => {
 app.get("/login", (req, res) => {
     console.log("GET /login");
     if (req.session.isLoggedIn) {
-        console.log("Already logged in, redirecting to index");
-        res.render("index");
+        console.log("Already logged in, redirecting to home");
+        return res.redirect("/");
     } else {
         res.render("login", { error_message: "" });
     }
@@ -207,7 +207,9 @@ app.post("/login", (req, res) => {
             req.session.email = user.participant_email;
             req.session.role = normalizedRole || "participant";
             req.session.username = `${user.participant_first_name} ${user.participant_last_name}`;
-            res.redirect("/");
+            const nextPath = req.session.redirectAfterLogin || "/";
+            delete req.session.redirectAfterLogin;
+            res.redirect(nextPath);
         })
         .catch(err => {
             console.error("Login error:", err);
@@ -598,6 +600,10 @@ app.post("/postsurveys/delete/:id", requireManager, async (req, res) => {
 
 // DONATIONS PAGE
 app.get("/donations", async (req, res) => {
+    if (!req.session.isLoggedIn) {
+        req.session.redirectAfterLogin = "/addDonations";
+        return res.render("login", { error_message: "Please log in to view Donations" });
+    }
     const search = req.query.search || "";
 
     try {
@@ -642,7 +648,7 @@ app.get("/donations", async (req, res) => {
 });
 
 // Add Donation - form
-app.get("/addDonations", requireManager, async (req, res) => {
+app.get("/addDonations", requireLogin, async (req, res) => {
     try {
         const participants = await knex("participants")
             .select("participant_id", "participant_first_name", "participant_last_name");
@@ -654,7 +660,7 @@ app.get("/addDonations", requireManager, async (req, res) => {
 });
 
 // Add Donation - submit
-app.post("/addDonations", requireManager, async (req, res) => {
+app.post("/addDonations", requireLogin, async (req, res) => {
     const { donation_date, donation_amount, participant_id } = req.body;
     try {
         await knex("donations").insert({

@@ -14,8 +14,8 @@
 
             <h1 class="mb-4">Donations List</h1>
 
-            <!-- ADMINS SEE ADD BUTTON -->
-            <% if (role === "admin") { %>
+            <!-- Logged-in users (admin or participant) can add donations -->
+            <% if (role === "admin" || role === "participant") { %>
                 <form action="/addDonations" method="GET" class="add-button-bar">
                     <button class="btn btn-primary" type="submit">Add Donation</button>
                 </form>
