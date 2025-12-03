@@ -18,14 +18,15 @@
             </div>
         <% } %>
 
-        <table class="event-table">
+        <table class="event-table table-striped">
             <thead>
                 <tr>
                     <th>Participant</th>
                     <th>Milestone Titles</th>
                     <th>Milestone Dates</th>
                     <% if (isManager) { %>
-                        <th>Actions</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
                     <% } %>
                 </tr>
             </thead>
@@ -39,11 +40,12 @@
                             <td><%= m.milestonedates %></td>
 
                             <% if (isManager) { %>
-                                <td class="actions">
-                                    <!-- These buttons don’t do anything yet; routes will come later -->
-                                    <a href="/milestones/edit/<%= m.milestoneid %>" class="btn btn-secondary">
+                                <td>
+                                    <a href="/milestones/edit/<%= m.milestoneid %>" class="btn btn-primary btn-sm">
                                         Edit
                                     </a>
+                                </td>
+                                <td>
                                     <form action="/milestones/delete/<%= m.milestoneid %>" method="POST" style="display:inline;">
                                         <button type="submit" class="btn btn-danger">Delete</button>
                                     </form>

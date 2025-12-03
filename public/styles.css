@@ -505,6 +505,20 @@ textarea {
 .actions {
   display: flex;
   gap: 8px;
+  align-items: center;
+}
+
+.actions form {
+  margin: 0;
+}
+
+.event-table td.actions,
+.table td.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #e4e4e4;
+  padding: 10px 10px;
 }
 
 .table-header {
