@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Survey</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    <div class="form-card" style="max-width: 560px;">
+        <h2>Event Survey</h2>
+        <% if (event) { %>
+            <p style="margin-top:6px; color:#4c4f4d;"><strong>Event:</strong> <%= event.name %></p>
+            <% if (event.start) { %>
+                <p style="color:#4c4f4d;"><strong>When:</strong> <%= new Date(event.start).toLocaleString(undefined, { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' }) %></p>
+            <% } %>
+        <% } %>
+
+        <% if (error_message) { %>
+            <div class="error-message"><%= error_message %></div>
+        <% } %>
+        <% if (success_message) { %>
+            <div class="alert alert-info"><%= success_message %></div>
+        <% } %>
+
+        <form action="/surveys/take" method="POST">
+            <input type="hidden" name="eventId" value="<%= event ? event.id : (eventId || '') %>">
+
+            <div class="form-row">
+                <label for="satisfaction_score">Satisfaction (1-5)</label>
+                <input type="number" id="satisfaction_score" name="satisfaction_score" min="1" max="5" required>
+            </div>
+            <div class="form-row">
+                <label for="usefulness_score">Usefulness (1-5)</label>
+                <input type="number" id="usefulness_score" name="usefulness_score" min="1" max="5" required>
+            </div>
+            <div class="form-row">
+                <label for="instructor_score">Instructor (1-5)</label>
+                <input type="number" id="instructor_score" name="instructor_score" min="1" max="5" required>
+            </div>
+            <div class="form-row">
+                <label for="recommendation_score">Recommendation (1-5)</label>
+                <input type="number" id="recommendation_score" name="recommendation_score" min="1" max="5" required>
+            </div>
+            <div class="form-row">
+                <label for="overall_score">Overall (1-5)</label>
+                <input type="number" id="overall_score" name="overall_score" min="1" max="5" required>
+            </div>
+            <div class="form-row">
+                <label for="comments">Comments</label>
+                <textarea id="comments" name="comments" rows="3" placeholder="Optional feedback"></textarea>
+            </div>
+            <div class="form-row" style="margin-top:16px; display:flex; gap:10px; align-items:center;">
+                <button type="submit" class="btn btn-primary">Submit Survey</button>
+                <a href="/calendar" class="btn btn-secondary">Back to Calendar</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

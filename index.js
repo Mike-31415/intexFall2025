@@ -272,6 +272,9 @@ app.get("/calendar", async (req, res) => {
         const registeredEventIds = participantId
             ? await knex("registrations").where("participant_id", participantId).pluck("event_occurrence_id")
             : [];
+        const completedSurveyIds = participantId
+            ? await knex("surveys").where("participant_id", participantId).pluck("event_occurrence_id")
+            : [];
 
         const events = await knex("event_occurrences as eo")
             .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
@@ -294,7 +297,8 @@ app.get("/calendar", async (req, res) => {
             role: req.session.role,
             events,
             eventTemplates,
-            registeredEventIds
+            registeredEventIds,
+            completedSurveyIds
         });
     } catch (err) {
         console.error("Error loading events for calendar:", err);
@@ -303,7 +307,8 @@ app.get("/calendar", async (req, res) => {
             role: req.session.role,
             events: [],
             eventTemplates: [],
-            registeredEventIds: []
+            registeredEventIds: [],
+            completedSurveyIds: []
         });
     }
 });
@@ -441,6 +446,80 @@ app.delete("/calendar/occurrences/:id", requireManager, async (req, res) => {
     } catch (err) {
         console.error("Error deleting event occurrence:", err);
         res.status(500).send("Failed to delete occurrence");
+    }
+});
+
+// Take survey - form
+app.get("/surveys/take", requireLogin, async (req, res) => {
+    const eventId = req.query.eventId;
+    if (!eventId) return res.redirect("/calendar");
+    try {
+        const event = await knex("event_occurrences as eo")
+            .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
+            .select(
+                "eo.event_occurrence_id as id",
+                "et.event_name as name",
+                "eo.event_date_time_start as start",
+                "et.event_type as type"
+            )
+            .where("eo.event_occurrence_id", eventId)
+            .first();
+
+        if (!event) return res.redirect("/calendar");
+
+        res.render("takeSurvey", {
+            error_message: "",
+            success_message: "",
+            event
+        });
+    } catch (err) {
+        console.error("Error loading survey form:", err);
+        res.redirect("/calendar");
+    }
+});
+
+// Take survey - submit
+app.post("/surveys/take", requireLogin, async (req, res) => {
+    const eventId = req.body.eventId;
+    const participantId = req.session.participant_id;
+    if (!eventId || !participantId) return res.redirect("/calendar");
+
+    const {
+        satisfaction_score,
+        usefulness_score,
+        instructor_score,
+        recommendation_score,
+        overall_score,
+        comments
+    } = req.body;
+
+    try {
+        await knex("surveys").insert({
+            survey_satisfaction_score: satisfaction_score,
+            survey_usefulness_score: usefulness_score,
+            survey_instructor_score: instructor_score,
+            survey_recommendation_score: recommendation_score,
+            survey_overall_score: overall_score,
+            survey_nps_bucket: (() => {
+                const rec = parseInt(recommendation_score, 10);
+                if (rec >= 5) return "Promoter";
+                if (rec === 4) return "Passive";
+                return "Detractor";
+            })(),
+            survey_comments: comments || "",
+            survey_submission_date: new Date().toISOString(),
+            participant_id: participantId,
+            event_occurrence_id: eventId
+        });
+
+        res.redirect("/calendar");
+    } catch (err) {
+        console.error("Error submitting survey:", err);
+        res.render("takeSurvey", {
+            success_message: "",
+            error_message: "Could not submit survey. Please try again.",
+            event: { id: eventId }
+        });
     }
 });
 

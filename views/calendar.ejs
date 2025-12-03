@@ -21,17 +21,14 @@ Calendar page: allows users to view events on a calendar.
             <div class="table-header">
                 <div>
                     <h1 style="margin-bottom:4px;">Events Calendar</h1>
-                    <p class="table-subtitle">Monthly view of event templates and occurrences.</p>
                 </div>
+                <button id="toggle-my-events" class="btn btn-secondary" type="button">Show My Events</button>
             </div>
 
             <div class="calendar-card">
                 <div class="calendar-header">
                     <button id="cal-prev" class="cal-nav" type="button" aria-label="Previous month">&#10094;</button>
-                    <div>
-                        <div id="calendar-month" class="calendar-month"></div>
-                        <div class="calendar-subtitle">Events pulled from Event Templates & Occurrences</div>
-                    </div>
+                    <div id="calendar-month" class="calendar-month"></div>
                     <button id="cal-next" class="cal-nav" type="button" aria-label="Next month">&#10095;</button>
                 </div>
                 <div class="calendar-weekdays" id="calendar-weekdays"></div>
@@ -87,6 +84,7 @@ Calendar page: allows users to view events on a calendar.
             <p id="modal-description" class="modal-body"></p>
             <div class="modal-actions">
                 <a id="modal-register" class="btn btn-primary" href="#">Register</a>
+                <a id="modal-take-survey" class="btn btn-primary" href="#" style="display:none;">Take Survey</a>
                 <a id="modal-surveys" class="btn btn-secondary" href="#">View Surveys</a>
                 <% if (isAdmin) { %>
                     <button id="modal-delete" class="btn btn-danger" type="button">Delete Event</button>
@@ -100,21 +98,27 @@ Calendar page: allows users to view events on a calendar.
         (function() {
             const events = <%- JSON.stringify(events || []) %>;
             const registeredEventIds = new Set((<%- JSON.stringify(registeredEventIds || []) %>).map(id => String(id)));
+            const completedSurveyIds = new Set((<%- JSON.stringify(completedSurveyIds || []) %>).map(id => String(id)));
             const eventTemplates = <%- JSON.stringify(eventTemplates || []) %>;
             const isAdmin = "<%= (role || '').toLowerCase() === 'admin' %>" === "true";
             const monthLabel = document.getElementById('calendar-month');
             const grid = document.getElementById('calendar-grid');
             const weekdaysRow = document.getElementById('calendar-weekdays');
             const emptyNote = document.getElementById('calendar-empty');
+            const toggleMineBtn = document.getElementById('toggle-my-events');
 
             const weekdayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
             weekdaysRow.innerHTML = weekdayLabels.map(d => '<div>' + d + '</div>').join('');
+
+            const formatDateKey = (d) => {
+                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            };
 
             const buildEventMap = (sourceEvents) => sourceEvents.reduce((acc, evt, idx) => {
                 if (!evt.start) return acc;
                 const d = new Date(evt.start);
                 if (isNaN(d)) return acc;
-                const key = d.toISOString().slice(0, 10); // YYYY-MM-DD
+                const key = formatDateKey(d); // local date key to avoid TZ shifts
                 acc[key] = acc[key] || [];
                 acc[key].push(idx);
                 return acc;
@@ -128,11 +132,32 @@ Calendar page: allows users to view events on a calendar.
             const modalDescription = document.getElementById('modal-description');
             const modalClose = document.getElementById('modal-close');
             const modalRegister = document.getElementById('modal-register');
+            const modalTakeSurvey = document.getElementById('modal-take-survey');
             const modalSurveys = document.getElementById('modal-surveys');
             const modalDelete = document.getElementById('modal-delete');
             const modalError = document.getElementById('modal-error');
+            const typeColors = {
+                stem: { bg: '#c7e9ff', color: '#0b3d91' },
+                arts: { bg: '#ffe0f1', color: '#7d1b4f' },
+                leadership: { bg: '#e8f3d8', color: '#2e5a1c' },
+                'annual-conference': { bg: '#fff3c2', color: '#5c3a00' }
+            };
             let activeEvents = events;
             let eventMap = buildEventMap(activeEvents);
+            let showingMine = false;
+            const showOverlay = (overlay) => {
+                overlay.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    overlay.classList.add('is-visible');
+                });
+            };
+
+            const hideOverlay = (overlay) => {
+                overlay.classList.remove('is-visible');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 200);
+            };
 
             function formatDateTime(dateStr) {
                 const d = new Date(dateStr);
@@ -152,19 +177,39 @@ Calendar page: allows users to view events on a calendar.
                 modalType.textContent = evt.type ? `Type: ${evt.type}` : '';
                 modalCapacity.textContent = evt.capacity ? `Capacity: ${evt.capacity}` : '';
                 modalDescription.textContent = evt.description || 'No description provided.';
-                modalRegister.href = `/events/register/${evt.id}`;
+                const isRegisteredForEvent = registeredEventIds.has(String(evt.id));
+                if (isRegisteredForEvent) {
+                    modalRegister.style.display = 'none';
+                } else {
+                    modalRegister.href = `/events/register/${evt.id}`;
+                    modalRegister.style.display = 'inline-block';
+                }
                 const searchTerm = (() => {
                     const d = new Date(evt.start);
                     return isNaN(d) ? '' : d.toISOString().slice(0, 10);
                 })();
-                modalSurveys.href = `/postsurveys?search=${encodeURIComponent(searchTerm)}`;
-                modal.classList.remove('hidden');
+                const hasOccurred = !isNaN(new Date(evt.start)) && new Date(evt.start) < new Date();
+                if (hasOccurred) {
+                    modalSurveys.href = `/postsurveys?search=${encodeURIComponent(searchTerm)}`;
+                    modalSurveys.style.display = 'inline-block';
+                    const surveyDone = completedSurveyIds.has(String(evt.id));
+                    if (isRegisteredForEvent && !surveyDone) {
+                        modalTakeSurvey.href = `/surveys/take?eventId=${evt.id}`;
+                        modalTakeSurvey.style.display = 'inline-block';
+                    } else {
+                        modalTakeSurvey.style.display = 'none';
+                    }
+                } else {
+                    modalSurveys.style.display = 'none';
+                    modalTakeSurvey.style.display = 'none';
+                }
+                showOverlay(modal);
                 modal.setAttribute('aria-hidden', 'false');
                 modalError.style.display = 'none';
             }
 
             function closeModal() {
-                modal.classList.add('hidden');
+                hideOverlay(modal);
                 modal.setAttribute('aria-hidden', 'true');
             }
 
@@ -197,11 +242,15 @@ Calendar page: allows users to view events on a calendar.
                         return '<div class="calendar-day calendar-day--empty"></div>';
                     }
                     const eventsHtml = cell.events.map(idx => {
-                        const evt = events[idx] || {};
-                        return `<button type="button" class="calendar-event" data-evt-index="${idx}">${evt.name || 'Event'}</button>`;
+                        const evt = activeEvents[idx] || {};
+                        const typeKey = (evt.type || 'default').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                        const typeClass = `event-type-${typeKey}`;
+                        const colors = typeColors[typeKey] || typeColors.default || {};
+                        const inlineStyle = colors.bg ? `style="background:${colors.bg};color:${colors.color || '#111'}"` : '';
+                        return `<button type="button" class="calendar-event ${typeClass}" data-evt-index="${idx}" ${inlineStyle}>${evt.name || 'Event'}</button>`;
                     }).join('');
                     return `
-                        <div class="calendar-day" data-date="${year}-${String(month + 1).padStart(2, '0')}-${String(cell.day).padStart(2, '0')}">
+                        <div class="calendar-day ${isAdmin ? 'admin-clickable' : ''}" data-date="${year}-${String(month + 1).padStart(2, '0')}-${String(cell.day).padStart(2, '0')}">
                             <div class="calendar-day-number">${cell.day}</div>
                             <div class="calendar-events">${eventsHtml}</div>
                         </div>
@@ -244,6 +293,25 @@ Calendar page: allows users to view events on a calendar.
                 if (e.key === 'Escape') closeModal();
             });
 
+            const applyMineFilter = () => {
+                if (showingMine && registeredEventIds.size > 0) {
+                    activeEvents = events.filter(evt => registeredEventIds.has(String(evt.id)));
+                } else {
+                    activeEvents = events;
+                }
+                eventMap = buildEventMap(activeEvents);
+                renderCalendar();
+            };
+
+            if (toggleMineBtn) {
+                toggleMineBtn.addEventListener('click', () => {
+                    showingMine = !showingMine;
+                    toggleMineBtn.textContent = showingMine ? 'Show All Events' : 'Show My Events';
+                    applyMineFilter();
+                });
+                // If user has no registrations, leave default state; otherwise allow quick switch
+            }
+
             renderCalendar();
 
             const deleteEvent = async (evtId) => {
@@ -264,6 +332,18 @@ Calendar page: allows users to view events on a calendar.
                 });
             }
 
+            // Fun pulse when registering
+            modalRegister?.addEventListener('click', () => {
+                modalRegister.classList.remove('btn-pulse');
+                void modalRegister.offsetWidth; // force reflow
+                modalRegister.classList.add('btn-pulse');
+            });
+            modalTakeSurvey?.addEventListener('click', () => {
+                modalTakeSurvey.classList.remove('btn-pulse');
+                void modalTakeSurvey.offsetWidth;
+                modalTakeSurvey.classList.add('btn-pulse');
+            });
+
             // Admin add occurrence modal handling
             if (isAdmin) {
                 const addModal = document.getElementById('add-occurrence-modal');
@@ -277,7 +357,7 @@ Calendar page: allows users to view events on a calendar.
                 const endInput = document.getElementById('occurrence-end');
 
                 const closeAddModal = () => {
-                    addModal.classList.add('hidden');
+                    hideOverlay(addModal);
                     addModal.setAttribute('aria-hidden', 'true');
                     addError.style.display = 'none';
                     templateSelect.value = "";
@@ -285,7 +365,7 @@ Calendar page: allows users to view events on a calendar.
 
                 window.openAddModal = (dateStr) => {
                     addDate.textContent = `Selected date: ${dateStr}`;
-                    addModal.classList.remove('hidden');
+                    showOverlay(addModal);
                     addModal.setAttribute('aria-hidden', 'false');
                 };
 
@@ -304,6 +384,13 @@ Calendar page: allows users to view events on a calendar.
                         return;
                     }
                     const selectedDate = addDate.textContent.replace('Selected date: ', '').trim();
+                    const startDate = new Date(`${selectedDate}T${startTime}`);
+                    const endDate = new Date(`${selectedDate}T${endTime}`);
+                    if (isNaN(startDate) || isNaN(endDate) || endDate <= startDate) {
+                        addError.textContent = "Please choose valid start and end times (end after start).";
+                        addError.style.display = 'block';
+                        return;
+                    }
                     const params = new URLSearchParams();
                     params.append('date', selectedDate);
                     params.append('templateId', templateId);

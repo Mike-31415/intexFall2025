@@ -623,14 +623,10 @@ textarea {
 }
 
 .calendar-month {
-  font-weight: 700;
-  font-size: 1.1rem;
-}
-
-.calendar-subtitle {
-  color: #6d6d6d;
-  font-size: 0.9rem;
-  margin-top: 2px;
+  font-weight: 800;
+  font-size: 1.4rem;
+  text-align: center;
+  flex: 1;
 }
 
 .cal-nav {
@@ -641,14 +637,20 @@ textarea {
   padding: 6px 10px;
   cursor: pointer;
   font-weight: 700;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
+.cal-nav:hover {
+  background: var(--lavender);
+  transform: translateY(-1px);
+}
 .calendar-weekdays,
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 6px;
 }
+
 
 .calendar-weekdays {
   font-weight: 700;
@@ -669,11 +671,21 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .calendar-day--empty {
   background: transparent;
   border: none;
+}
+
+.calendar-day.admin-clickable {
+  cursor: pointer;
+}
+
+.calendar-day.admin-clickable:hover {
+  background: rgba(153,183,198,0.2);
+  border-color: rgba(0,0,0,0.12);
 }
 
 .calendar-day-number {
@@ -689,15 +701,27 @@ textarea {
 
 .calendar-event {
   display: inline-block;
-  background: var(--coral);
-  color: white;
+  background: #fdf3ea;
+  color: #111;
   border-radius: 8px;
   padding: 4px 6px;
   font-size: 0.82rem;
   line-height: 1.1;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
+.calendar-event:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.16);
+}
+
+.event-type-stem { background: #c7e9ff; color: #0b3d91; }
+.event-type-arts { background: #ffe0f1; color: #7d1b4f; }
+.event-type-leadership { background: #e8f3d8; color: #2e5a1c; }
+.event-type-annual-conference { background: #fff3c2; color: #5c3a00; }
+.event-type-default { background: #f1f1f1; color: #111; }
 
 .calendar-empty {
   margin-top: 10px;
@@ -714,6 +738,12 @@ textarea {
   justify-content: center;
   padding: 20px;
   z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.modal-overlay.is-visible {
+  opacity: 1;
 }
 
 .modal-card {
@@ -724,6 +754,14 @@ textarea {
   width: 100%;
   box-shadow: 0 14px 36px rgba(0,0,0,0.18);
   position: relative;
+  transform: scale(0.96);
+  opacity: 0;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+}
+
+.modal-overlay.is-visible .modal-card {
+  transform: scale(1);
+  opacity: 1;
 }
 
 .modal-close {
@@ -917,6 +955,16 @@ textarea {
 .btn-lift:hover {
   transform: translateY(-2px);
   box-shadow: 0 14px 30px rgba(0,0,0,0.12);
+}
+
+.btn-pulse {
+  animation: btnPulse 0.5s ease;
+}
+
+@keyframes btnPulse {
+  0% { transform: scale(1); box-shadow: 0 8px 18px rgba(0,0,0,0.14); }
+  50% { transform: scale(1.05); box-shadow: 0 14px 30px rgba(0,0,0,0.18); }
+  100% { transform: scale(1); box-shadow: 0 8px 18px rgba(0,0,0,0.14); }
 }
 
 @keyframes fadeUp {
