@@ -345,6 +345,10 @@ app.get("/events", async (req, res) => {
         return res.redirect("/login");
     }
 
+    const pageSize = 20;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const offset = (page - 1) * pageSize;
+
     const search = req.query.search || "";
 
     try {
@@ -359,7 +363,7 @@ app.get("/events", async (req, res) => {
             )
             .orderBy("eventname", "asc");
 
-        if (search.trim() !== "") {
+    if (search.trim() !== "") {
             query = query.where(builder => {
                 builder
                     .whereILike("event_name", `%${search}%`)
@@ -370,13 +374,18 @@ app.get("/events", async (req, res) => {
             });
         }
 
-        const events = await query;
+        const totalRow = await query.clone().clearSelect().clearOrder().count("* as count").first();
+        const total = parseInt(totalRow.count, 10) || 0;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+        const events = await query.limit(pageSize).offset(offset);
 
         res.render("events", {
             username: req.session.username,
             role: req.session.role,
             events,
-            search
+            search,
+            pagination: { page, totalPages }
         });
 
     } catch (err) {
@@ -386,7 +395,8 @@ app.get("/events", async (req, res) => {
             role: req.session.role,
             events: [],
             error_message: "Error loading events",
-            search
+            search,
+            pagination: { page: 1, totalPages: 1 }
         });
     }
 });
@@ -490,6 +500,9 @@ app.get("/postsurveys", async (req, res) => {
 
     const search = req.query.search || "";
     const isManager = (req.session.role || "").toLowerCase() === "admin";
+    const pageSize = 20;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const offset = (page - 1) * pageSize;
 
     try {
         let query = knex("surveys as s")
@@ -517,14 +530,19 @@ app.get("/postsurveys", async (req, res) => {
             });
         }
 
-        const surveys = await query;
+        const totalRow = await query.clone().clearSelect().clearOrder().count("* as count").first();
+        const total = parseInt(totalRow.count, 10) || 0;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+        const surveys = await query.limit(pageSize).offset(offset);
 
         res.render("postsurveys", {
             username: req.session.username,
             role: req.session.role,
             isManager,
             surveys,
-            search
+            search,
+            pagination: { page, totalPages }
         });
 
     } catch (err) {
@@ -535,7 +553,8 @@ app.get("/postsurveys", async (req, res) => {
             isManager,
             surveys: [],
             error_message: "Error loading surveys",
-            search
+            search,
+            pagination: { page: 1, totalPages: 1 }
         });
     }
 });
@@ -649,6 +668,9 @@ app.get("/donations", async (req, res) => {
         return res.render("login", { error_message: "Please log in to view Donations" });
     }
     const search = req.query.search || "";
+    const pageSize = 20;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const offset = (page - 1) * pageSize;
 
     try {
         let query = knex("donations as d")
@@ -671,13 +693,18 @@ app.get("/donations", async (req, res) => {
             });
         }
 
-        const donations = await query;
+        const totalRow = await query.clone().clearSelect().clearOrder().count("* as count").first();
+        const total = parseInt(totalRow.count, 10) || 0;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+        const donations = await query.limit(pageSize).offset(offset);
 
         res.render("donations", {
             donations,
             role: req.session.role,
             error_message: null,
-            search
+            search,
+            pagination: { page, totalPages }
         });
 
     } catch (err) {
@@ -686,7 +713,8 @@ app.get("/donations", async (req, res) => {
             donations: [],
             role: req.session.role,
             error_message: "Error loading donations",
-            search
+            search,
+            pagination: { page: 1, totalPages: 1 }
         });
     }
 });
@@ -773,6 +801,9 @@ app.post("/deleteDonations/:id", requireManager, async (req, res) => {
 app.get("/users", requireManager, async (req, res) => {
     try {
         const search = req.query.search || "";
+        const pageSize = 20;
+        const page = Math.max(parseInt(req.query.page) || 1, 1);
+        const offset = (page - 1) * pageSize;
 
         let query = knex("participants as p")
             .select(
@@ -794,8 +825,13 @@ app.get("/users", requireManager, async (req, res) => {
             });
         }
 
+        const totalRow = await query.clone().clearSelect().clearOrder().count("* as count").first();
+        const total = parseInt(totalRow.count, 10) || 0;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
         query.orderBy("p.participant_last_name", "asc")
-        query.orderBy("p.participant_first_name", "asc");
+        query.orderBy("p.participant_first_name", "asc")
+        query.limit(pageSize).offset(offset);
 
         const users = await query;
 
@@ -803,7 +839,8 @@ app.get("/users", requireManager, async (req, res) => {
             users,
             role: req.session.role,
             error_message: null,
-            search
+            search,
+            pagination: { page, totalPages }
         });
 
     } catch (err) {
@@ -813,7 +850,8 @@ app.get("/users", requireManager, async (req, res) => {
             users: [],
             role: req.session.role,
             error_message: "Error loading users",
-            search: ""
+            search: "",
+            pagination: { page: 1, totalPages: 1 }
         });
     }
 });
@@ -956,6 +994,9 @@ app.post("/deleteUsers/:id", requireManager, async (req, res) => {
 app.get("/participants", async (req, res) => {
     try {
         const search = req.query.search || "";
+        const pageSize = 20;
+        const page = Math.max(parseInt(req.query.page) || 1, 1);
+        const offset = (page - 1) * pageSize;
 
         // Start building the query
         let query = knex("participants as p").select(
@@ -986,9 +1027,12 @@ app.get("/participants", async (req, res) => {
             });
         }
 
-        // Sort by last name
-        query.orderBy("p.participant_last_name", "asc")
-        query.orderBy("p.participant_first_name", "asc");
+        const totalRow = await query.clone().clearSelect().clearOrder().count("* as count").first();
+        const total = parseInt(totalRow.count, 10) || 0;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+        // Sort by last name/first name and page
+        query.orderBy("p.participant_last_name", "asc").orderBy("p.participant_first_name", "asc").limit(pageSize).offset(offset);
 
         const participants = await query;
 
@@ -997,7 +1041,8 @@ app.get("/participants", async (req, res) => {
             participants,
             role: req.session.role,
             error_message: null,
-            search // pass search query back to input field
+            search, // pass search query back to input field
+            pagination: { page, totalPages }
         });
 
     } catch (err) {
@@ -1006,7 +1051,8 @@ app.get("/participants", async (req, res) => {
             participants: [],
             role: req.session.role,
             error_message: "Error loading participants",
-            search: ""
+            search: "",
+            pagination: { page: 1, totalPages: 1 }
         });
     }
 });
@@ -1017,6 +1063,9 @@ app.get("/milestones", async (req, res) => {
 
     const search = req.query.search || "";
     const isManager = (req.session.role || "").toLowerCase() === "admin";
+    const pageSize = 20;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const offset = (page - 1) * pageSize;
 
     try {
         let query = knex("milestones as m")
@@ -1041,14 +1090,23 @@ app.get("/milestones", async (req, res) => {
             });
         }
 
-        const milestones = await query;
+        const totalRow = await query.clone().clearSelect().clearOrder().countDistinct("m.participant_id as count").first();
+        const total = parseInt(totalRow.count, 10) || 0;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+        const milestones = await query
+            .orderBy("p.participant_last_name", "asc")
+            .orderBy("p.participant_first_name", "asc")
+            .limit(pageSize)
+            .offset(offset);
 
         res.render("milestones", {
             username: req.session.username,
             role: req.session.role,
             milestones,
             isManager,
-            search
+            search,
+            pagination: { page, totalPages }
         });
 
     } catch (err) {
@@ -1059,7 +1117,8 @@ app.get("/milestones", async (req, res) => {
             milestones: [],
             isManager,
             error_message: "Error loading milestones",
-            search
+            search,
+            pagination: { page: 1, totalPages: 1 }
         });
     }
 });

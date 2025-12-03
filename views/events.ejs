@@ -15,7 +15,22 @@
     %>
 
     <div class="table-card">
-        <h1>Event Management</h1>
+        <div class="table-header-row">
+            <div>
+                <h1>Event Management</h1>
+            </div>
+            <% if (pagination && pagination.totalPages > 1) { %>
+                <div class="pagination-top">
+                    <div class="pagination">
+                        <a class="page-link <%= pagination.page === 1 ? 'disabled' : '' %>"
+                           href="?page=<%= pagination.page - 1 %>">Previous</a>
+                        <span class="page-info">Page <%= pagination.page %> of <%= pagination.totalPages %></span>
+                        <a class="page-link <%= pagination.page >= pagination.totalPages ? 'disabled' : '' %>"
+                           href="?page=<%= pagination.page + 1 %>">Next</a>
+                    </div>
+                </div>
+            <% } %>
+        </div>
         <% if (isManager) { %>
             <div class="table-actions">
                 <a href="/events/add" class="btn btn-primary">Add Event</a>
@@ -87,6 +102,11 @@
                 <% } %>
             </tbody>
         </table>
+
+        <div class="table-footer">
+            <div class="footer-left">
+            </div>
+        </div>
     </div>
 
 </body>
