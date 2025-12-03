@@ -1,17 +1,13 @@
-/* ==========================================================
-   ELLA RISES BRAND STYLESHEET
-   Based on provided brand guide (fonts + colors)
-   ========================================================== */
+/* Group 2-11
+ 
+Style sheet based on Ella Rises branding.
 
-/* -----------------------------
-   IMPORT FONTS
-   ----------------------------- */
+*/
+
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap');
 
-/* NOTE: TT Milk Script is not a free Google Font.
-   We will mock it using a soft script font for now.
-*/
+
 @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
 
 
