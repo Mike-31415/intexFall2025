@@ -1,29 +1,78 @@
 <header class="site-header">
     <div class="site-header__inner">
+        <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="site-sidebar">
+            <span class="menu-toggle__bar"></span>
+            <span class="menu-toggle__bar"></span>
+            <span class="menu-toggle__bar"></span>
+        </button>
         <a href="/" class="site-brand">
             <img src="/ella-rises-logo.png" alt="Ella Rises logo" class="site-logo">
             <span>Ella Rises</span>
         </a>
-        <nav class="site-nav">
-            <a href="/">Home</a>
+        <div class="header-actions">
             <% if (isLoggedIn) { %>
-                <a href="/homepage">Dashboard</a>
-            <% } %>
-            <a href="/donations">Donations</a>
-            <% if (isLoggedIn) { %>
-                <a href="/events">Events</a>
-                <a href="/participants">Participants</a>
-                <a href="/postsurveys">Surveys</a>
-                <a href="/milestones">Milestones</a>
-                <% if ((currentRole || '').toLowerCase() === 'admin') { %>
-                    <a href="/users">Users</a>
-                <% } %>
-                <a class="nav-accent" href="/logout">Logout</a>
                 <span class="user-chip"><%= currentRole.replace(/^./, char => char.toUpperCase()) || '' %></span>
+                <a class="nav-accent" href="/logout">Logout</a>
             <% } else { %>
                 <a href="/login">Login</a>
                 <a class="nav-accent" href="/register">Register</a>
             <% } %>
-        </nav>
+        </div>
     </div>
 </header>
+
+<div class="site-sidebar-backdrop" data-sidebar-close></div>
+<aside class="site-sidebar" id="site-sidebar" aria-hidden="true">
+    <div class="site-sidebar__header">
+        <span class="sidebar-label">Navigation</span>
+        <button class="menu-close" type="button" aria-label="Close navigation">&times;</button>
+    </div>
+    <nav class="site-nav">
+        <a href="/">Home</a>
+        <% if (isLoggedIn) { %>
+            <a href="/homepage">Dashboard</a>
+        <% } %>
+        <a href="/donations">Donations</a>
+        <% if (isLoggedIn) { %>
+            <a href="/events">Events</a>
+            <a href="/participants">Participants</a>
+            <a href="/postsurveys">Surveys</a>
+            <a href="/milestones">Milestones</a>
+        <% } %>
+    </nav>
+</aside>
+
+<script>
+    (() => {
+        const sidebar = document.getElementById('site-sidebar');
+        const toggleBtn = document.querySelector('.menu-toggle');
+        const closeBtn = document.querySelector('.menu-close');
+        const backdrop = document.querySelector('.site-sidebar-backdrop');
+
+        if (!sidebar || !toggleBtn) return;
+
+        const setOpen = (open) => {
+            sidebar.classList.toggle('is-open', open);
+            document.body.classList.toggle('sidebar-open', open);
+            backdrop?.classList.toggle('is-visible', open);
+            toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            sidebar.setAttribute('aria-hidden', open ? 'false' : 'true');
+        };
+
+        const closeSidebar = () => setOpen(false);
+
+        toggleBtn.addEventListener('click', () => {
+            const isOpen = sidebar.classList.contains('is-open');
+            setOpen(!isOpen);
+        });
+
+        closeBtn?.addEventListener('click', closeSidebar);
+        backdrop?.addEventListener('click', closeSidebar);
+
+        document.addEventListener('keydown', (evt) => {
+            if (evt.key === 'Escape' && sidebar.classList.contains('is-open')) {
+                closeSidebar();
+            }
+        });
+    })();
+</script>
