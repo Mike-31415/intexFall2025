@@ -581,25 +581,53 @@ app.post("/deleteDonations/:id", requireManager, async (req, res) => {
     }
 });
 
-// USERS PAGE (alias of participants for admin view)
+// USERS PAGE WITH SEARCH
 app.get("/users", requireManager, async (req, res) => {
     try {
-        const users = await knex("participants").select("*");
+        const search = req.query.search || "";
+
+        let query = knex("participants as p")
+            .select(
+                "p.participant_id",
+                "p.participant_email",
+                "p.participant_first_name",
+                "p.participant_last_name",
+                "p.participant_role"
+            );
+
+        if (search.trim() !== "") {
+            const s = `%${search}%`;
+
+            query.where(function () {
+                this.whereILike("p.participant_first_name", s)
+                    .orWhereILike("p.participant_last_name", s)
+                    .orWhereILike("p.participant_email", s)
+                    .orWhereILike("p.participant_role", s);
+            });
+        }
+
+        query.orderBy("p.participant_last_name", "asc");
+
+        const users = await query;
+
         res.render("users", {
             users,
             role: req.session.role,
-            error_message: null
+            error_message: null,
+            search
         });
+
     } catch (err) {
         console.error("Error loading users:", err);
+
         res.render("users", {
             users: [],
             role: req.session.role,
-            error_message: "Error loading users"
+            error_message: "Error loading users",
+            search: ""
         });
     }
 });
-
 
 // PARTICIPANTS PAGE WITH SEARCH
 app.get("/participants", async (req, res) => {
