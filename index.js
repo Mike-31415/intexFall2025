@@ -40,7 +40,9 @@ app.use((req, res, next) => {
         "script-src 'self' 'unsafe-inline'; " +
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
         "img-src 'self' data: https:; " + // 'https:' allows images from any HTTPS source
-        "font-src 'self' https://fonts.gstatic.com;"
+        "font-src 'self' https://fonts.gstatic.com;" +
+        "font-src 'self' https://fonts.gstatic.com; " +
+        "frame-src https://www.youtube.com https://www.youtube-nocookie.com;"
     );
     next();
 });
@@ -84,7 +86,7 @@ const requireManager = requireAdmin;
 // Global authentication middleware
 app.use((req, res, next) => {
     console.log("Auth middleware: checking path:", req.path);
-    if (
+    if (req.path === '/teapot' ||
         req.path === '/' ||
         req.path === '/login' ||
         req.path === '/logout' ||
@@ -188,6 +190,9 @@ app.get("/logout", (req, res) => {
 app.post("/login", (req, res) => {
     let sEmail = req.body.email;
     let sPassword = req.body.password;
+    if (sEmail.trim() === "Yeet!"){
+        return res.redirect("/teapot");
+    }
     console.log('Post Login')
     knex("participants")
         .select("participant_id","participant_email","password","participant_role","participant_first_name","participant_last_name")
@@ -345,6 +350,10 @@ app.get("/events", async (req, res) => {
         return res.redirect("/login");
     }
 
+    const pageSize = 20;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const offset = (page - 1) * pageSize;
+
     const search = req.query.search || "";
 
     try {
@@ -357,9 +366,9 @@ app.get("/events", async (req, res) => {
                 "event_default_capacity as eventdefaultcapacity",
                 "event_recurrence_pattern as eventrecurrencepattern"
             )
-            .orderBy("event_template_id", "asc");
+            .orderBy("eventname", "asc");
 
-        if (search.trim() !== "") {
+    if (search.trim() !== "") {
             query = query.where(builder => {
                 builder
                     .whereILike("event_name", `%${search}%`)
@@ -370,13 +379,18 @@ app.get("/events", async (req, res) => {
             });
         }
 
-        const events = await query;
+        const totalRow = await query.clone().clearSelect().clearOrder().count("* as count").first();
+        const total = parseInt(totalRow.count, 10) || 0;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+        const events = await query.limit(pageSize).offset(offset);
 
         res.render("events", {
             username: req.session.username,
             role: req.session.role,
             events,
-            search
+            search,
+            pagination: { page, totalPages }
         });
 
     } catch (err) {
@@ -386,7 +400,8 @@ app.get("/events", async (req, res) => {
             role: req.session.role,
             events: [],
             error_message: "Error loading events",
-            search
+            search,
+            pagination: { page: 1, totalPages: 1 }
         });
     }
 });
@@ -490,6 +505,9 @@ app.get("/postsurveys", async (req, res) => {
 
     const search = req.query.search || "";
     const isManager = (req.session.role || "").toLowerCase() === "admin";
+    const pageSize = 20;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const offset = (page - 1) * pageSize;
 
     try {
         let query = knex("surveys as s")
@@ -517,14 +535,19 @@ app.get("/postsurveys", async (req, res) => {
             });
         }
 
-        const surveys = await query;
+        const totalRow = await query.clone().clearSelect().clearOrder().count("* as count").first();
+        const total = parseInt(totalRow.count, 10) || 0;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+        const surveys = await query.limit(pageSize).offset(offset);
 
         res.render("postsurveys", {
             username: req.session.username,
             role: req.session.role,
             isManager,
             surveys,
-            search
+            search,
+            pagination: { page, totalPages }
         });
 
     } catch (err) {
@@ -535,7 +558,8 @@ app.get("/postsurveys", async (req, res) => {
             isManager,
             surveys: [],
             error_message: "Error loading surveys",
-            search
+            search,
+            pagination: { page: 1, totalPages: 1 }
         });
     }
 });
@@ -646,9 +670,12 @@ app.post("/postsurveys/delete/:id", requireManager, async (req, res) => {
 app.get("/donations", async (req, res) => {
     if (!req.session.isLoggedIn) {
         req.session.redirectAfterLogin = "/addDonations";
-        return res.render("login", { error_message: "Please log in to view Donations" });
+        return res.render("login", { error_message: "Please log in or register to make a Donation" });
     }
     const search = req.query.search || "";
+    const pageSize = 20;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const offset = (page - 1) * pageSize;
 
     try {
         let query = knex("donations as d")
@@ -660,7 +687,7 @@ app.get("/donations", async (req, res) => {
                 "p.participant_first_name as first_name",
                 "p.participant_last_name as last_name"
             )
-            .orderBy("d.donation_date", "desc");
+            .orderByRaw("d.donation_date DESC NULLS LAST");
 
         if (search.trim() !== "") {
             query = query.where(function () {
@@ -671,13 +698,18 @@ app.get("/donations", async (req, res) => {
             });
         }
 
-        const donations = await query;
+        const totalRow = await query.clone().clearSelect().clearOrder().count("* as count").first();
+        const total = parseInt(totalRow.count, 10) || 0;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+        const donations = await query.limit(pageSize).offset(offset);
 
         res.render("donations", {
             donations,
             role: req.session.role,
             error_message: null,
-            search
+            search,
+            pagination: { page, totalPages }
         });
 
     } catch (err) {
@@ -686,7 +718,8 @@ app.get("/donations", async (req, res) => {
             donations: [],
             role: req.session.role,
             error_message: "Error loading donations",
-            search
+            search,
+            pagination: { page: 1, totalPages: 1 }
         });
     }
 });
@@ -773,6 +806,9 @@ app.post("/deleteDonations/:id", requireManager, async (req, res) => {
 app.get("/users", requireManager, async (req, res) => {
     try {
         const search = req.query.search || "";
+        const pageSize = 20;
+        const page = Math.max(parseInt(req.query.page) || 1, 1);
+        const offset = (page - 1) * pageSize;
 
         let query = knex("participants as p")
             .select(
@@ -794,7 +830,13 @@ app.get("/users", requireManager, async (req, res) => {
             });
         }
 
-        query.orderBy("p.participant_last_name", "asc");
+        const totalRow = await query.clone().clearSelect().clearOrder().count("* as count").first();
+        const total = parseInt(totalRow.count, 10) || 0;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+        query.orderBy("p.participant_last_name", "asc")
+        query.orderBy("p.participant_first_name", "asc")
+        query.limit(pageSize).offset(offset);
 
         const users = await query;
 
@@ -802,7 +844,8 @@ app.get("/users", requireManager, async (req, res) => {
             users,
             role: req.session.role,
             error_message: null,
-            search
+            search,
+            pagination: { page, totalPages }
         });
 
     } catch (err) {
@@ -812,7 +855,8 @@ app.get("/users", requireManager, async (req, res) => {
             users: [],
             role: req.session.role,
             error_message: "Error loading users",
-            search: ""
+            search: "",
+            pagination: { page: 1, totalPages: 1 }
         });
     }
 });
@@ -955,6 +999,9 @@ app.post("/deleteUsers/:id", requireManager, async (req, res) => {
 app.get("/participants", async (req, res) => {
     try {
         const search = req.query.search || "";
+        const pageSize = 20;
+        const page = Math.max(parseInt(req.query.page) || 1, 1);
+        const offset = (page - 1) * pageSize;
 
         // Start building the query
         let query = knex("participants as p").select(
@@ -985,8 +1032,12 @@ app.get("/participants", async (req, res) => {
             });
         }
 
-        // Sort by last name
-        query.orderBy("p.participant_last_name", "asc");
+        const totalRow = await query.clone().clearSelect().clearOrder().count("* as count").first();
+        const total = parseInt(totalRow.count, 10) || 0;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+        // Sort by last name/first name and page
+        query.orderBy("p.participant_last_name", "asc").orderBy("p.participant_first_name", "asc").limit(pageSize).offset(offset);
 
         const participants = await query;
 
@@ -995,7 +1046,8 @@ app.get("/participants", async (req, res) => {
             participants,
             role: req.session.role,
             error_message: null,
-            search // pass search query back to input field
+            search, // pass search query back to input field
+            pagination: { page, totalPages }
         });
 
     } catch (err) {
@@ -1004,7 +1056,8 @@ app.get("/participants", async (req, res) => {
             participants: [],
             role: req.session.role,
             error_message: "Error loading participants",
-            search: ""
+            search: "",
+            pagination: { page: 1, totalPages: 1 }
         });
     }
 });
@@ -1015,6 +1068,9 @@ app.get("/milestones", async (req, res) => {
 
     const search = req.query.search || "";
     const isManager = (req.session.role || "").toLowerCase() === "admin";
+    const pageSize = 20;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const offset = (page - 1) * pageSize;
 
     try {
         let query = knex("milestones as m")
@@ -1025,7 +1081,8 @@ app.get("/milestones", async (req, res) => {
                 "m.milestone_date",
                 knex.raw("concat(coalesce(p.participant_first_name,''), ' ', coalesce(p.participant_last_name,'')) as participant_name")
             )
-            .orderBy("m.milestone_date", "desc");
+            .orderBy("p.participant_last_name", "asc")
+            .orderBy("p.participant_first_name", "asc");
 
         if (search.trim() !== "") {
             const like = `%${search}%`;
@@ -1038,14 +1095,23 @@ app.get("/milestones", async (req, res) => {
             });
         }
 
-        const milestones = await query;
+        const totalRow = await query.clone().clearSelect().clearOrder().countDistinct("m.participant_id as count").first();
+        const total = parseInt(totalRow.count, 10) || 0;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+        const milestones = await query
+            .orderBy("p.participant_last_name", "asc")
+            .orderBy("p.participant_first_name", "asc")
+            .limit(pageSize)
+            .offset(offset);
 
         res.render("milestones", {
             username: req.session.username,
             role: req.session.role,
             milestones,
             isManager,
-            search
+            search,
+            pagination: { page, totalPages }
         });
 
     } catch (err) {
@@ -1056,7 +1122,8 @@ app.get("/milestones", async (req, res) => {
             milestones: [],
             isManager,
             error_message: "Error loading milestones",
-            search
+            search,
+            pagination: { page: 1, totalPages: 1 }
         });
     }
 });
@@ -1312,6 +1379,33 @@ app.post("/deleteParticipants/:id", requireManager, async (req, res) => {
         res.redirect("/participants");
     }
 });
+
+app.get("/teapot", (req, res) => {
+    res.status(418);
+    console.log(res.statusCode);
+
+    res.send(`
+        <html>
+            <head>
+                <title>418 I'm a teapot!</title>
+            </head>
+            <body style="text-align:center; font-family:sans-serif;">
+                <h1>🫖 I'm a teapot!</h1>
+                <p>This page returns a 418 status code.</p>
+                <iframe width="560" height="315" 
+                    src="https://www.youtube.com/embed/xvFZjo5PgG0?autoplay=1&mute=1&si=RJBpqvHuqyTb4Avw" 
+                    title="YouTube video player" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    referrerpolicy="strict-origin-when-cross-origin" 
+                    allow="autoplay; fullscreen" 
+                    allowfullscreen>
+                </iframe>
+            </body>
+        </html>
+    `);
+});
+
 
 
 app.listen(port, () => {

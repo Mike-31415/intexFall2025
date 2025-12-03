@@ -20,8 +20,8 @@ they log in, this page serves as the main page with buttons to access other page
 
     <div class="page-wrapper">
 
-        <h1 style="text-align:center; margin-top:40px;">Welcome to</h1>
-        <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 20px; margin-top: 16px;">
+        <h1 class="landing-title">Welcome to</h1>
+        <div class="hero-row">
             <img src="/ballet_folklorico_dancer.png" alt="Ballet Folklorico Dancer" class="hero-circle">
             <img src="/art_student.jpg" alt="Art Student" class="hero-circle">
             <img src="/ella-rises-logo.png" alt="Ella Rises Logo" class="hero-circle">
@@ -29,25 +29,13 @@ they log in, this page serves as the main page with buttons to access other page
             <img src="/stem_students.jpg" alt="STEM Students" class="hero-circle">
         </div>
 
-        <div style="
-            display:flex;
-            flex-direction:column;
-            gap:20px;
-            align-items:center;
-            margin-top:30px;
-        ">
+        <div class="landing-actions">
 
                     <!-- Objective / Mission Statement -->
-        <section style="
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            text-align: center;
-            line-height: 1.6;
-        ">
+        <section class="mission-card">
             <h2>Our Objective</h2>
 
-            <p>
+            <p class="fade-up">
                 Ella Rises empowers young women to pursue higher education and
                 embrace their heritage through a transformative journey of culturally
                 rooted STEM and Arts "STEAM" programs. Serving 150 students
@@ -56,7 +44,7 @@ they log in, this page serves as the main page with buttons to access other page
                 higher education attainment.
             </p><br>
 
-            <p>
+            <p class="fade-up" style="animation-delay: 0.12s;">
                 Our curriculum fosters greater self-confidence, identity, and purpose
                 through weekly performing arts instruction, elite STEAM, leadership
                 events, and university tours. We believe that broadening a young
@@ -66,13 +54,29 @@ they log in, this page serves as the main page with buttons to access other page
             
         </section>
             <!-- Donations button (public) -->
-            <a href="/donations" class="btn btn-primary">Go to Donations</a>
+            <a href="/donations" class="btn btn-primary btn-lift">Go to Donations</a>
 
             <!-- Login button -->
-            <a href="/login" class="btn btn-secondary">Login</a>
+            <a href="/login" class="btn btn-secondary btn-lift">Login</a>
 
         </div>
     </div>
+
+    <script>
+        (() => {
+            const heroImages = Array.from(document.querySelectorAll('.hero-circle'));
+            if (!heroImages.length) return;
+            heroImages.forEach(img => {
+                img.addEventListener('click', () => {
+                    const isActive = img.classList.contains('is-active');
+                    heroImages.forEach(i => i.classList.remove('is-active'));
+                    if (!isActive) {
+                        img.classList.add('is-active');
+                    }
+                });
+            });
+        })();
+    </script>
 
 </body>
 </html>

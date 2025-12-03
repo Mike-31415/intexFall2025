@@ -29,6 +29,8 @@ a certain participant.
                     dobVal = d.toISOString().slice(0,10);
                 }
             }
+            const participantName = ((participant.participant_first_name || '') + ' ' + (participant.participant_last_name || '')).trim();
+            const milestoneSearch = encodeURIComponent(participantName);
         %>
 
         <form action="/editParticipants/<%= participant.participant_id %>" method="post">
@@ -95,6 +97,7 @@ a certain participant.
 
             <div class="buttons">
                 <button type="submit" class="btn btn-save">Update Participant</button>
+                <a href="/milestones?search=<%= milestoneSearch %>" class="btn btn-secondary">View Milestones</a>
                 <a href="/participants" class="btn btn-cancel">Cancel</a>
             </div>
         </form>

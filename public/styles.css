@@ -330,6 +330,14 @@ h1, h2, h3, .title {
   background: #ffffff;
 }
 
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 10px;
+}
+
 textarea {
   resize: vertical;
 }
@@ -529,6 +537,65 @@ textarea {
   color: #5c615e;
   font-size: 0.95rem;
   margin-top: 4px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-link {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  background: var(--blue);
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  box-shadow: var(--shadow-card);
+}
+
+.page-link:hover {
+  background: var(--lavender);
+}
+
+.page-link.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.page-info {
+  font-weight: 700;
+}
+
+.pagination-top {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.table-footer .footer-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.table-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .card-button-row {
@@ -785,4 +852,78 @@ textarea {
     height: 200px;
     border-radius: 50%;
     object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    box-shadow: var(--shadow-card);
+}
+
+.hero-circle:hover {
+    transform: translateY(-2px);
+}
+
+.hero-circle.is-active {
+    transform: scale(1.2);
+    box-shadow: 0 22px 48px rgba(0,0,0,0.2);
+}
+
+/* Landing page extras */
+.landing-title {
+  text-align: center;
+  margin-top: 32px;
+  animation: fadeIn 0.6s ease forwards;
+}
+
+.hero-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 12px;
+}
+
+.landing-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.mission-card {
+  max-width: 800px;
+  margin: 36px auto 30px;
+  padding: 16px 20px;
+  text-align: center;
+  line-height: 1.6;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
+}
+
+.fade-up {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeUp 0.8s ease forwards;
+}
+
+.btn-lift {
+  padding: 14px 24px;
+  font-size: 1rem;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.btn-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.12);
+}
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
