@@ -665,7 +665,7 @@ app.post("/postsurveys/delete/:id", requireManager, async (req, res) => {
 app.get("/donations", async (req, res) => {
     if (!req.session.isLoggedIn) {
         req.session.redirectAfterLogin = "/addDonations";
-        return res.render("login", { error_message: "Please log in to view Donations" });
+        return res.render("login", { error_message: "Please log in or register to make a Donation" });
     }
     const search = req.query.search || "";
     const pageSize = 20;
