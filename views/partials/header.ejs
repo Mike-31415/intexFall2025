@@ -11,7 +11,6 @@
         </a>
         <div class="header-actions">
             <% if (isLoggedIn) { %>
-                <span class="user-chip"><%= currentRole.replace(/^./, char => char.toUpperCase()) || '' %></span>
                 <a class="nav-accent" href="/logout">Logout</a>
             <% } else { %>
                 <a href="/login">Login</a>
