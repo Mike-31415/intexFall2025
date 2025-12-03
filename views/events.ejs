@@ -10,18 +10,70 @@
     <%- include('partials/header') %>
     <div class="table-card">
         <h1>Event Management</h1>
+    <% 
+        // Determine if user is an admin
+        let isManager = (role === 'admin' || role === 'Admin');
+    %>
 
-        <% 
-            // Determine if user is an admin
-            let isManager = (role === 'admin' || role === 'Admin');
-        %>
-
-        <!-- Add Event button (ADMINS ONLY) -->
+    <div class="table-card">
+        <div class="table-header">
+            <div>
+                <h1>Event Management</h1>
+                <p class="table-subtitle">Track upcoming programming, capacities, and recurrence at a glance.</p>
+            </div>
             <% if (isManager) { %>
-                <div class="add-button-bar">
-                    <a href="/events/add" class="btn btn-primary">Add Event</a>
-                </div>
+                <a href="/events/add" class="btn btn-add">Add Event</a>
             <% } %>
+        </div>
+
+        <table class="event-table table-striped">
+            <thead>
+                <tr>
+                    <th>Event Name</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Default Capacity</th>
+                    <th>Recurrence</th>
+
+                    <!-- Only show Actions column for admins -->
+                    <% if (isManager) { %>
+                        <th>Actions</th>
+                    <% } %>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% if (events && events.length > 0) { %>
+                    <% events.forEach(event => { %>
+                        <tr>
+                            <td><%= event.eventname %></td>
+                            <td><%= event.eventtype %></td>
+                            <td><%= event.eventdescription %></td>
+                            <td><%= event.eventdefaultcapacity %></td>
+                            <td><%= event.eventrecurrencepattern %></td>
+
+                            <!-- Admin-only actions -->
+                            <% if (isManager) { %>
+                                <td class="actions">
+                                    <a href="/events/edit/<%= event.eventid %>" class="btn btn-edit">Edit</a>
+                                    <form action="/events/delete/<%= event.eventid %>" method="POST" style="display:inline;">
+                                        <button type="submit" class="btn btn-delete">Delete</button>
+                                    </form>
+                                </td>
+                            <% } %>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="<%= isManager ? 6 : 5 %>" style="text-align:center; padding:20px;">
+                            No events available.
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+>>>>>>> Stashed changes
 
         <table class="event-table">
             <thead>

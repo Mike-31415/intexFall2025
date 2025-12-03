@@ -224,11 +224,108 @@ app.get("/homepage", (req, res) => {
     if (!req.session.isLoggedIn) {
         return res.redirect("/login");
     }
+    knex("event_occurrences as eo")
+        .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
+        .select(
+            "eo.event_occurrence_id as id",
+            "et.event_name as name",
+            "eo.event_date_time_start as start",
+            "et.event_type as type",
+            "et.event_description as description",
+            "et.event_default_capacity as capacity"
+        )
+        .orderBy("eo.event_date_time_start", "asc")
+        .then(events => {
+            res.render("homepage", {
+                username: req.session.username,
+                role: req.session.role,
+                events
+            });
+        })
+        .catch(err => {
+            console.error("Error loading events for homepage:", err);
+            res.render("homepage", {
+                username: req.session.username,
+                role: req.session.role,
+                events: []
+            });
+        });
+});
 
-    res.render("homepage", {
-        username: req.session.username,
-        role: req.session.role
-    });
+// Event registration page (basic capture)
+app.get("/events/register/:id", (req, res) => {
+    if (!req.session.isLoggedIn) {
+        return res.redirect("/login");
+    }
+    const id = req.params.id;
+    knex("event_occurrences as eo")
+        .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
+        .select(
+            "eo.event_occurrence_id as id",
+            "et.event_name as name",
+            "eo.event_date_time_start as start",
+            "et.event_type as type",
+            "et.event_description as description",
+            "et.event_default_capacity as capacity"
+        )
+        .where("eo.event_occurrence_id", id)
+        .first()
+        .then(event => {
+            if (!event) return res.redirect("/homepage");
+            res.render("registerEvent", {
+                event,
+                success_message: "",
+                error_message: "",
+                username: req.session.username,
+                email: req.session.email
+            });
+        })
+        .catch(err => {
+            console.error("Error loading event for registration:", err);
+            res.redirect("/homepage");
+        });
+});
+
+app.post("/events/register/:id", (req, res) => {
+    if (!req.session.isLoggedIn) {
+        return res.redirect("/login");
+    }
+    const id = req.params.id;
+    const { name, email, notes } = req.body;
+    knex("event_occurrences as eo")
+        .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
+        .select(
+            "eo.event_occurrence_id as id",
+            "et.event_name as name",
+            "eo.event_date_time_start as start",
+            "et.event_type as type",
+            "et.event_description as description",
+            "et.event_default_capacity as capacity"
+        )
+        .where("eo.event_occurrence_id", id)
+        .first()
+        .then(event => {
+            if (!event) return res.redirect("/homepage");
+            // Placeholder capture: in a real app we'd save to registrations table
+            console.log("Event registration submitted:", { eventId: id, name, email, notes });
+            res.render("registerEvent", {
+                event,
+                success_message: "Registration submitted! We'll confirm shortly.",
+                error_message: "",
+                username: req.session.username,
+                email: req.session.email
+            });
+        })
+        .catch(err => {
+            console.error("Error registering for event:", err);
+            res.render("registerEvent", {
+                event: null,
+                success_message: "",
+                error_message: "Unable to register right now. Please try again.",
+                username: req.session.username,
+                email: req.session.email
+            });
+        });
 });
 
 app.get("/events", (req, res) => {
