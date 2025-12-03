@@ -27,7 +27,7 @@
         <form action="/editParticipants/<%= participant.participant_id %>" method="post">
             <div class="form-row">
                 <label for="participant_email">Email</label>
-                <input type="email" id="participant_email" name="participant_email" value="<%= participant.participant_email %>" required>
+                <input type="email" id="participant_email" name="participant_email" value="<%= participant.participant_email %>" required readonly>
             </div>
 
             <div class="form-row">
@@ -71,22 +71,19 @@
             </div>
 
             <div class="form-row">
-                <label for="participant_field_of_interest">Field of Interest</label>
-                <input type="text" id="participant_field_of_interest" name="participant_field_of_interest" value="<%= participant.participant_field_of_interest %>">
-            </div>
-
-            <div class="form-row">
-                <label for="participant_role">Role</label>
-                <select id="participant_role" name="participant_role">
-                    <option value="participant" <%= participant.participant_role === 'participant' ? 'selected' : '' %>>Participant</option>
-                    <option value="manager" <%= participant.participant_role === 'manager' ? 'selected' : '' %>>Manager</option>
-                    <option value="admin" <%= participant.participant_role === 'admin' ? 'selected' : '' %>>Admin</option>
-                </select>
-            </div>
-
-            <div class="form-row">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Leave blank to keep current password">
+                <label>Field of Interest</label>
+                <div>
+                    <input type="radio" id="interest_arts" name="participant_field_of_interest" value="Arts" <%= (participant.participant_field_of_interest === 'Arts') ? 'checked' : '' %>>
+                    <label for="interest_arts">Arts</label>
+                </div>
+                <div>
+                    <input type="radio" id="interest_stem" name="participant_field_of_interest" value="STEM" <%= (participant.participant_field_of_interest === 'STEM') ? 'checked' : '' %>>
+                    <label for="interest_stem">STEM</label>
+                </div>
+                <div>
+                    <input type="radio" id="interest_both" name="participant_field_of_interest" value="Both" <%= (participant.participant_field_of_interest === 'Both') ? 'checked' : '' %>>
+                    <label for="interest_both">Both</label>
+                </div>
             </div>
 
             <div class="buttons">

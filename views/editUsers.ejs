@@ -25,6 +25,17 @@
                     value="<%= user.participant_email || '' %>"
                     required
                 >
+                
+            </div>
+
+                        <div class="form-row">
+                <label for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Leave blank to keep current password"
+                >
             </div>
 
             <div class="form-row">
@@ -35,6 +46,7 @@
                     name="participant_first_name"
                     value="<%= user.participant_first_name || '' %>"
                     required
+                    readonly
                 >
             </div>
 
@@ -46,6 +58,7 @@
                     name="participant_last_name"
                     value="<%= user.participant_last_name || '' %>"
                     required
+                    readonly
                 >
             </div>
 
@@ -55,16 +68,6 @@
                     <option value="participant" <%= (user.participant_role || '') === 'participant' ? 'selected' : '' %>>Participant</option>
                     <option value="admin" <%= (user.participant_role || '') === 'admin' ? 'selected' : '' %>>Admin</option>
                 </select>
-            </div>
-
-            <div class="form-row">
-                <label for="password">Password</label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="Leave blank to keep current password"
-                >
             </div>
 
             <div class="buttons">
