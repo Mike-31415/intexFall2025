@@ -47,6 +47,18 @@
 
 <script>
     (() => {
+        // Ensure favicon uses Ella Rises logo across all pages
+        try {
+            const existing = document.querySelector("link[rel*='icon']");
+            const link = existing || document.createElement("link");
+            link.rel = "icon";
+            link.type = "image/png";
+            link.href = "/ella-rises-logo.png";
+            if (!existing) document.head.appendChild(link);
+        } catch (e) {
+            console.error("Favicon setup failed", e);
+        }
+
         const sidebar = document.getElementById('site-sidebar');
         const toggleBtn = document.querySelector('.menu-toggle');
         const closeBtn = document.querySelector('.menu-close');
