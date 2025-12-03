@@ -16,8 +16,8 @@
 
             <!-- ADMINS SEE ADD BUTTON -->
             <% if (role === "admin") { %>
-                <form action="/addParticipants" method="GET" class="mb-3">
-                    <button class="btn btn-success" type="submit">Add Participant</button>
+                <form action="/addParticipants" method="GET" class="add-button-bar">
+                    <button class="btn btn-primary" type="submit">Add Participant</button>
                 </form>
             <% } %>
 
@@ -32,8 +32,8 @@
                         value="<%= search %>"
                         style="flex: 1; min-width: 250px; border-radius: 8px; height: 35px; padding: 0 12px;"
                     />
-                    <button class="btn btn-success" type="submit">Search</button>
-                    <button class="btn btn-success" type="button" onclick="window.location.href='/participants'">Clear</button>
+                    <button class="btn btn-secondary" type="submit">Search</button>
+                    <button class="btn btn-secondary" type="button" onclick="window.location.href='/participants'">Clear</button>
                 </div>
             </form>
 

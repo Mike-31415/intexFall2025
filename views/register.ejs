@@ -20,13 +20,35 @@
 
     <form action="/register" method="POST">
 
-      <!-- Username -->
+      <!-- First Name -->
       <div class="form-row">
-        <label for="username">Username</label>
+        <label for="participant_first_name">First Name</label>
         <input 
           type="text" 
-          id="username" 
-          name="username" 
+          id="participant_first_name" 
+          name="participant_first_name" 
+          required
+        >
+      </div>
+
+      <!-- Last Name -->
+      <div class="form-row">
+        <label for="participant_last_name">Last Name</label>
+        <input 
+          type="text" 
+          id="participant_last_name" 
+          name="participant_last_name" 
+          required
+        >
+      </div>
+
+      <!-- email -->
+      <div class="form-row">
+        <label for="participant_email">Email</label>
+        <input 
+          type="email" 
+          id="participant_email" 
+          name="participant_email" 
           required
         >
       </div>
@@ -40,6 +62,88 @@
           name="password" 
           required
         >
+      </div>
+
+      <!-- Date of Birth -->
+      <div class="form-row">
+        <label for="participant_dob">Date of Birth</label>
+        <input 
+          type="date" 
+          id="participant_dob" 
+          name="participant_dob"
+        >
+      </div>
+
+      <!-- Phone -->
+      <div class="form-row">
+        <label for="participant_phone">Phone</label>
+        <input 
+          type="tel" 
+          id="participant_phone" 
+          name="participant_phone"
+          required
+        >
+      </div>
+
+      <!-- City -->
+      <div class="form-row">
+        <label for="participant_city">City</label>
+        <input 
+          type="text" 
+          id="participant_city" 
+          name="participant_city"
+          required
+        >
+      </div>
+
+      <!-- State -->
+      <div class="form-row">
+        <label for="participant_state">State</label>
+        <input 
+          type="text" 
+          id="participant_state" 
+          name="participant_state"
+          required
+        >
+      </div>
+
+      <!-- Zip -->
+      <div class="form-row">
+        <label for="participant_zip">Zip Code</label>
+        <input 
+          type="text" 
+          id="participant_zip" 
+          name="participant_zip"
+          required
+        >
+      </div>
+
+      <!-- School or Employer -->
+      <div class="form-row">
+        <label for="participant_school_or_employer">School or Employer</label>
+        <input 
+          type="text" 
+          id="participant_school_or_employer" 
+          name="participant_school_or_employer"
+          required
+        >
+      </div>
+
+      <!-- Field of Interest -->
+      <div class="form-row">
+        <label>Field of Interest</label>
+        <div>
+          <input type="radio" id="interest_arts" name="participant_field_of_interest" value="Arts">
+          <label for="interest_arts">Arts</label>
+        </div>
+        <div>
+          <input type="radio" id="interest_stem" name="participant_field_of_interest" value="STEM">
+          <label for="interest_stem">STEM</label>
+        </div>
+        <div>
+          <input type="radio" id="interest_both" name="participant_field_of_interest" value="Both">
+          <label for="interest_both">Both</label>
+        </div>
       </div>
 
       <!-- Submit -->

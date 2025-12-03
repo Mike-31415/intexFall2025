@@ -8,81 +8,84 @@
 
 <body>
     <%- include('partials/header') %>
-    <h1>Add New Participant</h1>
+    <div class="form-card">
+        <h2>Add Participant</h2>
 
-    <% if (error_message) { %>
-        <div class="error-message"><%= error_message %></div>
-    <% } %>
+        <% if (error_message) { %>
+            <div class="error-message"><%= error_message %></div>
+        <% } %>
 
-    <form class="event-form" action="/addParticipants" method="POST">
+        <form action="/addParticipants" method="POST">
 
-        <div class="form-row">
-            <label for="participant_email">Email</label>
-            <input type="email" id="participant_email" name="participant_email" value="<%= participant.participant_email || '' %>" required>
-        </div>
+            <div class="form-row">
+                <label for="participant_email">Email</label>
+                <input type="email" id="participant_email" name="participant_email" value="<%= participant.participant_email || '' %>" required>
+            </div>
 
-        <div class="form-row">
-            <label for="password">Password</label>
-            <input type="text" id="password" name="password" value="<%= participant.password || '' %>" required>
-        </div>
+            <div class="form-row">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
 
-        <div class="form-row">
-            <label for="participant_first_name">First Name</label>
-            <input type="text" id="participant_first_name" name="participant_first_name" value="<%= participant.participant_first_name || '' %>" required>
-        </div>
+            <div class="form-row">
+                <label for="participant_first_name">First Name</label>
+                <input type="text" id="participant_first_name" name="participant_first_name" value="<%= participant.participant_first_name || '' %>" required>
+            </div>
 
-        <div class="form-row">
-            <label for="participant_last_name">Last Name</label>
-            <input type="text" id="participant_last_name" name="participant_last_name" value="<%= participant.participant_last_name || '' %>" required>
-        </div>
+            <div class="form-row">
+                <label for="participant_last_name">Last Name</label>
+                <input type="text" id="participant_last_name" name="participant_last_name" value="<%= participant.participant_last_name || '' %>" required>
+            </div>
 
-        <div class="form-row">
-            <label for="participant_dob">Date of Birth</label>
-            <input type="date" id="participant_dob" name="participant_dob" value="<%= participant.participant_dob || '' %>">
-        </div>
+            <div class="form-row">
+                <label for="participant_dob">Date of Birth</label>
+                <input type="date" id="participant_dob" name="participant_dob" value="<%= participant.participant_dob || '' %>">
+            </div>
 
-        <div class="form-row">
-            <label for="participant_phone">Phone</label>
-            <input type="text" id="participant_phone" name="participant_phone" value="<%= participant.participant_phone || '' %>">
-        </div>
+            <div class="form-row">
+                <label for="participant_phone">Phone</label>
+                <input type="text" id="participant_phone" name="participant_phone" value="<%= participant.participant_phone || '' %>">
+            </div>
 
-        <div class="form-row">
-            <label for="participant_city">City</label>
-            <input type="text" id="participant_city" name="participant_city" value="<%= participant.participant_city || '' %>">
-        </div>
+            <div class="form-row">
+                <label for="participant_city">City</label>
+                <input type="text" id="participant_city" name="participant_city" value="<%= participant.participant_city || '' %>">
+            </div>
 
-        <div class="form-row">
-            <label for="participant_state">State</label>
-            <input type="text" id="participant_state" name="participant_state" value="<%= participant.participant_state || '' %>">
-        </div>
+            <div class="form-row">
+                <label for="participant_state">State</label>
+                <input type="text" id="participant_state" name="participant_state" value="<%= participant.participant_state || '' %>">
+            </div>
 
-        <div class="form-row">
-            <label for="participant_zip">Zip</label>
-            <input type="text" id="participant_zip" name="participant_zip" value="<%= participant.participant_zip || '' %>">
-        </div>
+            <div class="form-row">
+                <label for="participant_zip">Zip</label>
+                <input type="text" id="participant_zip" name="participant_zip" value="<%= participant.participant_zip || '' %>">
+            </div>
 
-        <div class="form-row">
-            <label for="participant_school_or_employer">School or Employer</label>
-            <input type="text" id="participant_school_or_employer" name="participant_school_or_employer" value="<%= participant.participant_school_or_employer || '' %>">
-        </div>
+            <div class="form-row">
+                <label for="participant_school_or_employer">School or Employer</label>
+                <input type="text" id="participant_school_or_employer" name="participant_school_or_employer" value="<%= participant.participant_school_or_employer || '' %>">
+            </div>
 
-        <div class="form-row">
-            <label for="participant_field_of_interest">Field of Interest</label>
-            <input type="text" id="participant_field_of_interest" name="participant_field_of_interest" value="<%= participant.participant_field_of_interest || '' %>">
-        </div>
+            <div class="form-row">
+                <label for="participant_field_of_interest">Field of Interest</label>
+                <input type="text" id="participant_field_of_interest" name="participant_field_of_interest" value="<%= participant.participant_field_of_interest || '' %>">
+            </div>
 
-        <div class="form-row">
-            <label for="participant_role">Role</label>
-            <select id="participant_role" name="participant_role">
-                <option value="participant" <%= participant.participant_role === 'participant' ? 'selected' : '' %>>Participant</option>
-                <option value="admin" <%= participant.participant_role === 'admin' ? 'selected' : '' %>>Admin</option>
-            </select>
-        </div>
+            <div class="form-row">
+                <label for="participant_role">Role</label>
+                <select id="participant_role" name="participant_role">
+                    <option value="participant" <%= participant.participant_role === 'participant' ? 'selected' : '' %>>Participant</option>
+                    <option value="manager" <%= participant.participant_role === 'manager' ? 'selected' : '' %>>Manager</option>
+                    <option value="admin" <%= participant.participant_role === 'admin' ? 'selected' : '' %>>Admin</option>
+                </select>
+            </div>
 
-        <div class="buttons">
-            <button type="submit" class="btn btn-save">Add Participant</button>
-            <a href="/participants" class="btn btn-cancel">Cancel</a>
-        </div>
-    </form>
+            <div class="buttons">
+                <button type="submit" class="btn btn-save">Add Participant</button>
+                <a href="/participants" class="btn btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

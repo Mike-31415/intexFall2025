@@ -8,40 +8,42 @@
 
 <body>
     <%- include('partials/header') %>
-    <h1>Add New Donation</h1>
+    <div class="form-card">
+        <h2>Add Donation</h2>
 
-    <% if (error_message) { %>
-        <div class="error-message"><%= error_message %></div>
-    <% } %>
+        <% if (error_message) { %>
+            <div class="error-message"><%= error_message %></div>
+        <% } %>
 
-    <form class="event-form" action="/addDonations" method="POST">
+        <form action="/addDonations" method="POST">
 
-        <div class="form-row">
-            <label for="donationDate">Donation Date</label>
-            <input type="date" id="donationDate" name="donation_date">
-        </div>
+            <div class="form-row">
+                <label for="donationDate">Donation Date</label>
+                <input type="date" id="donationDate" name="donation_date">
+            </div>
 
-        <div class="form-row">
-            <label for="donationAmount">Donation Amount</label>
-            <input type="number" step="0.01" id="donationAmount" name="donation_amount" required>
-        </div>
+            <div class="form-row">
+                <label for="donationAmount">Donation Amount</label>
+                <input type="number" step="0.01" id="donationAmount" name="donation_amount" required>
+            </div>
 
-        <div class="form-row">
-            <label for="participant_id">Participant</label>
-            <select id="participant_id" name="participant_id" required>
-                <option value="">-- Select Participant --</option>
-                <% (participants || []).forEach(p => { %>
-                    <option value="<%= p.participant_id %>">
-                        <%= p.participant_first_name %> <%= p.participant_last_name %>
-                    </option>
-                <% }) %>
-            </select>
-        </div>
+            <div class="form-row">
+                <label for="participant_id">Participant</label>
+                <select id="participant_id" name="participant_id" required>
+                    <option value="">-- Select Participant --</option>
+                    <% (participants || []).forEach(p => { %>
+                        <option value="<%= p.participant_id %>" <%= ((locals.donation || {}).participant_id == p.participant_id) ? 'selected' : '' %>>
+                            <%= p.participant_first_name %> <%= p.participant_last_name %>
+                        </option>
+                    <% }) %>
+                </select>
+            </div>
 
-        <div class="buttons">
-            <button type="submit" class="btn btn-save">Add Donation</button>
-            <a href="/donations" class="btn btn-cancel">Cancel</a>
-        </div>
-    </form>
+            <div class="buttons">
+                <button type="submit" class="btn btn-save">Add Donation</button>
+                <a href="/donations" class="btn btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

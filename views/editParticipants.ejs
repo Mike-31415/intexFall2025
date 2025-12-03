@@ -1,84 +1,99 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Edit Participant</title>
-        <link rel="stylesheet" href="/styles.css">
-    </head>
-    <body>
-        <%- include('partials/header') %>
-        <h1>Edit Participant</h1>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Participant</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    <div class="form-card">
+        <h2>Edit Participant</h2>
 
         <% if (typeof error_message !== 'undefined' && error_message) { %>
-            <p style="color:red;"><%= error_message %></p>
+            <div class="error-message"><%= error_message %></div>
         <% } %>
 
-        <form action="/editParticipants/<%= participant.participant_id %>" method="post">
-            <label for="participant_email">Email: </label>
-            <input type="email" id="participant_email" name="participant_email" value="<%= participant.participant_email %>" required>
-            <br><br>
-
-            <label for="password">Password: </label>
-            <input type="text" id="password" name="password" value="<%= participant.password %>" required>
-            <br><br>
-
-            <label for="participant_first_name">First Name: </label>
-            <input type="text" id="participant_first_name" name="participant_first_name" value="<%= participant.participant_first_name %>" required>
-            <br><br>
-
-            <label for="participant_last_name">Last Name: </label>
-            <input type="text" id="participant_last_name" name="participant_last_name" value="<%= participant.participant_last_name %>" required>
-            <br><br>
-
-            <label for="participant_dob">Date of Birth: </label>
-            <input type="date" id="participant_dob" name="participant_dob" value="<%= participant.participant_dob %>">
-            <br><br>
-
-            <label for="participant_phone">Phone: </label>
-            <input type="text" id="participant_phone" name="participant_phone" value="<%= participant.participant_phone %>">
-            <br><br>
-
-            <label for="participant_city">City: </label>
-            <input type="text" id="participant_city" name="participant_city" value="<%= participant.participant_city %>">
-            <br><br>
-
-            <label for="participant_state">State: </label>
-            <input type="text" id="participant_state" name="participant_state" value="<%= participant.participant_state %>">
-            <br><br>
-
-            <label for="participant_zip">Zip: </label>
-            <input type="text" id="participant_zip" name="participant_zip" value="<%= participant.participant_zip %>">
-            <br><br>
-
-            <label for="participant_school_or_employer">School or Employer: </label>
-            <input type="text" id="participant_school_or_employer" name="participant_school_or_employer" value="<%= participant.participant_school_or_employer %>">
-            <br><br>
-
-            <label for="participant_field_of_interest">Field of Interest: </label>
-            <input type="text" id="participant_field_of_interest" name="participant_field_of_interest" value="<%= participant.participant_field_of_interest %>">
-            <br><br>
-
-            <label for="participant_role">Role: </label>
-            <select id="participant_role" name="participant_role">
-                <option value="participant" <%= participant.participant_role === 'participant' ? 'selected' : '' %>>Participant</option>
-                <option value="admin" <%= participant.participant_role === 'admin' ? 'selected' : '' %>>Admin</option>
-            </select>
-            <br><br>
-
-            <input type="submit" value="Update Participant">
-        </form>
-
-        <br>
-        <a href="/participants">Back to Participants</a>
-        <script>
-            // Set focus to the first input field when page loads
-            window.addEventListener('DOMContentLoaded', function() {
-                const firstInput = document.querySelector('input[type="text"]');
-                if (firstInput) {
-                    firstInput.focus();
+        <% 
+            let dobVal = participant.participant_dob || "";
+            if (dobVal) {
+                const d = new Date(dobVal);
+                if (!isNaN(d)) {
+                    dobVal = d.toISOString().slice(0,10);
                 }
-            });
-        </script>
-    </body>
+            }
+        %>
+
+        <form action="/editParticipants/<%= participant.participant_id %>" method="post">
+            <div class="form-row">
+                <label for="participant_email">Email</label>
+                <input type="email" id="participant_email" name="participant_email" value="<%= participant.participant_email %>" required>
+            </div>
+
+            <div class="form-row">
+                <label for="participant_first_name">First Name</label>
+                <input type="text" id="participant_first_name" name="participant_first_name" value="<%= participant.participant_first_name %>" required>
+            </div>
+
+            <div class="form-row">
+                <label for="participant_last_name">Last Name</label>
+                <input type="text" id="participant_last_name" name="participant_last_name" value="<%= participant.participant_last_name %>" required>
+            </div>
+
+            <div class="form-row">
+                <label for="participant_dob">Date of Birth</label>
+                <input type="date" id="participant_dob" name="participant_dob" value="<%= dobVal %>">
+            </div>
+
+            <div class="form-row">
+                <label for="participant_phone">Phone</label>
+                <input type="text" id="participant_phone" name="participant_phone" value="<%= participant.participant_phone %>">
+            </div>
+
+            <div class="form-row">
+                <label for="participant_city">City</label>
+                <input type="text" id="participant_city" name="participant_city" value="<%= participant.participant_city %>">
+            </div>
+
+            <div class="form-row">
+                <label for="participant_state">State</label>
+                <input type="text" id="participant_state" name="participant_state" value="<%= participant.participant_state %>">
+            </div>
+
+            <div class="form-row">
+                <label for="participant_zip">Zip</label>
+                <input type="text" id="participant_zip" name="participant_zip" value="<%= participant.participant_zip %>">
+            </div>
+
+            <div class="form-row">
+                <label for="participant_school_or_employer">School or Employer</label>
+                <input type="text" id="participant_school_or_employer" name="participant_school_or_employer" value="<%= participant.participant_school_or_employer %>">
+            </div>
+
+            <div class="form-row">
+                <label for="participant_field_of_interest">Field of Interest</label>
+                <input type="text" id="participant_field_of_interest" name="participant_field_of_interest" value="<%= participant.participant_field_of_interest %>">
+            </div>
+
+            <div class="form-row">
+                <label for="participant_role">Role</label>
+                <select id="participant_role" name="participant_role">
+                    <option value="participant" <%= participant.participant_role === 'participant' ? 'selected' : '' %>>Participant</option>
+                    <option value="manager" <%= participant.participant_role === 'manager' ? 'selected' : '' %>>Manager</option>
+                    <option value="admin" <%= participant.participant_role === 'admin' ? 'selected' : '' %>>Admin</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Leave blank to keep current password">
+            </div>
+
+            <div class="buttons">
+                <button type="submit" class="btn btn-save">Update Participant</button>
+                <a href="/participants" class="btn btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</body>
 </html>
-
-

@@ -22,7 +22,9 @@
 
         <!-- Add Survey button (ADMINS ONLY) -->
         <% if (isManager) { %>
-            <a href="/postsurveys/add" class="btn btn-add">Add Survey</a>
+            <div class="add-button-bar">
+                <a href="/postsurveys/add" class="btn btn-primary">Add Survey</a>
+            </div>
         <% } %>
 
         <table class="event-table">

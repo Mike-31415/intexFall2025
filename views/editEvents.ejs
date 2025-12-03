@@ -8,54 +8,44 @@
 
 <body>
     <%- include('partials/header') %>
-    <h1>Edit Event</h1>
+    <div class="form-card">
+        <h2>Edit Event</h2>
 
-    <% if (error_message) { %>
-        <div class="error-message"><%= error_message %></div>
-    <% } %>
+        <% if (error_message) { %>
+            <div class="error-message"><%= error_message %></div>
+        <% } %>
 
-    <!-- 
-        Expecting an "event" object passed in from index.js, e.g.:
-        res.render("editEvents", { event: someEventRow });
-    -->
-    <form class="event-form" action="/events/edit/<%= event.eventid %>" method="POST">
-        <!-- If you later use an ID from the database -->
-        <input type="hidden" name="eventid" value="<%= event.eventid %>">
+        <form action="/events/edit/<%= event.eventid %>" method="POST">
+            <div class="form-row">
+                <label for="eventname">Event Name</label>
+                <input type="text" id="eventname" name="eventname" value="<%= event.eventname %>" required>
+            </div>
 
-        <div class="form-row">
-            <label for="eventname">Event Name</label>
-            <!-- Often event name is the key, so you might keep it read-only -->
-            <input type="text" id="eventname" name="eventname" 
-                   value="<%= event.eventname %>" readonly>
-        </div>
+            <div class="form-row">
+                <label for="eventtype">Event Type</label>
+                <input type="text" id="eventtype" name="eventtype" value="<%= event.eventtype %>" required>
+            </div>
 
-        <div class="form-row">
-            <label for="eventtype">Event Type</label>
-            <input type="text" id="eventtype" name="eventtype" 
-                   value="<%= event.eventtype %>">
-        </div>
+            <div class="form-row">
+                <label for="eventdescription">Description</label>
+                <textarea id="eventdescription" name="eventdescription" required><%= event.eventdescription %></textarea>
+            </div>
 
-        <div class="form-row">
-            <label for="eventdescription">Description</label>
-            <textarea id="eventdescription" name="eventdescription"><%= event.eventdescription %></textarea>
-        </div>
+            <div class="form-row">
+                <label for="eventrecurrencepattern">Recurrence Pattern</label>
+                <input type="text" id="eventrecurrencepattern" name="eventrecurrencepattern" value="<%= event.eventrecurrencepattern %>" required>
+            </div>
 
-        <div class="form-row">
-            <label for="eventrecurrencepattern">Recurrence Pattern</label>
-            <input type="text" id="eventrecurrencepattern" name="eventrecurrencepattern" 
-                   value="<%= event.eventrecurrencepattern %>">
-        </div>
+            <div class="form-row">
+                <label for="eventdefaultcapacity">Default Capacity</label>
+                <input type="number" id="eventdefaultcapacity" name="eventdefaultcapacity" value="<%= event.eventdefaultcapacity %>" min="0" required>
+            </div>
 
-        <div class="form-row">
-            <label for="eventdefaultcapacity">Default Capacity</label>
-            <input type="number" id="eventdefaultcapacity" name="eventdefaultcapacity" 
-                   value="<%= event.eventdefaultcapacity %>">
-        </div>
-
-        <div class="buttons">
-            <button type="submit" class="btn btn-save">Save Changes</button>
-            <a href="/events" class="btn btn-cancel">Cancel</a>
-        </div>
-    </form>
+            <div class="buttons">
+                <button type="submit" class="btn btn-save">Save Changes</button>
+                <a href="/events" class="btn btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

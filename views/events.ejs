@@ -18,7 +18,9 @@
 
         <!-- Add Event button (ADMINS ONLY) -->
             <% if (isManager) { %>
-                <a href="/events/add" class="btn btn-add">Add Event</a>
+                <div class="add-button-bar">
+                    <a href="/events/add" class="btn btn-primary">Add Event</a>
+                </div>
             <% } %>
 
         <table class="event-table">

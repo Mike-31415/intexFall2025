@@ -1,9 +1,9 @@
 <header class="site-header">
     <div class="site-header__inner">
-        <div class="site-brand">
+        <a href="/" class="site-brand">
             <img src="/ella-rises-logo.png" alt="Ella Rises logo" class="site-logo">
             <span>Ella Rises</span>
-        </div>
+        </a>
         <nav class="site-nav">
             <a href="/">Home</a>
             <% if (isLoggedIn) { %>
@@ -19,7 +19,7 @@
                     <a href="/users">Users</a>
                 <% } %>
                 <a class="nav-accent" href="/logout">Logout</a>
-                <span class="user-chip"><%= currentRole || '' %></span>
+                <span class="user-chip"><%= currentRole.replace(/^./, char => char.toUpperCase()) || '' %></span>
             <% } else { %>
                 <a href="/login">Login</a>
                 <a class="nav-accent" href="/register">Register</a>

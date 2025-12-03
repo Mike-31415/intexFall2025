@@ -114,7 +114,7 @@ app.get("/login", (req, res) => {
     }
 });
 
-// Register (simple version, no hashing yet)
+// Register
 app.get("/register", (req, res) => {
     if (req.session.isLoggedIn) {
         return res.redirect("/");
@@ -123,20 +123,46 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-    const { username, password } = req.body;
+    const {
+        participant_email,
+        password,
+        participant_first_name,
+        participant_last_name,
+        participant_dob,
+        participant_phone,
+        participant_city,
+        participant_state,
+        participant_zip,
+        participant_school_or_employer,
+        participant_field_of_interest
+    } = req.body;
+
     try {
-        // Basic split of name into first/last (best-effort)
-        const [first, ...rest] = (username || "").split(" ");
-        const last = rest.join(" ");
+        // Check if user already exists
+        const existingUser = await knex("participants")
+            .where({ participant_email: participant_email })
+            .first();
+
+        if (existingUser) {
+            return res.render("register", { error_message: "An account with that email already exists." });
+        }
+
         const hashed = await bcrypt.hash(password, 10);
         // Insert participant as the auth user record
         const [created] = await knex("participants")
             .insert({
-                participant_email: username,
-                participant_first_name: first || username,
-                participant_last_name: last || "",
+                participant_email: participant_email,
+                participant_first_name,
+                participant_last_name,
                 password: hashed,
-                participant_role: "participant"
+                participant_role: "participant",
+                participant_dob: participant_dob || null,
+                participant_phone,
+                participant_city,
+                participant_state,
+                participant_zip,
+                participant_school_or_employer,
+                participant_field_of_interest
             })
             .returning(["participant_id", "participant_email", "participant_role", "participant_first_name", "participant_last_name"]);
 
@@ -641,6 +667,140 @@ app.get("/users", requireManager, async (req, res) => {
             error_message: "Error loading users",
             search: ""
         });
+    }
+});
+
+// Add User - form
+app.get("/addUsers", requireManager, (req, res) => {
+    res.render("addUsers", { error_message: "", user: {} });
+});
+
+// Add User - submit
+app.post("/addUsers", requireManager, async (req, res) => {
+    const {
+        participant_email,
+        password,
+        participant_first_name,
+        participant_last_name,
+        participant_role
+    } = req.body;
+
+    try {
+        if (!participant_email || !password || !participant_first_name || !participant_last_name) {
+            return res.render("addUsers", {
+                error_message: "Email, password, first name, and last name are required.",
+                user: req.body
+            });
+        }
+
+        const existingUser = await knex("participants")
+            .where("participant_email", participant_email)
+            .first();
+
+        if (existingUser) {
+            return res.render("addUsers", {
+                error_message: "A user with that email already exists.",
+                user: req.body
+            });
+        }
+
+        const hashed = await bcrypt.hash(password, 10);
+
+        await knex("participants").insert({
+            participant_email,
+            password: hashed,
+            participant_first_name,
+            participant_last_name,
+            participant_role: participant_role || "participant"
+        });
+
+        res.redirect("/users");
+    } catch (err) {
+        console.error("Error adding user:", err);
+        res.render("addUsers", {
+            error_message: "Failed to add user",
+            user: req.body
+        });
+    }
+});
+
+// Edit User - form
+app.get("/editUsers/:id", requireManager, async (req, res) => {
+    const id = req.params.id;
+    try {
+        const user = await knex("participants")
+            .where("participant_id", id)
+            .first();
+
+        if (!user) {
+            return res.redirect("/users");
+        }
+
+        res.render("editUsers", { error_message: "", user });
+    } catch (err) {
+        console.error("Error loading user:", err);
+        res.redirect("/users");
+    }
+});
+
+// Edit User - submit
+app.post("/editUsers/:id", requireManager, async (req, res) => {
+    const id = req.params.id;
+    const {
+        participant_email,
+        password,
+        participant_first_name,
+        participant_last_name,
+        participant_role
+    } = req.body;
+
+    try {
+        const existingUser = await knex("participants")
+            .where("participant_email", participant_email)
+            .andWhereNot("participant_id", id)
+            .first();
+
+        if (existingUser) {
+            return res.render("editUsers", {
+                error_message: "Email already in use by another user.",
+                user: { ...req.body, participant_id: id }
+            });
+        }
+
+        const updates = {
+            participant_email,
+            participant_first_name,
+            participant_last_name,
+            participant_role: participant_role || "participant"
+        };
+
+        if (password && password.trim() !== "") {
+            updates.password = await bcrypt.hash(password, 10);
+        }
+
+        await knex("participants")
+            .where("participant_id", id)
+            .update(updates);
+
+        res.redirect("/users");
+    } catch (err) {
+        console.error("Error updating user:", err);
+        res.render("editUsers", {
+            error_message: "Failed to update user",
+            user: { ...req.body, participant_id: id }
+        });
+    }
+});
+
+// Delete User
+app.post("/deleteUsers/:id", requireManager, async (req, res) => {
+    const id = req.params.id;
+    try {
+        await knex("participants").where("participant_id", id).del();
+        res.redirect("/users");
+    } catch (err) {
+        console.error("Error deleting user:", err);
+        res.redirect("/users");
     }
 });
 
