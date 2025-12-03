@@ -16,10 +16,35 @@
 
             <!-- ADMINS SEE ADD BUTTON -->
             <% if (role === "admin") { %>
-                <form action="/addParticipants" method="GET" class="mb-3">
+                <form action="/addUsers" method="GET" class="mb-3">
                     <button class="btn btn-success" type="submit">Add User</button>
                 </form>
             <% } %>
+
+            <!-- SEARCH BAR -->
+            <form method="GET" action="/users" class="mb-3">
+                <div class="search-bar-wrapper" 
+                     style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                    
+                    <input 
+                        type="text"
+                        name="search"
+                        class="form-control"
+                        placeholder="Search by email, first name, last name..."
+                        value="<%= search %>"
+                        style="flex: 1; min-width: 250px; border-radius: 8px; height: 35px; padding: 0 12px;"
+                    />
+
+                    <button class="btn btn-success" type="submit">Search</button>
+
+                    <button 
+                        class="btn btn-success" 
+                        type="button" 
+                        onclick="window.location.href='/users'">
+                        Clear
+                    </button>
+                </div>
+            </form>
 
             <!-- ERROR MESSAGE -->
             <% if (error_message) { %>
@@ -42,13 +67,11 @@
                             <th>First Name</th>
                             <th>Last Name</th>
                             <th>Role</th>
-                            
-                            <!-- Admin-only columns -->
+
                             <% if (role === "admin") { %>
                                 <th>Edit</th>
                                 <th>Delete</th>
                             <% } %>
-
                         </tr>
                     </thead>
 
@@ -60,17 +83,15 @@
                                 <td><%= user.participant_last_name %></td>
                                 <td><%= user.participant_role %></td>
 
-                                <!-- EDIT: Admins only -->
                                 <% if (role === "admin") { %>
                                     <td>
-                                        <form action="/editParticipants/<%= user.participant_id %>" method="GET">
+                                        <form action="/editUsers/<%= user.participant_id %>" method="GET">
                                             <button class="btn btn-primary btn-sm">Edit</button>
                                         </form>
                                     </td>
 
-                                    <!-- DELETE: Admins only -->
                                     <td>
-                                        <form action="/deleteParticipants/<%= user.participant_id %>" method="POST">
+                                        <form action="/deleteUsers/<%= user.participant_id %>" method="POST">
                                             <button class="btn btn-danger btn-sm">Delete</button>
                                         </form>
                                     </td>

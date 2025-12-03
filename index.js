@@ -84,7 +84,13 @@ const requireManager = requireAdmin;
 // Global authentication middleware
 app.use((req, res, next) => {
     console.log("Auth middleware: checking path:", req.path);
-    if (req.path === '/' || req.path === '/login' || req.path === '/logout' || req.path === '/register') {
+    if (
+        req.path === '/' ||
+        req.path === '/login' ||
+        req.path === '/logout' ||
+        req.path === '/register' ||
+        (req.method === 'GET' && req.path === '/donations') // public donations page
+    ) {
         return next();
     }
 
@@ -575,43 +581,108 @@ app.post("/deleteDonations/:id", requireManager, async (req, res) => {
     }
 });
 
-// USERS PAGE (alias of participants for admin view)
+// USERS PAGE WITH SEARCH
 app.get("/users", requireManager, async (req, res) => {
     try {
-        const users = await knex("participants").select("*");
+        const search = req.query.search || "";
+
+        let query = knex("participants as p")
+            .select(
+                "p.participant_id",
+                "p.participant_email",
+                "p.participant_first_name",
+                "p.participant_last_name",
+                "p.participant_role"
+            );
+
+        if (search.trim() !== "") {
+            const s = `%${search}%`;
+
+            query.where(function () {
+                this.whereILike("p.participant_first_name", s)
+                    .orWhereILike("p.participant_last_name", s)
+                    .orWhereILike("p.participant_email", s)
+                    .orWhereILike("p.participant_role", s);
+            });
+        }
+
+        query.orderBy("p.participant_last_name", "asc");
+
+        const users = await query;
+
         res.render("users", {
             users,
             role: req.session.role,
-            error_message: null
+            error_message: null,
+            search
         });
+
     } catch (err) {
         console.error("Error loading users:", err);
+
         res.render("users", {
             users: [],
             role: req.session.role,
-            error_message: "Error loading users"
+            error_message: "Error loading users",
+            search: ""
         });
     }
 });
 
-
-// PARTICIPANTS PAGE
+// PARTICIPANTS PAGE WITH SEARCH
 app.get("/participants", async (req, res) => {
     try {
-        const participants = await knex("participants").select("*");
+        const search = req.query.search || "";
 
+        // Start building the query
+        let query = knex("participants as p").select(
+            "p.participant_id",
+            "p.participant_first_name",
+            "p.participant_last_name",
+            "p.participant_email",
+            "p.participant_dob",
+            "p.participant_phone",
+            "p.participant_city",
+            "p.participant_state",
+            "p.participant_zip",
+            "p.participant_school_or_employer",
+            "p.participant_field_of_interest"
+        );
+
+        // Apply search filters if search query is not empty
+        if (search.trim() !== "") {
+            const s = `%${search}%`;
+            query.where(function () {
+                this.whereILike("p.participant_first_name", s)
+                    .orWhereILike("p.participant_last_name", s)
+                    .orWhereILike("p.participant_email", s)
+                    .orWhereILike("p.participant_city", s)
+                    .orWhereILike("p.participant_state", s)
+                    .orWhereILike("p.participant_school_or_employer", s)
+                    .orWhereRaw("CAST(p.participant_dob AS TEXT) ILIKE ?", [s]);
+            });
+        }
+
+        // Sort by last name
+        query.orderBy("p.participant_last_name", "asc");
+
+        const participants = await query;
+
+        // Render page with results
         res.render("participants", {
             participants,
             role: req.session.role,
-            error_message: null
+            error_message: null,
+            search // pass search query back to input field
         });
 
     } catch (err) {
-        console.error(err);
+        console.error("Error loading participants:", err);
         res.render("participants", {
             participants: [],
             role: req.session.role,
-            error_message: "Error loading participants"
+            error_message: "Error loading participants",
+            search: ""
         });
     }
 });

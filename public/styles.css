@@ -107,9 +107,18 @@ h1, h2, h3, .title {
 }
 
 .site-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-family: 'DM Serif Display', serif;
   font-size: 1.2rem;
   color: var(--charcoal);
+}
+
+.site-logo {
+  height: 54px;
+  width: auto;
+  display: block;
 }
 
 .site-nav {
@@ -150,6 +159,13 @@ h1, h2, h3, .title {
   background: var(--peach-light);
   border: 1px solid rgba(0,0,0,0.04);
   font-weight: 600;
+}
+
+.hero-logo {
+  display: block;
+  max-width: 200px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 
