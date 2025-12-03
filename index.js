@@ -475,8 +475,10 @@ app.post("/postsurveys/delete/:id", requireManager, async (req, res) => {
 
 // DONATIONS PAGE
 app.get("/donations", async (req, res) => {
+    const search = req.query.search || "";
+
     try {
-        const donations = await knex("donations as d")
+        let query = knex("donations as d")
             .join("participants as p", "d.participant_id", "p.participant_id")
             .select(
                 "d.donation_id as id",
@@ -487,18 +489,31 @@ app.get("/donations", async (req, res) => {
             )
             .orderBy("d.donation_date", "desc");
 
+        if (search.trim() !== "") {
+            query = query.where(function () {
+                this.whereILike("p.participant_first_name", `%${search}%`)
+                    .orWhereILike("p.participant_last_name", `%${search}%`)
+                    .orWhereRaw("CAST(d.donation_amount AS TEXT) ILIKE ?", [`%${search}%`])
+                    .orWhereRaw("CAST(d.donation_date AS TEXT) ILIKE ?", [`%${search}%`]);
+            });
+        }
+
+        const donations = await query;
+
         res.render("donations", {
             donations,
             role: req.session.role,
-            error_message: null
+            error_message: null,
+            search
         });
 
     } catch (err) {
-        console.error(err);
+        console.error("error:", err);
         res.render("donations", {
             donations: [],
             role: req.session.role,
-            error_message: "Error loading donations"
+            error_message: "Error loading donations",
+            search
         });
     }
 });
