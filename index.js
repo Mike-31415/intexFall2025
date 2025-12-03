@@ -224,6 +224,16 @@ app.get("/homepage", (req, res) => {
     if (!req.session.isLoggedIn) {
         return res.redirect("/login");
     }
+    res.render("homepage", {
+        username: req.session.username,
+        role: req.session.role
+    });
+});
+
+app.get("/calendar", (req, res) => {
+    if (!req.session.isLoggedIn) {
+        return res.redirect("/login");
+    }
     knex("event_occurrences as eo")
         .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
         .select(
@@ -236,15 +246,15 @@ app.get("/homepage", (req, res) => {
         )
         .orderBy("eo.event_date_time_start", "asc")
         .then(events => {
-            res.render("homepage", {
+            res.render("calendar", {
                 username: req.session.username,
                 role: req.session.role,
                 events
             });
         })
         .catch(err => {
-            console.error("Error loading events for homepage:", err);
-            res.render("homepage", {
+            console.error("Error loading events for calendar:", err);
+            res.render("calendar", {
                 username: req.session.username,
                 role: req.session.role,
                 events: []

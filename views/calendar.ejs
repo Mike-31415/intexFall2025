@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ella Rises - Calendar</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+    <%- include('partials/header') %>
+    <div class="page-wrapper">
+
+        <div class="table-card" style="margin-top:24px;">
+            <div class="table-header">
+                <div>
+                    <h1 style="margin-bottom:4px;">Events Calendar</h1>
+                    <p class="table-subtitle">Monthly view of event templates and occurrences.</p>
+                </div>
+            </div>
+
+            <div class="calendar-card">
+                <div class="calendar-header">
+                    <button id="cal-prev" class="cal-nav" type="button" aria-label="Previous month">&#10094;</button>
+                    <div>
+                        <div id="calendar-month" class="calendar-month"></div>
+                        <div class="calendar-subtitle">Events pulled from Event Templates & Occurrences</div>
+                    </div>
+                    <button id="cal-next" class="cal-nav" type="button" aria-label="Next month">&#10095;</button>
+                </div>
+                <div class="calendar-weekdays" id="calendar-weekdays"></div>
+                <div class="calendar-grid" id="calendar-grid"></div>
+                <div id="calendar-empty" class="calendar-empty"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Event detail modal -->
+    <div id="event-modal" class="modal-overlay hidden" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <button id="modal-close" class="modal-close" type="button" aria-label="Close">&times;</button>
+            <h3 id="modal-title"></h3>
+            <p id="modal-datetime" class="modal-meta"></p>
+            <p id="modal-type" class="modal-meta"></p>
+            <p id="modal-capacity" class="modal-meta"></p>
+            <p id="modal-description" class="modal-body"></p>
+            <div class="modal-actions">
+                <a id="modal-register" class="btn btn-primary" href="#">Register</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const events = <%- JSON.stringify(events || []) %>;
+
+            const monthLabel = document.getElementById('calendar-month');
+            const grid = document.getElementById('calendar-grid');
+            const weekdaysRow = document.getElementById('calendar-weekdays');
+            const emptyNote = document.getElementById('calendar-empty');
+
+            const weekdayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+            weekdaysRow.innerHTML = weekdayLabels.map(d => '<div>' + d + '</div>').join('');
+
+            const eventMap = events.reduce((acc, evt, idx) => {
+                if (!evt.start) return acc;
+                const d = new Date(evt.start);
+                if (isNaN(d)) return acc;
+                const key = d.toISOString().slice(0, 10); // YYYY-MM-DD
+                acc[key] = acc[key] || [];
+                acc[key].push(idx);
+                return acc;
+            }, {});
+
+            const modal = document.getElementById('event-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalDatetime = document.getElementById('modal-datetime');
+            const modalType = document.getElementById('modal-type');
+            const modalCapacity = document.getElementById('modal-capacity');
+            const modalDescription = document.getElementById('modal-description');
+            const modalClose = document.getElementById('modal-close');
+            const modalRegister = document.getElementById('modal-register');
+
+            function formatDateTime(dateStr) {
+                const d = new Date(dateStr);
+                if (isNaN(d)) return 'Date TBD';
+                return d.toLocaleString(undefined, {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit'
+                });
+            }
+
+            function openModal(evt) {
+                modalTitle.textContent = evt.name || 'Event';
+                modalDatetime.textContent = formatDateTime(evt.start);
+                modalType.textContent = evt.type ? `Type: ${evt.type}` : '';
+                modalCapacity.textContent = evt.capacity ? `Capacity: ${evt.capacity}` : '';
+                modalDescription.textContent = evt.description || 'No description provided.';
+                modalRegister.href = `/events/register/${evt.id}`;
+                modal.classList.remove('hidden');
+                modal.setAttribute('aria-hidden', 'false');
+            }
+
+            function closeModal() {
+                modal.classList.add('hidden');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+
+            let currentMonth = new Date();
+            currentMonth.setDate(1);
+
+            function renderCalendar() {
+                const year = currentMonth.getFullYear();
+                const month = currentMonth.getMonth();
+
+                monthLabel.textContent = currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+                const firstDayIndex = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                const cells = [];
+                for (let i = 0; i < firstDayIndex; i++) {
+                    cells.push({ empty: true });
+                }
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    cells.push({
+                        day,
+                        events: eventMap[dateStr] || []
+                    });
+                }
+
+                grid.innerHTML = cells.map(cell => {
+                    if (cell.empty) {
+                        return '<div class="calendar-day calendar-day--empty"></div>';
+                    }
+                    const eventsHtml = cell.events.map(idx => {
+                        const evt = events[idx] || {};
+                        return `<button type="button" class="calendar-event" data-evt-index="${idx}">${evt.name || 'Event'}</button>`;
+                    }).join('');
+                    return `
+                        <div class="calendar-day">
+                            <div class="calendar-day-number">${cell.day}</div>
+                            <div class="calendar-events">${eventsHtml}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                const hasEventsInMonth = cells.some(c => c.events && c.events.length > 0);
+                emptyNote.textContent = hasEventsInMonth ? '' : 'No events scheduled this month.';
+            }
+
+            document.getElementById('cal-prev').addEventListener('click', () => {
+                currentMonth.setMonth(currentMonth.getMonth() - 1);
+                renderCalendar();
+            });
+            document.getElementById('cal-next').addEventListener('click', () => {
+                currentMonth.setMonth(currentMonth.getMonth() + 1);
+                renderCalendar();
+            });
+
+            grid.addEventListener('click', (e) => {
+                const btn = e.target.closest('.calendar-event');
+                if (!btn) return;
+                const idx = parseInt(btn.dataset.evtIndex, 10);
+                const evt = events[idx];
+                if (!evt) return;
+                openModal(evt);
+            });
+
+            modalClose.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
+            });
+
+            renderCalendar();
+        })();
+    </script>
+</body>
+</html>

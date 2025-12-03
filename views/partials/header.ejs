@@ -35,9 +35,13 @@
         <a href="/donations">Donations</a>
         <% if (isLoggedIn) { %>
             <a href="/events">Events</a>
+            <a href="/calendar">Calendar</a>
             <a href="/participants">Participants</a>
             <a href="/postsurveys">Surveys</a>
             <a href="/milestones">Milestones</a>
+            <% if ((currentRole || '').toLowerCase() === 'admin') { %>
+                <a href="/users">Users</a>
+            <% } %>
         <% } %>
     </nav>
 </aside>
