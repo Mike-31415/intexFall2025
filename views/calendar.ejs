@@ -189,12 +189,13 @@ Calendar page: allows users to view events on a calendar.
                     return isNaN(d) ? '' : d.toISOString().slice(0, 10);
                 })();
                 const hasOccurred = !isNaN(new Date(evt.start)) && new Date(evt.start) < new Date();
+                const monthQuery = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-01`;
                 if (hasOccurred) {
                     modalSurveys.href = `/postsurveys?search=${encodeURIComponent(searchTerm)}`;
                     modalSurveys.style.display = 'inline-block';
                     const surveyDone = completedSurveyIds.has(String(evt.id));
                     if (isRegisteredForEvent && !surveyDone) {
-                        modalTakeSurvey.href = `/surveys/take?eventId=${evt.id}`;
+                        modalTakeSurvey.href = `/surveys/take?eventId=${evt.id}&from=calendar&month=${monthQuery}`;
                         modalTakeSurvey.style.display = 'inline-block';
                     } else {
                         modalTakeSurvey.style.display = 'none';
@@ -203,6 +204,7 @@ Calendar page: allows users to view events on a calendar.
                     modalSurveys.style.display = 'none';
                     modalTakeSurvey.style.display = 'none';
                 }
+                modalRegister.href = `/events/register/${evt.id}?month=${monthQuery}&from=calendar`;
                 showOverlay(modal);
                 modal.setAttribute('aria-hidden', 'false');
                 modalError.style.display = 'none';
@@ -213,7 +215,18 @@ Calendar page: allows users to view events on a calendar.
                 modal.setAttribute('aria-hidden', 'true');
             }
 
+            const urlParams = new URLSearchParams(window.location.search);
+            const monthParam = urlParams.get('month');
             let currentMonth = new Date();
+            if (monthParam) {
+                const parts = monthParam.split('-');
+                if (parts.length >= 2) {
+                    const yr = parseInt(parts[0], 10);
+                    const mo = parseInt(parts[1], 10);
+                    const parsed = new Date(yr, mo - 1, 1);
+                    if (!isNaN(parsed)) currentMonth = parsed;
+                }
+            }
             currentMonth.setDate(1);
 
             function renderCalendar() {

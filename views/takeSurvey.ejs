@@ -26,6 +26,9 @@
 
         <form action="/surveys/take" method="POST">
             <input type="hidden" name="eventId" value="<%= event ? event.id : (eventId || '') %>">
+            <input type="hidden" name="from" value="<%= from || '' %>">
+            <input type="hidden" name="calendarMonth" value="<%= calendarMonth || '' %>">
+            <input type="hidden" name="anchor" value="<%= anchor || '' %>">
 
             <div class="form-row">
                 <label for="satisfaction_score">Satisfaction (1-5)</label>
@@ -53,7 +56,8 @@
             </div>
             <div class="form-row" style="margin-top:16px; display:flex; gap:10px; align-items:center;">
                 <button type="submit" class="btn btn-primary">Submit Survey</button>
-                <a href="/calendar" class="btn btn-secondary">Back to Calendar</a>
+                <% const backLink = (from === 'homepage') ? `/homepage${anchor ? ('#' + anchor) : ''}` : `/calendar${calendarMonth ? ('?month=' + calendarMonth) : ''}`; %>
+                <a href="<%= backLink %>" class="btn btn-secondary">Back</a>
             </div>
         </form>
     </div>

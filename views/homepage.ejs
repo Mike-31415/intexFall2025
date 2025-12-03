@@ -1,9 +1,3 @@
-<!-- Group 2-11
- 
-Dashboard page: This is the dashboard that shows our tableau dashboard.
-
--->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,48 +6,177 @@ Dashboard page: This is the dashboard that shows our tableau dashboard.
     <title>Ella Rises - Home</title>
     <link rel="stylesheet" href="/styles.css">
 </head>
-
 <body>
     <%- include('partials/header') %>
     <div class="page-wrapper">
-
         <div class="table-card" style="margin-top:24px;">
             <div class="table-header">
                 <div>
-                    <h1 style="margin-bottom:4px;">Ella Rises Admin Home</h1>
-                    <p class="table-subtitle">Quick links to manage your programs and data.</p>
+                    <h1 style="margin-bottom:4px;">Welcome back<% if (username) { %>, <%= username %><% } %>!</h1>
+                    <p class="table-subtitle">Access level: <strong><%= (role || '').charAt(0).toUpperCase() + (role || '').slice(1) || 'Participant' %></strong></p>
                 </div>
             </div>
 
-            <!-- Logged-in status -->
-            <p style="margin-top:10px;">
-                <% 
-                    // role will be "admin" or "participant"
-                    let roleLabel = (role === 'admin') ? 'Admin' : 'Participant';
-                %>
-                Logged in as <strong><%= roleLabel %></strong>
-                <% if (username) { %>
-                    ( <%= username %> )
-                <% } %>
-            </p>
+            <% if (error_message) { %>
+                <div class="error-message"><%= error_message %></div>
+            <% } %>
 
-            <!-- Navigation buttons -->
-            <div class="card-button-row">
-                <a href="/donations" class="btn btn-primary">Donations</a>
-                <a href="/milestones" class="btn btn-primary">Milestones</a>
-                <a href="/participants" class="btn btn-primary">Participants</a>
-                <a href="/events" class="btn btn-primary">Events</a>
-                <a href="/postsurveys" class="btn btn-primary">Post Surveys</a>
+            <% 
+                const start = startOfWeek ? new Date(startOfWeek) : new Date();
+                start.setHours(0,0,0,0);
+                const weekDays = [];
+                for (let i = 0; i < 7; i++) {
+                    const d = new Date(start);
+                    d.setDate(start.getDate() + i);
+                    weekDays.push(d);
+                }
+                const eventsByDate = {};
+                (weekEvents || []).forEach(evt => {
+                    if (!evt.start) return;
+                    const d = new Date(evt.start);
+                    if (isNaN(d)) return;
+                    const key = d.toISOString().slice(0, 10);
+                    eventsByDate[key] = eventsByDate[key] || [];
+                    eventsByDate[key].push(evt);
+                });
+                const typeClass = (t) => `event-type-${(t || 'default').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+                const statusByEvent = registrationStatusByEvent || {};
+            %>
 
-                <!-- Users page — admin only -->
-                <% if (role === 'admin') { %>
-                    <a href="/users" class="btn btn-primary">Users</a>
+            <div id="week" class="calendar-card" style="margin-top:16px;">
+                <div class="calendar-header" style="justify-content: space-between;">
+                    <div>
+                        <h2 style="margin-bottom:4px;">Week at a Glance</h2>
+                        <p class="table-subtitle">Events happening this week</p>
+                    </div>
+                    <a href="/calendar" class="btn btn-secondary">Open Calendar</a>
+                </div>
+                <div class="calendar-weekdays">
+                    <% ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => { %>
+                        <div><%= d %></div>
+                    <% }); %>
+                </div>
+                <div class="calendar-grid">
+                    <% weekDays.forEach(day => { 
+                        const key = day.toISOString().slice(0,10);
+                        const dayEvents = eventsByDate[key] || [];
+                    %>
+                        <div class="calendar-day">
+                            <div class="calendar-day-number"><%= day.getDate() %></div>
+                            <div class="calendar-events">
+                                <% if (dayEvents.length === 0) { %>
+                                    <div class="calendar-empty">No events</div>
+                                <% } else { 
+                                    dayEvents.forEach(evt => {
+                                        const hasOccurred = evt.start && new Date(evt.start) < new Date();
+                                        const isRegistered = Array.isArray(registeredEventIds) && registeredEventIds.includes(evt.id);
+                                        const regStatus = statusByEvent[evt.id];
+                                        const isNoShow = regStatus === 'no-show';
+                                        const surveyDone = Array.isArray(completedSurveyIds) && completedSurveyIds.includes(evt.id);
+                                        const dateStr = evt.start ? new Date(evt.start).toISOString().slice(0,10) : '';
+                                %>
+                                    <div class="calendar-event <%= typeClass(evt.type) %>" style="display:flex; flex-direction:column; gap:6px; padding:8px;">
+                                        <div style="font-weight:700;"><%= evt.name || 'Event' %></div>
+                                        <div style="color:#4c4f4d; font-size:0.9rem;">
+                                            <%= evt.start ? new Date(evt.start).toLocaleString(undefined, { hour:'numeric', minute:'2-digit' }) : 'Time TBD' %>
+                                            <% if (evt.type) { %> • <%= evt.type %><% } %>
+                                        </div>
+                                        <% if (isRegistered) { %>
+                                            <div style="font-size:0.85rem; color:#2e5a1c; font-weight:700;">Registered</div>
+                                        <% } %>
+                                        <% if (surveyDone) { %>
+                                            <div style="font-size:0.85rem; color:#4c4f4d; font-weight:700;">Survey completed</div>
+                                        <% } %>
+                                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                            <% if (!isRegistered) { %>
+                                                <a class="btn btn-primary" href="/events/register/<%= evt.id %>?from=homepage&anchor=week">Register</a>
+                                            <% } %>
+                                            <% if (hasOccurred && isRegistered && !surveyDone && !isNoShow) { %>
+                                                <a class="btn btn-primary" href="/surveys/take?eventId=<%= evt.id %>&from=homepage">Take Survey</a>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                <% }); } %>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+
+            <div id="tasks" class="table-card" style="margin-top:16px; background:#fff;">
+                <div class="table-header" style="margin-bottom:8px;">
+                    <div>
+                        <h2 style="margin-bottom:4px;">Tasks</h2>
+                        <p class="table-subtitle">Surveys to complete from past events (oldest first)</p>
+                    </div>
+                </div>
+                <% if (tasks && tasks.length > 0) { %>
+                    <div class="calendar-events" style="gap:10px;">
+                        <% tasks.forEach(task => { 
+                            const d = new Date(task.start);
+                            const now = new Date();
+                            const diffMonths = (now - d) / (1000 * 60 * 60 * 24 * 30);
+                            let urgency = { label: 'Recent', bg: '#fff7c2', color: '#5c4a00' };
+                            if (diffMonths > 3) urgency = { label: 'Over 3 months ago', bg: '#ffd6d6', color: '#7a1b1b' };
+                            else if (diffMonths > 1) urgency = { label: '1-3 months ago', bg: '#ffd7a8', color: '#7a3b00' };
+                        %>
+                            <div class="calendar-event task-card-row" style="display:flex; justify-content:space-between; align-items:center; padding:10px;">
+                                <div class="task-main" style="flex:1;">
+                                    <div style="font-weight:700;"><%= task.name || 'Event' %></div>
+                                    <div style="color:#4c4f4d; font-size:0.9rem;">
+                                        <%= d.toLocaleString(undefined, { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' }) %>
+                                    </div>
+                                    <div style="margin-top:6px; display:inline-block; padding:4px 8px; border-radius:8px; font-weight:700; font-size:0.85rem; background:<%= urgency.bg %>; color:<%= urgency.color %>;">
+                                        <%= urgency.label %>
+                                    </div>
+                                </div>
+                                <div class="task-action-strip">
+                                        <a class="btn btn-primary" href="/surveys/take?eventId=<%= task.id %>&from=homepage&anchor=tasks">Take Survey</a>
+                                    <% if (task.registration_id && task.registration_status !== 'attended') { %>
+                                        <button type="button" class="btn btn-secondary attendance-toggle">Attendance</button>
+                                    <% } %>
+                                </div>
+                                <% if (task.registration_id && task.registration_status !== 'attended') { %>
+                                    <div class="task-actions">
+                                        <form action="/registrations/<%= task.registration_id %>/attended" method="POST">
+                                            <button type="submit" class="btn btn-attended">Attended</button>
+                                        </form>
+                                        <form action="/registrations/<%= task.registration_id %>/no-show" method="POST">
+                                            <button type="submit" class="btn btn-no-show">Did Not Attend</button>
+                                        </form>
+                                    </div>
+                                <% } %>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <p style="margin-top:8px;">No pending surveys. You're all caught up!</p>
                 <% } %>
             </div>
 
-            <p class="table-subtitle" style="margin-top:16px;">Need a monthly view? Visit the <a href="/calendar">calendar page</a>.</p>
         </div>
-
     </div>
+    <script>
+        (function() {
+            const toggles = document.querySelectorAll('.attendance-toggle');
+            const rows = document.querySelectorAll('.task-card-row');
+            toggles.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const row = btn.closest('.task-card-row');
+                    if (!row) return;
+                    rows.forEach(r => {
+                        if (r !== row) r.classList.remove('reveal');
+                    });
+                    row.classList.toggle('reveal');
+                });
+            });
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.task-card-row')) {
+                    rows.forEach(r => r.classList.remove('reveal'));
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

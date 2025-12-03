@@ -357,6 +357,11 @@ textarea {
   text-align: center;
   display: inline-block;
   text-decoration: none;
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.btn:hover {
+  filter: brightness(0.92);
 }
 
 /* Primary coral button */
@@ -715,6 +720,56 @@ textarea {
 .calendar-event:hover {
   transform: translateY(-2px) scale(1.02);
   box-shadow: 0 8px 18px rgba(0,0,0,0.16);
+}
+
+.task-card-row {
+  position: relative;
+  overflow: hidden;
+}
+
+.task-card-row .task-actions {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.task-actions .btn {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+.task-actions .btn-attended {
+  background: #c7e9ff;
+  color: #0b3d91;
+}
+
+.task-actions .btn-no-show {
+  background: #ffd6d6;
+  color: #7a1b1b;
+}
+
+.task-action-strip {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  transition: transform 0.2s ease;
+}
+
+.task-card-row.reveal .task-action-strip {
+  transform: translateX(-130px);
+}
+
+.task-card-row.reveal .task-actions {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .event-type-stem { background: #c7e9ff; color: #0b3d91; }

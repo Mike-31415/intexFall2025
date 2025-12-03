@@ -41,9 +41,12 @@ Register Event page: This is page allows participants to register for events.
         <% } %>
 
         <form action="/events/register/<%= event ? event.id : '' %>" method="POST">
+            <input type="hidden" name="month" value="<%= month || '' %>">
+            <input type="hidden" name="from" value="<%= from || '' %>">
+            <input type="hidden" name="anchor" value="<%= anchor || '' %>">
             <div class="form-row" style="margin-top:16px; display:flex; gap:10px; align-items:center;">
                 <button type="submit" class="btn btn-primary">Register</button>
-                <a href="/calendar" class="btn btn-secondary">Back to Calendar</a>
+                <a href="<%= backLink || '/calendar' %>" class="btn btn-secondary">Back</a>
             </div>
         </form>
     </div>

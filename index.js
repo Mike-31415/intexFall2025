@@ -238,7 +238,7 @@ app.post("/login", (req, res) => {
             req.session.email = user.participant_email;
             req.session.role = normalizedRole || "participant";
             req.session.username = `${user.participant_first_name} ${user.participant_last_name}`;
-            const nextPath = req.session.redirectAfterLogin || "/";
+            const nextPath = req.session.redirectAfterLogin || "/homepage";
             delete req.session.redirectAfterLogin;
             res.redirect(nextPath);
         })
@@ -253,14 +253,107 @@ app.get("/", (req, res) => {
     res.render("index")
 });
 
-app.get("/homepage", (req, res) => {
+app.get("/dashboard", async (req, res) => {
     if (!req.session.isLoggedIn) {
         return res.redirect("/login");
     }
-    res.render("homepage", {
+    res.render("dashboard", {
         username: req.session.username,
         role: req.session.role
     });
+});
+
+// Homepage (logged-in landing)
+app.get("/homepage", async (req, res) => {
+    if (!req.session.isLoggedIn) {
+        return res.redirect("/login");
+    }
+    try {
+        const participantId = req.session.participant_id;
+        let tasks = [];
+        let weekEvents = [];
+        const registrations = participantId
+            ? await knex("registrations").where("participant_id", participantId).select("event_occurrence_id", "registration_status")
+            : [];
+        const registeredEventIds = registrations.map(r => r.event_occurrence_id);
+        const registrationStatusByEvent = registrations.reduce((acc, r) => {
+            acc[r.event_occurrence_id] = r.registration_status;
+            return acc;
+        }, {});
+        const completedSurveyIds = participantId
+            ? await knex("surveys").where("participant_id", participantId).pluck("event_occurrence_id")
+            : [];
+
+        if (participantId) {
+            tasks = await knex("registrations as r")
+                .leftJoin("event_occurrences as eo", "r.event_occurrence_id", "eo.event_occurrence_id")
+                .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
+                .leftJoin("surveys as s", function() {
+                    this.on("s.event_occurrence_id", "eo.event_occurrence_id")
+                        .andOn("s.participant_id", "r.participant_id");
+                })
+                .select(
+                    "r.registration_id as registration_id",
+                    "r.registration_status",
+                    "eo.event_occurrence_id as id",
+                    "et.event_name as name",
+                    "eo.event_date_time_start as start",
+                    "et.event_type as type"
+                )
+                .where("r.participant_id", participantId)
+                .whereNot("r.registration_status", "no-show")
+                .whereNull("s.survey_id")
+                .andWhere("eo.event_date_time_start", "<", knex.fn.now())
+                .orderBy("eo.event_date_time_start", "asc");
+        }
+
+        // Week at a glance (current week)
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday start
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 7);
+        const startOfWeekStr = startOfWeek.toISOString().slice(0,10);
+
+        weekEvents = await knex("event_occurrences as eo")
+            .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
+            .select(
+                "eo.event_occurrence_id as id",
+                "et.event_name as name",
+                "eo.event_date_time_start as start",
+                "et.event_type as type",
+                "et.event_description as description",
+                "et.event_default_capacity as capacity"
+            )
+            .whereBetween("eo.event_date_time_start", [startOfWeek.toISOString(), endOfWeek.toISOString()])
+            .orderBy("eo.event_date_time_start", "asc");
+
+        res.render("homepage", {
+            username: req.session.username,
+            role: req.session.role,
+            tasks,
+            weekEvents,
+            registeredEventIds,
+            registrationStatusByEvent,
+            completedSurveyIds,
+            startOfWeek: startOfWeekStr,
+            error_message: ""
+        });
+    } catch (err) {
+        console.error("Error loading homepage:", err);
+        res.render("homepage", {
+            username: req.session.username,
+            role: req.session.role,
+            tasks: [],
+            weekEvents: [],
+            registeredEventIds: [],
+            registrationStatusByEvent: {},
+            completedSurveyIds: [],
+            startOfWeek: "",
+            error_message: "Unable to load tasks right now."
+        });
+    }
 });
 
 app.get("/calendar", async (req, res) => {
@@ -319,6 +412,13 @@ app.get("/events/register/:id", async (req, res) => {
         return res.redirect("/login");
     }
     const id = req.params.id;
+    const month = req.query.month || "";
+    const from = req.query.from || "";
+    const anchor = req.query.anchor || "";
+    const backLink = req.query.back ||
+        (from === "homepage"
+            ? `/homepage${anchor ? '#' + anchor : ''}`
+            : (month ? `/calendar?month=${month}` : "/calendar"));
     try {
         const event = await knex("event_occurrences as eo")
             .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
@@ -338,7 +438,11 @@ app.get("/events/register/:id", async (req, res) => {
         res.render("registerEvent", {
             event,
             success_message: "",
-            error_message: ""
+            error_message: "",
+            month,
+            from,
+            anchor,
+            backLink
         });
     } catch (err) {
         console.error("Error loading event for registration:", err);
@@ -352,8 +456,16 @@ app.post("/events/register/:id", async (req, res) => {
     }
     const id = req.params.id;
     const participantId = req.session.participant_id;
+    const month = req.body.month || "";
+    const from = req.body.from || "";
+    const anchor = req.body.anchor || "";
+    const backLink = req.body.backLink ||
+        (from === "homepage"
+            ? `/homepage${anchor ? '#' + anchor : ''}`
+            : (month ? `/calendar?month=${month}` : "/calendar"));
 
     try {
+        console.log("POST /events/register", { id, month, from, anchor, participantId });
         const event = await knex("event_occurrences as eo")
             .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
             .select(
@@ -373,7 +485,10 @@ app.post("/events/register/:id", async (req, res) => {
             return res.render("registerEvent", {
                 event,
                 success_message: "",
-                error_message: "You must be logged in as a participant to register."
+                error_message: "You must be logged in as a participant to register.",
+                month,
+                from,
+                anchor
             });
         }
 
@@ -396,17 +511,22 @@ app.post("/events/register/:id", async (req, res) => {
             });
         }
 
-        res.render("registerEvent", {
-            event,
-            success_message: existing ? "You are already registered for this event." : "Registration submitted! We'll confirm shortly.",
-            error_message: ""
-        });
+        // Redirect back to origin like survey flow
+        if (from === "homepage") {
+            return res.redirect(backLink || "/homepage");
+        }
+        const monthQuery = month ? `?month=${month}` : "";
+        return res.redirect(`/calendar${monthQuery}`);
     } catch (err) {
         console.error("Error registering for event:", err);
         res.render("registerEvent", {
             event: null,
             success_message: "",
-            error_message: "Unable to register right now. Please try again."
+            error_message: "Unable to register right now. Please try again.",
+            month,
+            from,
+            anchor,
+            backLink
         });
     }
 });
@@ -453,6 +573,7 @@ app.delete("/calendar/occurrences/:id", requireManager, async (req, res) => {
 app.get("/surveys/take", requireLogin, async (req, res) => {
     const eventId = req.query.eventId;
     if (!eventId) return res.redirect("/calendar");
+    const anchor = req.query.anchor || "";
     try {
         const event = await knex("event_occurrences as eo")
             .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
@@ -467,10 +588,19 @@ app.get("/surveys/take", requireLogin, async (req, res) => {
 
         if (!event) return res.redirect("/calendar");
 
+        const calendarMonth = event.start ? (() => {
+            const d = new Date(event.start);
+            if (isNaN(d)) return "";
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+        })() : "";
+
         res.render("takeSurvey", {
             error_message: "",
             success_message: "",
-            event
+            event,
+            from: req.query.from || "",
+            calendarMonth,
+            anchor
         });
     } catch (err) {
         console.error("Error loading survey form:", err);
@@ -490,7 +620,10 @@ app.post("/surveys/take", requireLogin, async (req, res) => {
         instructor_score,
         recommendation_score,
         overall_score,
-        comments
+        comments,
+        from,
+        calendarMonth,
+        anchor
     } = req.body;
 
     try {
@@ -512,14 +645,76 @@ app.post("/surveys/take", requireLogin, async (req, res) => {
             event_occurrence_id: eventId
         });
 
-        res.redirect("/calendar");
+        if (from === "homepage") {
+            const hash = anchor ? `#${anchor}` : "";
+            res.redirect(`/homepage${hash}`);
+        } else {
+            const monthQuery = calendarMonth ? `?month=${calendarMonth}` : "";
+            res.redirect(`/calendar${monthQuery}`);
+        }
     } catch (err) {
         console.error("Error submitting survey:", err);
+        let event = null;
+        try {
+            event = await knex("event_occurrences as eo")
+                .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
+                .select(
+                    "eo.event_occurrence_id as id",
+                    "et.event_name as name",
+                    "eo.event_date_time_start as start",
+                    "et.event_type as type"
+                )
+                .where("eo.event_occurrence_id", eventId)
+                .first();
+        } catch (_) {}
         res.render("takeSurvey", {
             success_message: "",
             error_message: "Could not submit survey. Please try again.",
-            event: { id: eventId }
+            event: event || { id: eventId },
+            from,
+            calendarMonth,
+            anchor
         });
+    }
+});
+
+// Mark registration as no-show
+app.post("/registrations/:id/no-show", requireLogin, async (req, res) => {
+    const regId = req.params.id;
+    const participantId = req.session.participant_id;
+    if (!participantId) return res.redirect("/homepage");
+    try {
+        const reg = await knex("registrations").where("registration_id", regId).first();
+        if (!reg || reg.participant_id !== participantId) {
+            return res.status(403).send("Forbidden");
+        }
+        await knex("registrations")
+            .where("registration_id", regId)
+            .update({ registration_status: "no-show" });
+        res.redirect("/homepage#tasks");
+    } catch (err) {
+        console.error("Error marking no-show:", err);
+        res.redirect("/homepage#tasks");
+    }
+});
+
+// Mark registration as attended
+app.post("/registrations/:id/attended", requireLogin, async (req, res) => {
+    const regId = req.params.id;
+    const participantId = req.session.participant_id;
+    if (!participantId) return res.redirect("/homepage");
+    try {
+        const reg = await knex("registrations").where("registration_id", regId).first();
+        if (!reg || reg.participant_id !== participantId) {
+            return res.status(403).send("Forbidden");
+        }
+        await knex("registrations")
+            .where("registration_id", regId)
+            .update({ registration_status: "attended" });
+        res.redirect("/homepage#tasks");
+    } catch (err) {
+        console.error("Error marking attended:", err);
+        res.redirect("/homepage#tasks");
     }
 });
 
