@@ -357,7 +357,7 @@ app.get("/events", async (req, res) => {
                 "event_default_capacity as eventdefaultcapacity",
                 "event_recurrence_pattern as eventrecurrencepattern"
             )
-            .orderBy("event_template_id", "asc");
+            .orderBy("eventname", "asc");
 
         if (search.trim() !== "") {
             query = query.where(builder => {
@@ -660,7 +660,7 @@ app.get("/donations", async (req, res) => {
                 "p.participant_first_name as first_name",
                 "p.participant_last_name as last_name"
             )
-            .orderBy("d.donation_date", "desc");
+            .orderByRaw("d.donation_date DESC NULLS LAST");
 
         if (search.trim() !== "") {
             query = query.where(function () {
@@ -794,7 +794,8 @@ app.get("/users", requireManager, async (req, res) => {
             });
         }
 
-        query.orderBy("p.participant_last_name", "asc");
+        query.orderBy("p.participant_last_name", "asc")
+        query.orderBy("p.participant_first_name", "asc");
 
         const users = await query;
 
@@ -986,7 +987,8 @@ app.get("/participants", async (req, res) => {
         }
 
         // Sort by last name
-        query.orderBy("p.participant_last_name", "asc");
+        query.orderBy("p.participant_last_name", "asc")
+        query.orderBy("p.participant_first_name", "asc");
 
         const participants = await query;
 
@@ -1025,7 +1027,8 @@ app.get("/milestones", async (req, res) => {
                 "m.milestone_date",
                 knex.raw("concat(coalesce(p.participant_first_name,''), ' ', coalesce(p.participant_last_name,'')) as participant_name")
             )
-            .orderBy("m.milestone_date", "desc");
+            .orderBy("p.participant_last_name", "asc")
+            .orderBy("p.participant_first_name", "asc");
 
         if (search.trim() !== "") {
             const like = `%${search}%`;
