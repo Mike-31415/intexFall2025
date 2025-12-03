@@ -40,7 +40,9 @@ app.use((req, res, next) => {
         "script-src 'self' 'unsafe-inline'; " +
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
         "img-src 'self' data: https:; " + // 'https:' allows images from any HTTPS source
-        "font-src 'self' https://fonts.gstatic.com;"
+        "font-src 'self' https://fonts.gstatic.com;" +
+        "font-src 'self' https://fonts.gstatic.com; " +
+        "frame-src https://www.youtube.com https://www.youtube-nocookie.com;"
     );
     next();
 });
@@ -84,7 +86,7 @@ const requireManager = requireAdmin;
 // Global authentication middleware
 app.use((req, res, next) => {
     console.log("Auth middleware: checking path:", req.path);
-    if (
+    if (req.path === '/teapot' ||
         req.path === '/' ||
         req.path === '/login' ||
         req.path === '/logout' ||
@@ -188,6 +190,9 @@ app.get("/logout", (req, res) => {
 app.post("/login", (req, res) => {
     let sEmail = req.body.email;
     let sPassword = req.body.password;
+    if (sEmail.trim() === "Yeet!"){
+        return res.redirect("/teapot");
+    }
     console.log('Post Login')
     knex("participants")
         .select("participant_id","participant_email","password","participant_role","participant_first_name","participant_last_name")
@@ -1315,6 +1320,33 @@ app.post("/deleteParticipants/:id", requireManager, async (req, res) => {
         res.redirect("/participants");
     }
 });
+
+app.get("/teapot", (req, res) => {
+    res.status(418);
+    console.log(res.statusCode);
+
+    res.send(`
+        <html>
+            <head>
+                <title>418 I'm a teapot!</title>
+            </head>
+            <body style="text-align:center; font-family:sans-serif;">
+                <h1>🫖 I'm a teapot!</h1>
+                <p>This page returns a 418 status code.</p>
+                <iframe width="560" height="315" 
+                    src="https://www.youtube.com/embed/xvFZjo5PgG0?autoplay=1&mute=1&si=RJBpqvHuqyTb4Avw" 
+                    title="YouTube video player" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    referrerpolicy="strict-origin-when-cross-origin" 
+                    allow="autoplay; fullscreen" 
+                    allowfullscreen>
+                </iframe>
+            </body>
+        </html>
+    `);
+});
+
 
 
 app.listen(port, () => {
