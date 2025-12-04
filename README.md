@@ -1,14 +1,13 @@
 # intexFall2025
 INTEX Fall 2025 Group 2-11
 
-ejs Files
-- Home page
-- Login Page
+Admin Credentials:
+Username/email: ethan.garcia1@community.org
+Password: eg1980
 
-- - Pages below need View/Add/Edit/Delete Button
-- Donation Page
-- User Mainenance
-- Participants
-- events
-- post surveys
-- milestones
+User Credentials:
+Username/email: penelope.martinez4@studentmail.org
+Password: pm2000
+
+URL:
+https://ellarises2-11.is404.net
