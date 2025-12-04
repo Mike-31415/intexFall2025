@@ -115,7 +115,13 @@ and role (admin/participant).
 
                                     <td>
                                         <form action="/deleteUsers/<%= user.participant_id %>" method="POST">
-                                            <button class="btn btn-danger btn-sm">Delete</button>
+                                            <button 
+                                                class="btn btn-danger btn-sm"
+                                                type="button"
+                                                data-name="<%= user.participant_first_name + ' ' + user.participant_last_name %>"
+                                                onclick="openUserDeletePopup(this.form, this.dataset.name)">
+                                                Delete
+                                            </button>
                                         </form>
                                     </td>
                                 <% } %>
@@ -140,5 +146,66 @@ and role (admin/participant).
                 </div>
             </div>
         </div>
+
+        <div class="simple-overlay" id="user-delete-popup">
+            <div class="simple-dialog">
+                <h3>Delete this user?</h3>
+                <p id="user-delete-text">Are you sure you want to delete this user?</p>
+                <div class="simple-dialog__actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeUserDeletePopup()">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="user-confirm-delete">Yes, delete</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            var pendingUserDeleteForm = null;
+            var userDeletePopup = document.getElementById('user-delete-popup');
+            var userDeleteText = document.getElementById('user-delete-text');
+            var userConfirmBtn = document.getElementById('user-confirm-delete');
+
+            function openUserDeletePopup(form, displayName) {
+                pendingUserDeleteForm = form;
+                var name = (displayName || '').trim();
+                if (userDeleteText) {
+                    userDeleteText.textContent = name
+                        ? 'Delete "' + name + '"?'
+                        : 'Are you sure you want to delete this user?';
+                }
+                if (userDeletePopup) {
+                    userDeletePopup.classList.add('is-visible');
+                }
+            }
+
+            function closeUserDeletePopup() {
+                pendingUserDeleteForm = null;
+                if (userDeletePopup) {
+                    userDeletePopup.classList.remove('is-visible');
+                }
+            }
+
+            if (userConfirmBtn) {
+                userConfirmBtn.addEventListener('click', function() {
+                    if (pendingUserDeleteForm) {
+                        pendingUserDeleteForm.submit();
+                    }
+                    closeUserDeletePopup();
+                });
+            }
+
+            if (userDeletePopup) {
+                userDeletePopup.addEventListener('click', function(e) {
+                    if (e.target === userDeletePopup) {
+                        closeUserDeletePopup();
+                    }
+                });
+            }
+
+            window.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeUserDeletePopup();
+                }
+            });
+        </script>
     </body>
 </html>

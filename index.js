@@ -46,7 +46,6 @@ app.use((req, res, next) => {
         "script-src 'self' 'unsafe-inline'; " +
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
         "img-src 'self' data: https:; " + // 'https:' allows images from any HTTPS source
-        "font-src 'self' https://fonts.gstatic.com;" +
         "font-src 'self' https://fonts.gstatic.com; " +
         "frame-src https://www.youtube.com https://www.youtube-nocookie.com;"
     );

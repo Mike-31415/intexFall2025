@@ -53,11 +53,11 @@ to go to different pages in the website.
 </aside>
 
 <script>
-    (() => {
+    (function() {
         // Ensure favicon uses Ella Rises logo across all pages
         try {
-            const existing = document.querySelector("link[rel*='icon']");
-            const link = existing || document.createElement("link");
+            var existing = document.querySelector("link[rel*='icon']");
+            var link = existing || document.createElement("link");
             link.rel = "icon";
             link.type = "image/png";
             link.href = "/ella-rises-logo.png";
@@ -66,32 +66,34 @@ to go to different pages in the website.
             console.error("Favicon setup failed", e);
         }
 
-        const sidebar = document.getElementById('site-sidebar');
-        const toggleBtn = document.querySelector('.menu-toggle');
-        const closeBtn = document.querySelector('.menu-close');
-        const backdrop = document.querySelector('.site-sidebar-backdrop');
+        var sidebar = document.getElementById('site-sidebar');
+        var toggleBtn = document.querySelector('.menu-toggle');
+        var closeBtn = document.querySelector('.menu-close');
+        var backdrop = document.querySelector('.site-sidebar-backdrop');
 
         if (!sidebar || !toggleBtn) return;
 
-        const setOpen = (open) => {
+        function setOpen(open) {
             sidebar.classList.toggle('is-open', open);
             document.body.classList.toggle('sidebar-open', open);
-            backdrop?.classList.toggle('is-visible', open);
+            if (backdrop) backdrop.classList.toggle('is-visible', open);
             toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
             sidebar.setAttribute('aria-hidden', open ? 'false' : 'true');
-        };
+        }
 
-        const closeSidebar = () => setOpen(false);
+        function closeSidebar() {
+            setOpen(false);
+        }
 
-        toggleBtn.addEventListener('click', () => {
-            const isOpen = sidebar.classList.contains('is-open');
+        toggleBtn.addEventListener('click', function() {
+            var isOpen = sidebar.classList.contains('is-open');
             setOpen(!isOpen);
         });
 
-        closeBtn?.addEventListener('click', closeSidebar);
-        backdrop?.addEventListener('click', closeSidebar);
+        if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+        if (backdrop) backdrop.addEventListener('click', closeSidebar);
 
-        document.addEventListener('keydown', (evt) => {
+        document.addEventListener('keydown', function(evt) {
             if (evt.key === 'Escape' && sidebar.classList.contains('is-open')) {
                 closeSidebar();
             }

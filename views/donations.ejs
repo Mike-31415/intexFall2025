@@ -119,7 +119,13 @@ amind/managers can edit and delete donations.
                                     <!-- DELETE: Admins only -->
                                     <td>
                                         <form action="/deleteDonations/<%= donation.id %>" method="POST">
-                                            <button class="btn btn-danger btn-sm">Delete</button>
+                                            <button 
+                                                class="btn btn-danger btn-sm"
+                                                type="button"
+                                                data-name="<%= donation.first_name + ' ' + donation.last_name %>"
+                                                onclick="openDonationDeletePopup(this.form, this.dataset.name)">
+                                                Delete
+                                            </button>
                                         </form>
                                     </td>
                                 <% } %>
@@ -145,5 +151,66 @@ amind/managers can edit and delete donations.
                 </div>
             </div>
         </div>
+
+        <div class="simple-overlay" id="donation-delete-popup">
+            <div class="simple-dialog">
+                <h3>Delete this donation?</h3>
+                <p id="donation-delete-text">Are you sure you want to delete this donation?</p>
+                <div class="simple-dialog__actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeDonationDeletePopup()">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="donation-confirm-delete">Yes, delete</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            var pendingDonationDeleteForm = null;
+            var donationDeletePopup = document.getElementById('donation-delete-popup');
+            var donationDeleteText = document.getElementById('donation-delete-text');
+            var donationConfirmBtn = document.getElementById('donation-confirm-delete');
+
+            function openDonationDeletePopup(form, displayName) {
+                pendingDonationDeleteForm = form;
+                var name = (displayName || '').trim();
+                if (donationDeleteText) {
+                    donationDeleteText.textContent = name
+                        ? 'Delete donation from ' + name + ' ?'
+                        : 'Are you sure you want to delete this donation?';
+                }
+                if (donationDeletePopup) {
+                    donationDeletePopup.classList.add('is-visible');
+                }
+            }
+
+            function closeDonationDeletePopup() {
+                pendingDonationDeleteForm = null;
+                if (donationDeletePopup) {
+                    donationDeletePopup.classList.remove('is-visible');
+                }
+            }
+
+            if (donationConfirmBtn) {
+                donationConfirmBtn.addEventListener('click', function() {
+                    if (pendingDonationDeleteForm) {
+                        pendingDonationDeleteForm.submit();
+                    }
+                    closeDonationDeletePopup();
+                });
+            }
+
+            if (donationDeletePopup) {
+                donationDeletePopup.addEventListener('click', function(e) {
+                    if (e.target === donationDeletePopup) {
+                        closeDonationDeletePopup();
+                    }
+                });
+            }
+
+            window.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeDonationDeletePopup();
+                }
+            });
+        </script>
     </body>
 </html>

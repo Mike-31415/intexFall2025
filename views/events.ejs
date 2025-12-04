@@ -93,7 +93,13 @@ Events page: page that shows a list of the different events available and relate
                                 </td>
                                 <td>
                                     <form action="/events/delete/<%= event.eventid %>" method="POST" style="display:inline;">
-                                        <button type="submit" class="btn btn-delete">Delete</button>
+                                        <button
+                                            type="button"
+                                            class="btn btn-delete"
+                                            data-name="<%= event.eventname %>"
+                                            onclick="openEventDeletePopup(this.form, this.dataset.name)">
+                                            Delete
+                                        </button>
                                     </form>
                                 </td>
                             <% } %>
@@ -115,5 +121,65 @@ Events page: page that shows a list of the different events available and relate
         </div>
     </div>
 
+    <div class="simple-overlay" id="event-delete-popup">
+        <div class="simple-dialog">
+            <h3>Delete this event?</h3>
+            <p id="event-delete-text">This will also remove all event occurrences, registrations, and surveys.</p>
+            <div class="simple-dialog__actions">
+                <button type="button" class="btn btn-secondary" onclick="closeEventDeletePopup()">Cancel</button>
+                <button type="button" class="btn btn-danger" id="event-confirm-delete">Yes, delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var pendingEventDeleteForm = null;
+        var eventDeletePopup = document.getElementById('event-delete-popup');
+        var eventDeleteText = document.getElementById('event-delete-text');
+        var eventConfirmBtn = document.getElementById('event-confirm-delete');
+
+        function openEventDeletePopup(form, displayName) {
+            pendingEventDeleteForm = form;
+            var name = (displayName || '').trim();
+            if (eventDeleteText) {
+                eventDeleteText.textContent = name
+                    ? 'Delete "' + name + '"? This will also remove all event occurrences, registrations, and surveys.'
+                    : 'This will also remove all event occurrences, registrations, and surveys.';
+            }
+            if (eventDeletePopup) {
+                eventDeletePopup.classList.add('is-visible');
+            }
+        }
+
+        function closeEventDeletePopup() {
+            pendingEventDeleteForm = null;
+            if (eventDeletePopup) {
+                eventDeletePopup.classList.remove('is-visible');
+            }
+        }
+
+        if (eventConfirmBtn) {
+            eventConfirmBtn.addEventListener('click', function() {
+                if (pendingEventDeleteForm) {
+                    pendingEventDeleteForm.submit();
+                }
+                closeEventDeletePopup();
+            });
+        }
+
+        if (eventDeletePopup) {
+            eventDeletePopup.addEventListener('click', function(e) {
+                if (e.target === eventDeletePopup) {
+                    closeEventDeletePopup();
+                }
+            });
+        }
+
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeEventDeletePopup();
+            }
+        });
+    </script>
 </body>
 </html>
