@@ -11,7 +11,6 @@ const express = require("express");
 const session = require("express-session");
 const path = require("path");
 const bodyParser = require("body-parser");
-
 const bcrypt = require("bcrypt");
 const app = express();
 app.set("view engine", "ejs");
@@ -41,13 +40,17 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
     console.log("Applying Content-Security-Policy headers...");
     res.setHeader(
-        'Content-Security-Policy',
-        "default-src 'self' http://localhost:* ws://localhost:* wss://localhost:*; " +
-        "script-src 'self' 'unsafe-inline'; " +
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-        "img-src 'self' data: https:; " + // 'https:' allows images from any HTTPS source
-        "font-src 'self' https://fonts.gstatic.com; " +
-        "frame-src https://www.youtube.com https://www.youtube-nocookie.com;"
+        "Content-Security-Policy",
+        "default-src 'self' http://localhost:* ws://localhost:* wss://localhost:* data: blob:; " +
+        "script-src 'self' 'unsafe-inline' https://public.tableau.com https://*.tableau.com https://*.cloudfront.net https://*.akamaihd.net; " +
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://public.tableau.com https://*.tableau.com; " +
+        "connect-src 'self' https://public.tableau.com https://*.tableau.com https://*.cloudfront.net https://*.akamaihd.net; " +
+        "img-src 'self' data: blob: https:; " + // 'https:' allows images from any HTTPS source
+        "font-src 'self' data: https://fonts.gstatic.com https://public.tableau.com https://*.tableau.com; " +
+        "worker-src 'self' blob:; " +
+        "frame-src 'self' https://public.tableau.com https://*.tableau.com http://public.tableau.com http://*.tableau.com https://www.youtube.com https://www.youtube-nocookie.com; " +
+        "child-src 'self' https://public.tableau.com https://*.tableau.com http://public.tableau.com http://*.tableau.com; " +
+        "object-src 'self' blob:;"
     );
     next();
 });

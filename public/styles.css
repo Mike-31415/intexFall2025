@@ -55,6 +55,24 @@ body {
   margin: 0 auto;
 }
 
+.page-wrapper--wide {
+  max-width: 1400px;
+  width: calc(100% - 32px);
+}
+
+.dashboard-card {
+  width: 100%;
+  max-width: none;
+}
+
+.dashboard-viz {
+  position: relative;
+  width: 100%;
+  min-height: 640px;
+  height: calc(100vh - 220px);
+  max-height: 1100px;
+  margin-top: 16px;
+}
 .container {
   max-width: 1100px;
   margin: 0 auto;

@@ -1,0 +1,238 @@
+﻿Ella Rises
+Fall 2025 INTEX Case Description
+Ella Rises (https://www.ellarises.org/) aims to empower the rising generation of women to pursue higher education and embrace their heritage through mentoring, creative workshops, and leadership opportunities that build both technical competence and artistic confidence. Leaders work together with partnerships at UVU and BYU to provide STEAM (science, technology, engineering, arts, and math) programs to encourage women to pursue their interests in these fields.
+Ella Rises (ER) uses post-event surveys to measure the effectiveness of their programs. Primary measures include satisfaction, usefulness, and a recommendation score. ER also keeps track of milestones achieved - an indicator of long-term success. ER wants to quantify the impact of their events on these key indicators of success. Tracking these things will help identify high-impact activities and enable detailed reporting of program effectiveness to donors, sponsors, and project leadership.
+You are trying to win the business of the Ella Rises leadership committee. You have been asked to do three things:
+1. Investigate the dataset and present insights and recommendations. You will investigate the dataset provided to you. Prepare a presentation that helps the Ella Rises project understand data-backed insights about indicators that inspire long-term success (as demonstrated by milestone achievements) and the effectiveness of their events. Based on your insights, provide recommendations for where Ella Rises could be focusing their efforts moving forward. More information about the presentation is included below. 
+2. Create and deploy a Node/Express web app that lets users manage and view different aspects of the project. The website is security driven where a user (manager or common user) either maintains data or views data collected to support the project requirements. The logic would need to include the ability for supporting data gathering/maintenance of:
+* Participants (those that sign up for events)
+* Events (workshops, etc.)
+* Surveys (post)
+* Milestones (these are milestones participants can/have reached - 1 to M relationship)
+* Donations
+The basics will include creating web pages, routes, logic, security, and CRUD.
+3. Create a dashboard that allows ER administrators to track how participants are liking their experiences and the impact of the events. Include impact KPIs (metrics showing long-term success and mission alignment):
+   1. STEAM field major post-secondary graduation rate
+   2. STEAM field post-college job rate
+Must be able to filter by event type and participant demographics to allow admins to determine if program interventions are effective. 
+Presentation Info
+You will present to representatives of the Ella Rises committee on Friday 12/5. As was stated above, you will present data-backed insights that help the ER committee understand insights about indicators that inspire long-term success and the effectiveness of the events. Only focus on insights that help you tell a relevant story to the ER committee. As part of your presentation, you will show how the website you created (dashboard included) provides value and insights to assist Ella Rises to manage their events and survey data. Your audience does not need to see the specific implementation details as much as they need to see the value of those two tools.
+You will be randomly assigned a presentation slot. Presentations will be held Friday beginning at 1:00 pm. A schedule with the assigned times for each group will be posted. Each presentation period will be structured as follows:
+
+
+        Presentation and Tech Demo                20 minutes (Student group presents)
+        Questions & Answers                        5 minutes (Student group answers questions)
+Judge Deliberation                         5 minutes (Student group waits in the hall)
+        Feedback                                 5-10 minutes (Student group comes back to room)
+        Judge Break                                 5 minutes
+
+
+The judges for your presentation will take the role of the clients. Your role is to pitch your system/solution as worthy of continued investment and/or adoption by the client. Get them excited about the system and how it meets their needs. Demonstrate the depth of your data analysis, and show how the site will support ongoing efforts to understand the impact of ER events.
+________________
+Presentation Schedule
+This schedule might have slight adjustments during INTEX week. Double check your room/time on presentation day.
+
+
+
+
+	1
+	2
+	3
+	4
+	5
+	6
+	7
+	8
+	9
+	10
+	11
+	12
+	ROOM
+	TNRB 164
+	TNRB 170
+	TNRB 174
+	TNRB 180
+	TNRB 184
+	TNRB 374
+	TNRB W108
+	TNRB W110
+	TNRB W118
+	TNRB W122
+	TNRB W308
+	TNRB W310
+	1:00-1:40
+	3-07
+	3-04
+	4-14
+	1-11
+	1-06
+	1-02
+	2-14
+	3-11
+	2-07
+	1-05
+	1-01
+	2-01
+	1:45-2:25
+	2-02
+	3-08
+	1-03
+	2-11
+	2-10
+	3-14
+	3-12
+	2-05
+	2-04
+	1-15
+	4-13
+	4-08
+	2:30-3:10
+	4-09
+	3-10
+	3-05
+	4-01
+	3-01
+	1-14
+	3-09
+	1-07
+	2-09
+	4-11
+	4-05
+	1-08
+	3:10-3:25
+	Break
+	
+
+	
+
+	3:30-4:10
+	3-02
+	2-06
+	2-08
+	4-07
+	4-04
+	2-15
+	1-13
+	1-09
+	2-12
+	4-10
+	2-13
+	4-02
+	4:15-4:55
+	1-12
+	3-03
+	4-06
+	4-12
+	3-06
+	
+
+	4-15
+	1-04
+	2-03
+	4-03
+	3-13
+	1-10
+	
+
+
+
+Links
+* Box folder with data and grading rubric 
+* INTEX Slack workspace
+Technical Requirements
+In addition to the requirements above, the following technical requirements need to be met:
+* Node.js Website: To handle the server-side logic and interaction with the database (you may use PostgreSQL or MySQL).
+* Database Management: To manage the user data efficiently, ensuring the integrity and security of the data. A relational database that has little or no redundancy and no anomalies must be used to store the information for this site, including survey results.
+* Data Communications: The platform must be deployed on AWS and include appropriate AWS services. Your site must also allow secure access over HTTPS.
+* Data Analytics: The website must have an embedded dashboard displaying insights relevant to the Ella Rises project
+Evaluation
+Ella Rises has a tech team (aka, your TAs) that will evaluate your work. After you submit your projects to the ER committee, the tech team will review your submission. To help aid the technical team, you will create short videos outlining how you have completed the requirements. Grading will commence immediately following the project submission deadline on Friday (12/5). 
+Professionalism
+For this INTEX project, you will have access to the grading rubric. As a result, you know exactly how points will be assigned for this project. Use the rubric to guide your efforts, but also keep in mind that merely checking the box may not be enough to receive full points for a rubric item. In this project and throughout your careers, you will be assigned tasks; these tasks can be completed to varying degrees of quality. Doing the bare minimum to “technically” complete requirements will result in dissatisfied customers. Instead, aim to complete the requirements and to do it well. 
+Deliverables
+The following deliverables are due Friday (12/5) by 11:00am. Files will be uploaded to a Box folder. Make sure you follow the file naming instructions. You will submit a single Zip file for your team’s project with the following contents:
+* File name : Your Zip file must be named Team<section>-<group>-v<version>.zip (e.g., Team4-2-v2.zip for Team 4-2’s second upload). Including the version number will avoid confusion for us if you make corrections to your upload. We will grade the latest version number in the Box folder as of the submission deadline.
+* 4 Videos (1 for each course) - 5 minutes max (each). Videos can be video files, or links to the videos in a shared space (e.g., Box, Dropbox, YouTube, etc.)
+   * Each video should provide information that the graders will need to evaluate your solution. The video should demonstrate that you have completed the requirements outlined in the rubric (use the rubric for each class as your guide in making the video). If you have not completed something, be forthright about it in the video. You do not need to have all team members present. Be thorough, but concise. Point out anything you feel was above and beyond the requirements.
+* Source code (Zipped or a link to a publicly visible GitHub project)
+* Slides from your presentation
+* README with documentation for how TAs can use the website to grade (URL, admin username/password if applicable)
+* Spreadsheet showing steps of normalization to 3rd Normal Form
+* Entity-Relationship Diagram (ERD) for the Database
+* SQL Scripts
+* Preliminary AI Feedback for Presentation Prep
+* Document containing the Google colab shared file link and the Tableau Public link to your dashboard 
+Peer Evaluation
+After INTEX is complete, you will receive a link to a peer evaluation survey. This survey will be used to evaluate your performance, and poor team evaluation scores will result in lower individual scores on INTEX. 
+Miscellaneous
+* Your professors will be available only to answer administrative and project-related questions, and only in the Slack workspace in public channels. This ensures that all relevant information is shared with all students at the same time. DMs will not be answered.
+* Do not ask questions of the TAs. They are not available as a resource for this exercise.
+* We encourage you to use AI tools to accomplish the tasks given to you.
+Course Specific Information
+In addition to the general requirements, each course might have specific requirements for the implementation of the Ella Rises application. Details on those are found below.
+In the following requirements, there are topics and skills that you have been taught this semester. There will be some skills that require additional learning or integration of topics beyond what you have been explicitly taught. Use the tools and resources available to you to accomplish these requirements. The purpose of the INTEX exercise is to challenge you like real-world experiences will. You must always be ready to learn new things to accomplish the tasks given to you.
+IS 402
+Use all of the database skills you have acquired this semester as necessary throughout the project. You may use a PostgreSQL or MySQL database for this project. Be sure that any schema(s) that you create are normalized properly to 3rd Normal Form with the goal of reducing redundancy and eliminating anomalies. Following the same process we learned in class, build a spreadsheet that has a sheet for each of the steps (1NF, Primary Key, Dependencies, 2NF, 3NF, 3NF w/ IDs). Your team can add additional fields beyond what the client has asked for if you determine they would be useful for the client to track as data is entered. Utilize AI to help with the normalization and data conversion, but remember that you are ultimately responsible for the results (i.e. AI can and does make mistakes).
+Define the relationships between the tables and build an Entity-Relationship Diagram (ERD) that shows the cardinality/optionality in those relationships.
+Create SQL Scripts to build your database and load the data.
+Then query the database as necessary (using the tools you have learned in IS 403) to add new records or delete records and pull any information that you need in order to present the data and solve the various problems presented in the project. Write good, clean code, and use good convention as you build any queries.
+Bonus Non-Database Requirement: As you prepare for your presentation to the client, use AI to give you some feedback (either the slides or audio or both) on what you have completed for the presentation before submitting. Nothing tricky here – The presentation can be just a rough draft. We just want you thinking about how you could use AI to improve your presentation. Submit the feedback you received as proof of completing this requirement.
+Deliverables:
+* PostgreSQL or MySQL Database (just as part of the complete project)
+* Spreadsheet with your normalization steps to get to 3NF
+* ERD
+* Script(s) to build the database and insert the data
+* Document containing the preliminary feedback on your presentation.
+IS 403
+The website should have a login where a user can have either manager level or common user. The manager has the ability to manage/maintain the different areas of data while the common user can view only. The data that has to be managed/viewed include:
+* Participants
+* Events
+* Surveys (post)
+* Milestones (you will need to support the milestones setup which can then be assigned to participants in a 1 to many relationship)
+* Donations
+You will also need to incorporate the ability to display dashboards and have a public-facing landing page for donors and supporters.
+The basics will include creating web pages, routes, logic, security, and CRUD. Some of the packages that would be expected to be installed include, but are not limited to:
+* Express
+* Ejs
+* Knex
+* Pg or mysql2
+* Express-session
+* Multer
+Other packages you might want to consider and that you could investigate based upon your project logic might include:
+* Bcrypt
+* Helmet
+* Csurf
+* Connect-flash
+* Nodemailer
+* <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> - See what this does
+You may use AI to help you on this project.
+NOTE: If you would like to go the extra mile you could also look at items such as the following. Be aware that you might not have been taught some of these topics but you are also being taught to learn. You will need to specifically tell us what you did above and beyond the basics you have learned to warrant extra credit. Some examples might be:
+* ADA compliance
+* RWD (mobile-friendly)
+* Encryption
+* Emails
+This site and database will need to be deployed.
+Professionalism matters!
+IS 404
+I require that you use your own AWS account (created at https://aws.amazon.com/), and do not use the Learner Lab for INTEX. The 4 hour time limit and permissions restrictions on the Learner Lab will lead to too many issues during updates of your application and during grading. If you use services judiciously (e.g., using free-tier eligible instances for all your services), you will have plenty of capacity for the small loads on these applications and still keep your costs low. See the video for additional info on creating an AWS account.
+* Your application must be deployed on AWS. AWS offers grants to nonprofits that will allow them to operate the website at very low cost. There is no requirement to use Elastic Beanstalk, but it is recommended as an easy way to deploy your application following industry practices for managing application servers. 
+* Your application must use a managed database hosted on AWS.
+* Your application must include a custom DNS record (not elasticbeanstalk.com). You may use a subdomain of is404.net for free, or purchase a domain name from a DNS registrar for the project.
+* Your website must use HTTPS.
+* One page on your site must return the HTTP 418 status code.
+* These things need to be done well. For the most part, it’s just a matter of checking the boxes to make sure all the steps are completed. However, points will be assigned for using the appropriate services and tools for each task. It doesn’t mean you should spend a bunch of money for high availability services, but you should make effective decisions about the infrastructure you use to host this application.
+IS 415
+Complete the following requirements.
+* Python Exploratory Analysis
+   * Explore the data in python to understand what indicators inspire milestones.
+   * Include a dataset overview, data cleaning (if needed), univariate analysis (at least four variables, but it may be beneficial to do more), and bivariate analysis (at least for four relationships, but it may be beneficial to do more). Include clean headers and a markdown after each section with insights. The file should look professional.
+   * In your video to the TAs, open your python file and explain how your exploratory analysis influenced the insights and recommendations you shared with the audience.
+* Presentation Slide Deck
+   * At least two meaningful charts are used in the presentation slide deck that provide insights as to what indicators inspire milestones. The charts need to enhance the presentation by providing data backed insights.
+   * The charts used in the slide deck follow the Storytelling with Data principles (i.e., appropriate visual display, clutter eliminated, attention is focused where you want it, basic design techniques, etc.).
+   * The slide deck tells a story with a clear beginning (plot/problem), middle (data backed insights), and end (call to action).
+* Dashboard
+   * The dashboard is aesthetically pleasing (i.e., good use of color, white space, alignment, no spelling errors, etc.).
+   * The dashboard is effective. The charts provide valuable insights to the user based on the user prompt (i.e., charts weren’t created just to create charts).
+   * The dashboard is interactive (i.e., has filters for the user). The type of filters chosen provide value and allow the user to explore the data in meaningful ways.
+   * The dashboard is embedded into your website.

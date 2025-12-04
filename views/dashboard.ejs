@@ -9,21 +9,76 @@ Dashboard: Logged in users can see the Tableau dashboard.
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Ella Rises - Dashboard</title>
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <%- include('partials/header') %>
-    <div class="page-wrapper">
-        <div class="table-card" style="margin-top:24px;">
+
+    <div class="page-wrapper page-wrapper--wide">
+        <div class="table-card dashboard-card">
             <div class="table-header">
                 <div>
-                    <h1 style="margin-bottom:4px;">Dashboard</h1>
-                    <p class="table-subtitle">Tableau dashboard will appear here.</p>
+                    <h1 style="margin-bottom:4px;">Program Dashboard</h1>
+                    <p class="table-subtitle">Live Tableau view of INTEX data</p>
+                </div>
+                <span class="user-chip">Interactive</span>
+            </div>
+
+            <div class="dashboard-viz">
+                <div class="tableauPlaceholder" id="tableau-viz" style="position: relative; width: 100%; height: auto; min-height: 600px;">
+                    <noscript>
+                        <a href="#">
+                            <img alt="Dashboard 1" src="https://public.tableau.com/static/images/IN/INTEXideas/Dashboard1/1_rss.png" style="border: none; width:100%; height:auto;" />
+                        </a>
+                    </noscript>
+                    <object class="tableauViz" style="display:none;">
+                        <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F" />
+                        <param name="embed_code_version" value="3" />
+                        <param name="site_root" value="" />
+                        <param name="name" value="INTEXideas/Dashboard1" />
+                        <param name="tabs" value="no" />
+                        <param name="toolbar" value="yes" />
+                        <param name="static_image" value="https://public.tableau.com/static/images/IN/INTEXideas/Dashboard1/1.png" />
+                        <param name="animate_transition" value="yes" />
+                        <param name="display_static_image" value="yes" />
+                        <param name="display_spinner" value="yes" />
+                        <param name="display_overlay" value="yes" />
+                        <param name="display_count" value="yes" />
+                        <param name="language" value="en-US" />
+                        <param name="filter" value="publish=yes" />
+                    </object>
                 </div>
             </div>
-            <p style="margin-top:10px; color:#4c4f4d;">Coming soon: interactive Tableau visuals.</p>
         </div>
     </div>
+
+    <script type="text/javascript">
+        (function() {
+            var divElement = document.getElementById('tableau-viz');
+            if (!divElement) return;
+            var vizElement = divElement.getElementsByTagName('object')[0];
+
+            var setSize = function() {
+                var width = divElement.offsetWidth || window.innerWidth || 1366;
+                var aspect = 795 / 1366; // original Tableau embed aspect ratio
+                var targetHeight = Math.round(width * aspect);
+                var maxHeight = Math.min(1100, window.innerHeight - 140);
+                var minHeight = 620;
+                var height = Math.max(minHeight, Math.min(targetHeight, maxHeight));
+
+                divElement.style.height = height + 'px';
+                vizElement.style.width = '100%';
+                vizElement.style.height = height + 'px';
+            };
+
+            setSize();
+            window.addEventListener('resize', setSize);
+
+            var scriptElement = document.createElement('script');
+            scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+            vizElement.parentNode.insertBefore(scriptElement, vizElement);
+        })();
+    </script>
 </body>
 </html>
