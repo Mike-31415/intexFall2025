@@ -19,6 +19,11 @@ console.log("Starting server setup...");
 
 app.use(express.static(path.join(__dirname, "public")));
 
+// Serve favicon using existing logo asset
+app.get("/favicon.ico", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "ella-rises-logo.png"));
+});
+
 const port = process.env.PORT || 3001;
 
 // Session setup
@@ -73,6 +78,7 @@ app.use(express.urlencoded({extended: true}));
 // Helpers
 const requireLogin = (req, res, next) => {
     if (!req.session.isLoggedIn) {
+        req.session.redirectAfterLogin = req.originalUrl || req.url || "/";
         return res.redirect("/login");
     }
     next();
@@ -120,6 +126,7 @@ app.use((req, res, next) => {
         req.path === '/login' ||
         req.path === '/logout' ||
         req.path === '/register' ||
+        req.path === '/donate/guest' ||
         (req.method === 'GET' && req.path === '/donations')
     ) {
         return next();
@@ -130,7 +137,8 @@ app.use((req, res, next) => {
         next();
     } else {
         console.log("User is NOT logged in, redirecting to login...");
-        res.render("login", { error_message: "Please log in to access this page" });
+        req.session.redirectAfterLogin = req.originalUrl || req.url || "/homepage";
+        res.redirect("/login");
     }
 });
 
@@ -140,9 +148,14 @@ app.use((req, res, next) => {
 // Login
 app.get("/login", (req, res) => {
     console.log("GET /login");
+    if (req.query.next) {
+        req.session.redirectAfterLogin = req.query.next;
+    }
     if (req.session.isLoggedIn) {
         console.log("Already logged in, redirecting to home");
-        return res.redirect("/");
+        const nextPath = req.session.redirectAfterLogin || "/";
+        delete req.session.redirectAfterLogin;
+        return res.redirect(nextPath);
     } else {
         res.render("login", { error_message: "" });
     }
@@ -152,7 +165,9 @@ app.get("/login", (req, res) => {
 app.get("/register", (req, res) => {
     // check for login
     if (req.session.isLoggedIn) {
-        return res.redirect("/");
+        const nextPath = req.session.redirectAfterLogin || "/";
+        delete req.session.redirectAfterLogin;
+        return res.redirect(nextPath);
     }
     res.render("register", { error_message: "" });
 });
@@ -213,7 +228,9 @@ app.post("/register", async (req, res) => {
         req.session.role = "participant";
         req.session.username = `${created.participant_first_name} ${created.participant_last_name}`.trim();
 
-        res.redirect("/");
+        const nextPath = req.session.redirectAfterLogin || "/homepage";
+        delete req.session.redirectAfterLogin;
+        res.redirect(nextPath);
     } catch (err) {
         console.error("Register error:", err);
         res.render("register", { error_message: "Registration failed" });
@@ -268,10 +285,10 @@ app.post("/login", (req, res) => {
         });
 });
 
-// Initail page route
+// Initial page route
 app.get("/", (req, res) => {
     console.log("GET /");
-    res.render("index") // first page
+    res.render("index", { role: req.session.role || "" }); // first page
 });
 
 // Dashboard route
@@ -1083,13 +1100,13 @@ app.get("/donations", async (req, res) => {
 
     try {
         let query = knex("donations as d")
-            .join("participants as p", "d.participant_id", "p.participant_id")
+            .leftJoin("participants as p", "d.participant_id", "p.participant_id")
             .select(
                 "d.donation_id as id",
                 "d.donation_date",
                 "d.donation_amount",
-                "p.participant_first_name as first_name",
-                "p.participant_last_name as last_name"
+                knex.raw("coalesce(p.participant_first_name, '') as first_name"),
+                knex.raw("coalesce(p.participant_last_name, '') as last_name")
             )
             .orderByRaw("d.donation_date DESC NULLS LAST");
 
@@ -1135,28 +1152,119 @@ app.get("/addDonations", requireLogin, async (req, res) => {
     try {
         const participants = await knex("participants")
             .select("participant_id", "participant_first_name", "participant_last_name");
-        res.render("addDonations", { error_message: "", participants });
+        const backLink = req.query.from || req.get("referer") || "/donations";
+        res.render("addDonations", { error_message: "", participants, backLink });
     } catch (err) {
         console.error("Error loading participants for donation:", err);
-        res.render("addDonations", { error_message: "Failed to load participants", participants: [] });
+        const backLink = req.query.from || req.get("referer") || "/donations";
+        res.render("addDonations", { error_message: "Failed to load participants", participants: [], backLink });
     }
 });
 
 // Add Donation - submit
 app.post("/addDonations", requireLogin, async (req, res) => {
-    const { donation_date, donation_amount, participant_id } = req.body;
+    const { donation_date, donation_amount, participant_id, backLink } = req.body;
+    const redirectTo = backLink || "/donations";
     try {
         await knex("donations").insert({
             donation_date: donation_date || null,
             donation_amount,
             participant_id
         });
-        res.redirect("/donations");
+        res.redirect(redirectTo);
     } catch (err) {
         console.error("Error adding donation:", err);
         const participants = await knex("participants")
             .select("participant_id", "participant_first_name", "participant_last_name");
-        res.render("addDonations", { error_message: "Failed to add donation", participants });
+        res.render("addDonations", { error_message: "Failed to add donation", participants, backLink: redirectTo });
+    }
+});
+
+// Simple donor-facing add donation (logged-in non-admin users)
+app.get("/donate", requireLogin, (req, res) => {
+    const role = (req.session.role || "").toLowerCase();
+    if (role === "admin") {
+        return res.redirect("/donations");
+    }
+    res.render("donate", {
+        error_message: "",
+        username: req.session.username || "",
+        success_message: ""
+    });
+});
+
+app.post("/donate", requireLogin, async (req, res) => {
+    const role = (req.session.role || "").toLowerCase();
+    if (role === "admin") {
+        return res.redirect("/donations");
+    }
+    const participantId = req.session.participant_id;
+    if (!participantId) {
+        req.session.redirectAfterLogin = "/donate";
+        return res.redirect("/login");
+    }
+    const { donation_amount } = req.body;
+    const amountNumber = donation_amount ? parseFloat(donation_amount) : NaN;
+    if (!donation_amount || isNaN(amountNumber) || amountNumber <= 0) {
+        return res.render("donate", {
+            error_message: "Please enter a valid donation amount.",
+            username: req.session.username || "",
+        });
+    }
+    try {
+        await knex("donations").insert({
+            donation_date: new Date(),
+            donation_amount: amountNumber,
+            participant_id: participantId
+        });
+        res.render("donate", {
+            error_message: "",
+            username: req.session.username || "",
+            success_message: "Your donation was received. Thank you!"
+        });
+    } catch (err) {
+        console.error("Error adding donation (simple):", err);
+        res.render("donate", {
+            error_message: "Failed to add donation. Please try again.",
+            username: req.session.username || "",
+            success_message: ""
+        });
+    }
+});
+
+// Guest/anonymous donation (no login required)
+app.get("/donate/guest", (req, res) => {
+    res.render("donateGuest", {
+        error_message: "",
+        success_message: ""
+    });
+});
+
+app.post("/donate/guest", async (req, res) => {
+    const { donation_amount } = req.body;
+    const amountNumber = donation_amount ? parseFloat(donation_amount) : NaN;
+    if (!donation_amount || isNaN(amountNumber) || amountNumber <= 0) {
+        return res.render("donateGuest", {
+            error_message: "Please enter a valid donation amount.",
+            success_message: ""
+        });
+    }
+    try {
+        await knex("donations").insert({
+            donation_date: new Date(),
+            donation_amount: amountNumber,
+            participant_id: null
+        });
+        res.render("donateGuest", {
+            error_message: "",
+            success_message: "Your donation was received. Thank you!"
+        });
+    } catch (err) {
+        console.error("Error adding donation (guest):", err);
+        res.render("donateGuest", {
+            error_message: "Failed to add donation. Please try again.",
+            success_message: ""
+        });
     }
 });
 

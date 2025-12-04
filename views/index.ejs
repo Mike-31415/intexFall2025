@@ -54,25 +54,21 @@ and view donations.
                 
             </section>
 
-            <section class="donation-appeal fade-up">
-                <div class="appeal-copy">
-                    <h2>Your Gift Fuels Ella Rises</h2>
-                    <p>
-                        Every donation keeps 150 first-generation girls in free weekly performing arts,
-                        elite STEAM, leadership events, and university tours—covering supplies, travel,
-                        and mentors their families shouldn’t have to shoulder.
-                    </p>
-                </div>
-                <div class="appeal-details">
-                    <span class="appeal-chip">150 girls ages 11–18</span>
-                    <span class="appeal-chip">Weekly arts + elite STEAM</span>
-                    <span class="appeal-chip">Leadership events & university tours</span>
-                </div>
-                <div class="appeal-cta">
+            <div class="donation-simple fade-up">
+                <p class="donation-simple__text">Your generosity fuels opportunities for more than 1,000 girls.</p>
+                <% if (role && role.toLowerCase() === 'admin') { %>
                     <a href="/donations" class="btn btn-primary btn-lift btn-pulse">Donate to Ella Rises</a>
-                    <p class="appeal-note">Your support removes financial and logistical barriers for first-generation, low-income families.</p>
-                </div>
-            </section>
+                <% } else { %>
+                    <div class="donation-actions">
+                        <% if (role) { %>
+                            <a href="/donate" class="btn btn-primary btn-lift btn-pulse">Donate (Use My Account)</a>
+                        <% } else { %>
+                            <a href="/login?next=/donate" class="btn btn-primary btn-lift btn-pulse">Login to Donate</a>
+                        <% } %>
+                        <a href="/donate/guest" class="btn btn-secondary btn-lift">Donate Anonymously</a>
+                    </div>
+                <% } %>
+            </div>
             
         </div>
     </div>

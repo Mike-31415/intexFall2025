@@ -1012,85 +1012,38 @@ textarea {
   box-shadow: var(--shadow-card);
 }
 
-.donation-appeal {
-  width: 100%;
-  max-width: 900px;
-  margin: 4px auto 8px;
-  padding: 22px 24px;
-  background: linear-gradient(135deg, rgba(151, 142, 196, 0.12), rgba(244, 176, 146, 0.16)), #fff;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  border-radius: 20px;
-  box-shadow: var(--shadow-card);
-  position: relative;
-  overflow: hidden;
-}
-
-.donation-appeal::after {
-  content: "";
-  position: absolute;
-  width: 280px;
-  height: 280px;
-  top: -90px;
-  right: -120px;
-  background: radial-gradient(circle at 30% 30%, rgba(206, 50, 91, 0.12), transparent 70%);
-  z-index: 0;
-}
-
-.appeal-copy {
+.donation-simple {
   text-align: center;
-  max-width: 720px;
-  margin: 0 auto 10px;
-  position: relative;
-  z-index: 1;
+  margin: 8px 0 16px;
 }
 
-.appeal-copy h2 {
-  margin-bottom: 8px;
+.donation-simple__text {
+  margin-bottom: 10px;
+  font-size: 1.05rem;
+  line-height: 1.5;
 }
 
-.appeal-copy p {
-  font-size: 1rem;
-  line-height: 1.55;
-}
-
-.appeal-details {
+.donation-actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   gap: 10px;
-  margin: 10px auto 6px;
-  position: relative;
-  z-index: 1;
-}
-
-.appeal-chip {
-  display: inline-flex;
+  justify-content: center;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: 999px;
-  background: rgba(153, 183, 198, 0.2);
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  font-weight: 700;
-  color: var(--charcoal);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
 }
 
-.appeal-cta {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin-top: 12px;
-  position: relative;
-  z-index: 1;
-}
-
-.appeal-note {
-  font-size: 0.95rem;
-  max-width: 640px;
+.donation-center {
   text-align: center;
-  color: #4b4f4c;
+}
+
+.donation-center .form-row {
+  text-align: left;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 420px;
+}
+
+.donation-center .buttons {
+  justify-content: center;
 }
 
 .simple-overlay {

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make a Donation</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <div class="form-card donation-center">
+        <h2>Make a Donation</h2>
+        <% if (username) { %>
+            <p class="mb-3">Hi <%= username %>,</p>
+            <p>thank you for supporting Ella Rises.</p>
+            <br>
+        <% } %>
+        <% if (error_message) { %>
+            <div class="error-message"><%= error_message %></div>
+        <% } %>
+        <% if (success_message) { %>
+            <div class="alert alert-success"><%= success_message %></div>
+            <div class="buttons" style="justify-content: center;">
+                <a href="/homepage" class="btn btn-primary">Go Home</a>
+                <a href="/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        <% } %>
+
+        <% if (!success_message) { %>
+            <form action="/donate" method="POST">
+                <div class="form-row">
+                    <label for="donation_amount">Donation Amount</label>
+                    <input 
+                        type="number" 
+                        id="donation_amount" 
+                        name="donation_amount" 
+                        class="form-control"
+                        step="0.01" 
+                        min="1" 
+                        placeholder="Enter amount" 
+                        required
+                    />
+                </div>
+
+            <div class="buttons" style="justify-content: center;">
+                <button type="submit" class="btn btn-save">Submit Donation</button>
+                <a href="/" class="btn btn-cancel">Cancel</a>
+            </div>
+        </form>
+    <% } %>
+    </div>
+</body>
+</html>

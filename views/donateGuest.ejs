@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donate Anonymously</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <div class="form-card donation-center">
+        <h2>Make an Anonymous Donation</h2>
+        <p class="mb-3">Thank you for supporting Ella Rises. No login required.</p>
+        <% if (error_message) { %>
+            <div class="error-message"><%= error_message %></div>
+        <% } %>
+        <% if (success_message) { %>
+            <div class="alert alert-success"><%= success_message %></div>
+            <div class="buttons" style="justify-content: center;">
+                <a href="/" class="btn btn-primary">Go Home</a>
+                <a href="/donate/guest" class="btn btn-secondary">Donate Again</a>
+            </div>
+        <% } %>
+
+        <% if (!success_message) { %>
+            <form action="/donate/guest" method="POST">
+                <div class="form-row">
+                    <label for="donation_amount_guest">Donation Amount</label>
+                    <input 
+                        type="number" 
+                        id="donation_amount_guest" 
+                        name="donation_amount" 
+                        class="form-control"
+                        step="0.01" 
+                        min="1" 
+                        placeholder="Enter amount" 
+                        required
+                    />
+                </div>
+
+                <div class="buttons" style="justify-content: center;">
+                    <button type="submit" class="btn btn-save">Submit Donation</button>
+                    <a href="/" class="btn btn-cancel">Cancel</a>
+                </div>
+            </form>
+        <% } %>
+    </div>
+</body>
+</html>

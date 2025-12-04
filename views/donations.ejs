@@ -105,8 +105,8 @@ amind/managers can edit and delete donations.
                                     <% } %>
                                 </td>
                                 <td><%= donation.donation_amount %></td>
-                                <td><%= donation.first_name %></td>
-                                <td><%= donation.last_name %></td>
+                                <td><%= donation.first_name || 'Anonymous' %></td>
+                                <td><%= donation.last_name || '' %></td>
 
                                 <!-- EDIT: Admins only -->
                                 <% if (role === "admin") { %>
