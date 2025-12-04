@@ -1,3 +1,9 @@
+// Group 2-11
+
+// Ella Rises app server: Express + EJS with sessions, CSP, and a Postgres (Knex) connection.
+// Handles login/register/logout and access based on roles(admin/manager)
+
+
 // Load environment variables from .env file into memory
 require('dotenv').config();
 
@@ -40,7 +46,6 @@ app.use((req, res, next) => {
         "script-src 'self' 'unsafe-inline'; " +
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
         "img-src 'self' data: https:; " + // 'https:' allows images from any HTTPS source
-        "font-src 'self' https://fonts.gstatic.com;" +
         "font-src 'self' https://fonts.gstatic.com; " +
         "frame-src https://www.youtube.com https://www.youtube-nocookie.com;"
     );
@@ -80,7 +85,7 @@ const requireAdmin = (req, res, next) => {
     }
     next();
 };
-// alias for older references
+// Alias for older references
 const requireManager = requireAdmin;
 
 // Normalize phone numbers to a consistent (XXX)XXX-XXXX format, with optional country code prefix.
@@ -126,7 +131,10 @@ app.use((req, res, next) => {
     }
 });
 
-// Routes
+//--------------------------------------------------------------------------------------------
+// ROUTES
+
+// Login
 app.get("/login", (req, res) => {
     console.log("GET /login");
     if (req.session.isLoggedIn) {
@@ -139,12 +147,14 @@ app.get("/login", (req, res) => {
 
 // Register
 app.get("/register", (req, res) => {
+    // check for login
     if (req.session.isLoggedIn) {
         return res.redirect("/");
     }
     res.render("register", { error_message: "" });
 });
 
+// Sends register info to get checked if exists
 app.post("/register", async (req, res) => {
     const {
         participant_email,
@@ -207,20 +217,27 @@ app.post("/register", async (req, res) => {
     }
 });
 
+// Logout route
 app.get("/logout", (req, res) => {
     req.session.destroy(() => {
+        // directs back to login
         res.redirect("/login");
     });
 });
 
+// Login route
 app.post("/login", (req, res) => {
     let sEmail = req.body.email;
     let sPassword = req.body.password;
+    // Teapot error check
     if (sEmail.trim() === "Yeet!"){
+        // shows teapot page
         return res.redirect("/teapot");
     }
     console.log('Post Login')
     knex("participants")
+        // searching database to pull info
+        // SQL Query
         .select("participant_id","participant_email","password","participant_role","participant_first_name","participant_last_name")
         .where("participant_email", sEmail)
         .then(async participants => {
@@ -248,15 +265,18 @@ app.post("/login", (req, res) => {
         });
 });
 
+// Initail page route
 app.get("/", (req, res) => {
     console.log("GET /");
-    res.render("index")
+    res.render("index") // first page
 });
 
+// Dashboard route
 app.get("/dashboard", async (req, res) => {
     if (!req.session.isLoggedIn) {
         return res.redirect("/login");
     }
+    // shows the tableau
     res.render("dashboard", {
         username: req.session.username,
         role: req.session.role
@@ -329,6 +349,7 @@ app.get("/homepage", async (req, res) => {
             .whereBetween("eo.event_date_time_start", [startOfWeek.toISOString(), endOfWeek.toISOString()])
             .orderBy("eo.event_date_time_start", "asc");
 
+        // shows homepage with related info
         res.render("homepage", {
             username: req.session.username,
             role: req.session.role,
@@ -356,7 +377,9 @@ app.get("/homepage", async (req, res) => {
     }
 });
 
+// Calender route
 app.get("/calendar", async (req, res) => {
+    // check if logged in
     if (!req.session.isLoggedIn) {
         return res.redirect("/login");
     }
@@ -385,6 +408,7 @@ app.get("/calendar", async (req, res) => {
             .select("event_template_id as id", "event_name as name")
             .orderBy("event_name", "asc");
 
+        // show calender
         res.render("calendar", {
             username: req.session.username,
             role: req.session.role,
@@ -450,10 +474,11 @@ app.get("/events/register/:id", async (req, res) => {
     }
 });
 
+// Register for an event
 app.post("/events/register/:id", async (req, res) => {
     if (!req.session.isLoggedIn) {
         return res.redirect("/login");
-    }
+    } // info sent to server
     const id = req.params.id;
     const participantId = req.session.participant_id;
     const month = req.body.month || "";
@@ -557,7 +582,7 @@ app.post("/calendar/occurrences", requireManager, async (req, res) => {
     }
 });
 
-// Delete event occurrence (admin only)
+// Delete event occurrence by ID (admin only)
 app.delete("/calendar/occurrences/:id", requireManager, async (req, res) => {
     const id = req.params.id;
     try {
@@ -585,7 +610,7 @@ app.get("/surveys/take", requireLogin, async (req, res) => {
             )
             .where("eo.event_occurrence_id", eventId)
             .first();
-
+        // if there is no event, redirect to calendar
         if (!event) return res.redirect("/calendar");
 
         const calendarMonth = event.start ? (() => {
@@ -718,6 +743,7 @@ app.post("/registrations/:id/attended", requireLogin, async (req, res) => {
     }
 });
 
+// Events page
 app.get("/events", async (req, res) => {
     if (!req.session.isLoggedIn) {
         return res.redirect("/login");
@@ -728,7 +754,7 @@ app.get("/events", async (req, res) => {
     const offset = (page - 1) * pageSize;
 
     const search = req.query.search || "";
-
+    // SQL to grab events from database
     try {
         let query = knex("event_templates")
             .select(
@@ -873,6 +899,8 @@ app.post("/events/delete/:id", requireManager, (req, res) => {
             res.redirect("/events");
         });
 });
+
+// Post surveys page route
 app.get("/postsurveys", async (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect("/login");
 
@@ -1039,7 +1067,7 @@ app.post("/postsurveys/delete/:id", requireManager, async (req, res) => {
     }
 });
 
-// DONATIONS PAGE
+// Donations page
 app.get("/donations", async (req, res) => {
     if (!req.session.isLoggedIn) {
         req.session.redirectAfterLogin = "/addDonations";
@@ -1177,7 +1205,7 @@ app.post("/deleteDonations/:id", requireManager, async (req, res) => {
     }
 });
 
-// USERS PAGE WITH SEARCH
+// Users page route with search bar
 app.get("/users", requireManager, async (req, res) => {
     try {
         const search = req.query.search || "";
@@ -1369,7 +1397,7 @@ app.post("/deleteUsers/:id", requireManager, async (req, res) => {
     }
 });
 
-// PARTICIPANTS PAGE WITH SEARCH
+// Participants page route with search bar
 app.get("/participants", async (req, res) => {
     try {
         const search = req.query.search || "";
@@ -1435,7 +1463,7 @@ app.get("/participants", async (req, res) => {
     }
 });
 
-// MILESTONES PAGE
+// Milestones page route
 app.get("/milestones", async (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect("/login");
 
@@ -1761,6 +1789,7 @@ app.post("/deleteParticipants/:id", requireManager, async (req, res) => {
     }
 });
 
+// Error route - teapot
 app.get("/teapot", (req, res) => {
     res.status(418);
     console.log(res.statusCode);
@@ -1786,8 +1815,6 @@ app.get("/teapot", (req, res) => {
         </html>
     `);
 });
-
-
 
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);

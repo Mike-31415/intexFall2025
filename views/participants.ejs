@@ -121,7 +121,13 @@ information (name, DOB, phone, city, etc). Admin/Managers can edit and delete.
                                     <!-- DELETE: Admins only -->
                                     <td>
                                         <form action="/deleteParticipants/<%= participant.participant_id %>" method="POST">
-                                            <button class="btn btn-danger btn-sm">Delete</button>
+                                            <button 
+                                                type="button" 
+                                                class="btn btn-danger btn-sm"
+                                                data-name="<%= participant.participant_first_name + ' ' + participant.participant_last_name %>"
+                                                onclick="openDeletePopup(this.form, this.dataset.name)">
+                                                Delete
+                                            </button>
                                         </form>
                                     </td>
                                 <% } %>
@@ -146,5 +152,66 @@ information (name, DOB, phone, city, etc). Admin/Managers can edit and delete.
                 </div>
             </div>
         </div>
+
+        <div class="simple-overlay" id="delete-popup">
+            <div class="simple-dialog">
+                <h3>Delete this participant?</h3>
+                <p id="delete-popup-text">This will also remove all associated milestones, registrations, and surveys.</p>
+                <div class="simple-dialog__actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeDeletePopup()">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete-btn">Yes, delete</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            var pendingDeleteForm = null;
+            var deletePopup = document.getElementById('delete-popup');
+            var deletePopupText = document.getElementById('delete-popup-text');
+            var confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+
+            function openDeletePopup(form, displayName) {
+                pendingDeleteForm = form;
+                var name = (displayName || '').trim();
+                if (deletePopupText) {
+                    deletePopupText.textContent = name
+                        ? 'Delete ' + name + '? This will also remove all associated milestones, registrations, and surveys.'
+                        : 'This will also remove all associated milestones, registrations, and surveys.';
+                }
+                if (deletePopup) {
+                    deletePopup.classList.add('is-visible');
+                }
+            }
+
+            function closeDeletePopup() {
+                pendingDeleteForm = null;
+                if (deletePopup) {
+                    deletePopup.classList.remove('is-visible');
+                }
+            }
+
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', function() {
+                    if (pendingDeleteForm) {
+                        pendingDeleteForm.submit();
+                    }
+                    closeDeletePopup();
+                });
+            }
+
+            if (deletePopup) {
+                deletePopup.addEventListener('click', function(e) {
+                    if (e.target === deletePopup) {
+                        closeDeletePopup();
+                    }
+                });
+            }
+
+            window.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeDeletePopup();
+                }
+            });
+        </script>
     </body>
 </html>

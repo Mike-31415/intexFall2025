@@ -94,6 +94,18 @@ Calendar page: allows users to view events on a calendar.
         </div>
     </div>
 
+    <div class="simple-overlay" id="calendar-delete-popup">
+        <div class="simple-dialog">
+            <h3>Delete this event?</h3>
+            <p id="calendar-delete-text">Are you sure you want to delete this event?</p>
+            <p class="delete-warning-note">Deleting this occurrence will also delete all associated registrations and surveys.</p>
+            <div class="simple-dialog__actions">
+                <button type="button" class="btn btn-secondary" onclick="closeCalendarDeletePopup()">Cancel</button>
+                <button type="button" class="btn btn-danger" id="calendar-confirm-delete">Yes, delete</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         (function() {
             const events = <%- JSON.stringify(events || []) %>;
@@ -136,6 +148,9 @@ Calendar page: allows users to view events on a calendar.
             const modalSurveys = document.getElementById('modal-surveys');
             const modalDelete = document.getElementById('modal-delete');
             const modalError = document.getElementById('modal-error');
+            const calendarDeletePopup = document.getElementById('calendar-delete-popup');
+            const calendarDeleteText = document.getElementById('calendar-delete-text');
+            const calendarDeleteConfirm = document.getElementById('calendar-confirm-delete');
             const typeColors = {
                 stem: { bg: '#c7e9ff', color: '#0b3d91' },
                 arts: { bg: '#ffe0f1', color: '#7d1b4f' },
@@ -145,6 +160,7 @@ Calendar page: allows users to view events on a calendar.
             let activeEvents = events;
             let eventMap = buildEventMap(activeEvents);
             let showingMine = false;
+            let currentModalEvent = null;
             const showOverlay = (overlay) => {
                 overlay.classList.remove('hidden');
                 requestAnimationFrame(() => {
@@ -172,6 +188,7 @@ Calendar page: allows users to view events on a calendar.
             }
 
             function openModal(evt) {
+                currentModalEvent = evt;
                 modalTitle.textContent = evt.name || 'Event';
                 modalDatetime.textContent = formatDateTime(evt.start);
                 modalType.textContent = evt.type ? `Type: ${evt.type}` : '';
@@ -271,7 +288,13 @@ Calendar page: allows users to view events on a calendar.
                 }).join('');
 
                 const hasEventsInMonth = cells.some(c => c.events && c.events.length > 0);
-                emptyNote.textContent = hasEventsInMonth ? '' : 'No events scheduled this month.';
+                if (!hasEventsInMonth) {
+                    emptyNote.textContent = showingMine
+                        ? "You haven't registered for any events this month."
+                        : 'No events scheduled this month.';
+                } else {
+                    emptyNote.textContent = '';
+                }
             }
 
             document.getElementById('cal-prev').addEventListener('click', () => {
@@ -307,7 +330,7 @@ Calendar page: allows users to view events on a calendar.
             });
 
             const applyMineFilter = () => {
-                if (showingMine && registeredEventIds.size > 0) {
+                if (showingMine) {
                     activeEvents = events.filter(evt => registeredEventIds.has(String(evt.id)));
                 } else {
                     activeEvents = events;
@@ -331,19 +354,58 @@ Calendar page: allows users to view events on a calendar.
                 try {
                     const res = await fetch(`/calendar/occurrences/${evtId}`, { method: 'DELETE' });
                     if (!res.ok) throw new Error('Failed');
-                    window.location.reload();
+                    const monthParam = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-01`;
+                    const basePath = window.location.pathname || '/calendar';
+                    window.location.href = `${basePath}?month=${encodeURIComponent(monthParam)}`;
                 } catch (err) {
                     modalError.textContent = "Failed to delete event.";
                     modalError.style.display = 'block';
                 }
             };
 
+            window.openCalendarDeletePopup = function() {
+                const titleText = (modalTitle.textContent || '').trim();
+                if (calendarDeleteText) {
+                    calendarDeleteText.textContent = titleText
+                        ? `Delete "${titleText}"?`
+                        : 'Delete this event?';
+                }
+                if (calendarDeletePopup) {
+                    calendarDeletePopup.classList.add('is-visible');
+                }
+            };
+
+            window.closeCalendarDeletePopup = function() {
+                if (calendarDeletePopup) {
+                    calendarDeletePopup.classList.remove('is-visible');
+                }
+            };
+
             if (modalDelete) {
                 modalDelete.addEventListener('click', () => {
-                    const currentId = modalRegister.href.split('/').pop();
-                    deleteEvent(currentId);
+                    openCalendarDeletePopup();
                 });
             }
+
+            if (calendarDeleteConfirm) {
+                calendarDeleteConfirm.addEventListener('click', () => {
+                    const currentId = currentModalEvent && currentModalEvent.id
+                        ? currentModalEvent.id
+                        : modalRegister.href.split('/').pop();
+                    deleteEvent(currentId);
+                    closeCalendarDeletePopup();
+                });
+            }
+
+            if (calendarDeletePopup) {
+                calendarDeletePopup.addEventListener('click', (e) => {
+                    if (e.target === calendarDeletePopup) closeCalendarDeletePopup();
+                });
+            }
+
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeCalendarDeletePopup();
+            });
 
             // Fun pulse when registering
             modalRegister?.addEventListener('click', () => {

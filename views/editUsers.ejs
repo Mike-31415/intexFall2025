@@ -20,7 +20,7 @@ Edit Users page: allows admin/managers to edit email, name, and role of a user.
         <% if (error_message) { %>
             <div class="error-message"><%= error_message %></div>
         <% } %>
-
+        <!-- Admins can change user info with the post route -->
         <form action="/editUsers/<%= user.participant_id %>" method="POST">
             <div class="form-row">
                 <label for="participant_email">Email</label>

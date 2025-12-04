@@ -24,6 +24,7 @@ to login. There is also a button to register if user isn't in the database.
       <div class="error-message"><%= error_message %></div>
     <% } %>
 
+    <!-- Login post route -->
     <form action="/login" method="POST">
       <div class="form-row">
         <label for="email">Email</label>
@@ -38,7 +39,7 @@ to login. There is also a button to register if user isn't in the database.
       <div class="form-row" style="margin-top: 20px;">
         <button type="submit" class="btn btn-primary">Login</button>
       </div>
-
+      <!-- Redirect to register.ejs file -->
       <div class="form-row" style="margin-top: 10px;">
         <a href="/register" class="btn btn-secondary">Register</a>
       </div>
