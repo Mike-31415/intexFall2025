@@ -80,10 +80,11 @@ and role (admin/participant).
                     No users found in the database.
                 </div>
             <% } else { %>
-
+                <!-- Creation of table -->
                 <table class="table table-striped">
                     <thead>
                         <tr>
+                            <!-- table headers -->
                             <th>Email</th>
                             <th>First Name</th>
                             <th>Last Name</th>
@@ -97,6 +98,7 @@ and role (admin/participant).
                     </thead>
 
                     <tbody>
+                        <!-- table body, for each user/row, grab info -->
                         <% users.forEach(user => { %>
                             <tr>
                                 <td><%= user.participant_email %></td>

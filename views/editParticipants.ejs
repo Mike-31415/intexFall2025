@@ -32,7 +32,7 @@ a certain participant.
             const participantName = ((participant.participant_first_name || '') + ' ' + (participant.participant_last_name || '')).trim();
             const milestoneSearch = encodeURIComponent(participantName);
         %>
-
+        <!-- Input sections for admins to edit participants info -->
         <form action="/editParticipants/<%= participant.participant_id %>" method="post">
             <div class="form-row">
                 <label for="participant_email">Email</label>

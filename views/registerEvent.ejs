@@ -15,6 +15,7 @@ Register Event page: This is page allows participants to register for events.
 <body>
     <%- include('partials/header') %>
 
+    <!-- Event info listed -->
     <div class="form-card" style="max-width:640px;">
         <h2>Register for <%= event ? event.name : 'Event' %></h2>
         <% if (event && event.start) { %>

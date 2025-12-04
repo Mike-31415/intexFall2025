@@ -1,3 +1,10 @@
+<!-- Group 2-11
+ 
+Take Survey page: This page is rendered when users click to take a survey. It
+shows boxes for useres to rate events, instrucotrs, experience, etc.
+
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,6 +37,7 @@
             <input type="hidden" name="calendarMonth" value="<%= calendarMonth || '' %>">
             <input type="hidden" name="anchor" value="<%= anchor || '' %>">
 
+            <!-- Section of survey for user input -->
             <div class="form-row">
                 <label for="satisfaction_score">Satisfaction (1-5)</label>
                 <input type="number" id="satisfaction_score" name="satisfaction_score" min="1" max="5" required>
