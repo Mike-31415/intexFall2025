@@ -98,7 +98,6 @@ amind/managers can edit and delete donations.
                                         <%= "Unkown Date" %>
                                     <% } else { %>
                                         <%= new Date(donation.donation_date).toLocaleDateString("en-US", {
-                                            weekday: "long",
                                             month: "long",
                                             day: "numeric",
                                             year: "numeric"

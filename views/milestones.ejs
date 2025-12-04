@@ -75,7 +75,16 @@ them. Admin/managers can edit and delete participants and milestones.
                         <tr>
                             <td><%= m.participant_name %></td>
                             <td><%= m.milestone_title %></td>
-                            <td><%= m.milestone_date %></td>
+                            <td>
+                                <%= m.milestone_date 
+                                    ? new Date(m.milestone_date).toLocaleDateString("en-US", { 
+                                        year: "numeric", 
+                                        month: "long", 
+                                        day: "numeric" 
+                                    }) 
+                                    : "" %>
+                            </td>
+
 
                             <% if (isManager) { %>
                                 <td>
