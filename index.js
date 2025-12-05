@@ -1014,12 +1014,31 @@ app.get("/postsurveys/add", requireManager, async (req, res) => {
 
 // Add Survey - submit
 app.post("/postsurveys/add", requireManager, async (req, res) => {
-    const { eventid, participantid, rating, comments } = req.body;
+    const {
+        eventid,
+        participantid,
+        satisfaction_score,
+        usefulness_score,
+        instructor_score,
+        recommendation_score,
+        overall_score,
+        comments
+    } = req.body;
     try {
         await knex("surveys").insert({
             event_occurrence_id: eventid,
             participant_id: participantid,
-            survey_overall_score: rating,
+            survey_satisfaction_score: satisfaction_score,
+            survey_usefulness_score: usefulness_score,
+            survey_instructor_score: instructor_score,
+            survey_recommendation_score: recommendation_score,
+            survey_overall_score: overall_score,
+            survey_nps_bucket: (() => {
+                const rec = parseInt(recommendation_score, 10);
+                if (rec >= 5) return "Promoter";
+                if (rec === 4) return "Passive";
+                return "Detractor";
+            })(),
             survey_comments: comments,
             survey_submission_date: knex.fn.now()
         });
@@ -1043,7 +1062,11 @@ app.get("/postsurveys/edit/:id", requireManager, async (req, res) => {
                 "et.event_name as eventname",
                 "eo.event_date_time_start as eventdatetimestart",
                 knex.raw("concat(coalesce(p.participant_first_name,''),' ', coalesce(p.participant_last_name,'')) as participantname"),
-                "s.survey_overall_score as rating",
+                "s.survey_overall_score as overall",
+                "s.survey_recommendation_score as recommend",
+                "s.survey_satisfaction_score as satisfaction",
+                "s.survey_usefulness_score as usefulness",
+                "s.survey_instructor_score as instructor",
                 "s.survey_comments as comments"
             )
             .where("s.survey_id", id)
@@ -1057,15 +1080,65 @@ app.get("/postsurveys/edit/:id", requireManager, async (req, res) => {
     }
 });
 
+// View Survey - read-only
+app.get("/postsurveys/view/:id", requireLogin, async (req, res) => {
+    const id = req.params.id;
+    try {
+        const survey = await knex("surveys as s")
+            .leftJoin("participants as p", "s.participant_id", "p.participant_id")
+            .leftJoin("event_occurrences as eo", "s.event_occurrence_id", "eo.event_occurrence_id")
+            .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
+            .select(
+                "s.survey_id as surveyid",
+                "et.event_name as eventname",
+                "eo.event_date_time_start as eventdatetimestart",
+                knex.raw("concat(coalesce(p.participant_first_name,''),' ', coalesce(p.participant_last_name,'')) as participantname"),
+                "s.survey_overall_score as rating",
+                "s.survey_recommendation_score as recommend",
+                "s.survey_satisfaction_score as satisfaction",
+                "s.survey_usefulness_score as usefulness",
+                "s.survey_instructor_score as instructor",
+                "s.survey_nps_bucket as nps_bucket",
+                "s.survey_comments as comments",
+                "s.survey_submission_date as submitted"
+            )
+            .where("s.survey_id", id)
+            .first();
+
+        if (!survey) return res.redirect("/postsurveys");
+        res.render("viewPostsurvey", { survey });
+    } catch (err) {
+        console.error("Error loading survey for view:", err);
+        res.redirect("/postsurveys");
+    }
+});
+
 // Edit Survey - submit
 app.post("/postsurveys/edit/:id", requireManager, async (req, res) => {
     const id = req.params.id;
-    const { rating, comments } = req.body;
+    const {
+        satisfaction_score,
+        usefulness_score,
+        instructor_score,
+        recommendation_score,
+        overall_score,
+        comments
+    } = req.body;
     try {
         await knex("surveys")
             .where("survey_id", id)
             .update({
-                survey_overall_score: rating,
+                survey_satisfaction_score: satisfaction_score,
+                survey_usefulness_score: usefulness_score,
+                survey_instructor_score: instructor_score,
+                survey_recommendation_score: recommendation_score,
+                survey_overall_score: overall_score,
+                survey_nps_bucket: (() => {
+                    const rec = parseInt(recommendation_score, 10);
+                    if (rec >= 5) return "Promoter";
+                    if (rec === 4) return "Passive";
+                    return "Detractor";
+                })(),
                 survey_comments: comments
             });
         res.redirect("/postsurveys");
