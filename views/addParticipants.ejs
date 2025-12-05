@@ -29,6 +29,11 @@ Add Participant page: Allows admin/managers to create a new participant record.
             </div>
 
             <div class="form-row">
+                <label for="password">Password</label>
+                <input type="text" id="password" name="password" required>
+            </div>
+
+            <div class="form-row">
                 <label for="participant_first_name">First Name</label>
                 <input type="text" id="participant_first_name" name="participant_first_name" value="<%= participant.participant_first_name || '' %>" required>
             </div>
