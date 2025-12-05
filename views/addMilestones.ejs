@@ -18,7 +18,7 @@ Add Milestones page: Allows admin/managers to add milestones for a participant.
     <%- include('partials/header') %>
 
     <div class="form-card">
-        <h2>Add Milestones</h2>
+        <h2>Add Milestone</h2>
 
         <% if (error_message) { %>
             <div class="error-message"><%= error_message %></div>
@@ -37,40 +37,41 @@ Add Milestones page: Allows admin/managers to add milestones for a participant.
                 <select id="participantid" name="participantid" required>
                     <option value="">-- Select a participant --</option>
                     <% participants.forEach(p => { %>
-                        <option value="<%= p.participantid %>">
+                        <option value="<%= p.participantid %>" <%= (form_values && form_values.participantid == p.participantid) ? 'selected' : '' %>>
                             <%= p.participantname %>
                         </option>
                     <% }) %>
                 </select>
             </div>
 
-            <!-- Milestone titles -->
+            <!-- Milestone title -->
             <div class="form-row">
-                <label for="milestonetitles">Milestone Titles (separated by semicolons)</label>
-                <textarea
-                    id="milestonetitles"
-                    name="milestonetitles"
-                    rows="3"
-                    placeholder="First Day;Completed Workshop;Earned Certificate"
+                <label for="milestonetitle">Milestone Title</label>
+                <input
+                    type="text"
+                    id="milestonetitle"
+                    name="milestonetitle"
+                    placeholder="Completed Workshop"
+                    value="<%= form_values ? form_values.milestonetitle : '' %>"
                     required
-                ></textarea>
+                >
             </div>
 
-            <!-- Milestone dates -->
+            <!-- Milestone date -->
             <div class="form-row">
-                <label for="milestonedates">Milestone Dates (same order, separated by semicolons)</label>
-                <textarea
-                    id="milestonedates"
-                    name="milestonedates"
-                    rows="3"
-                    placeholder="2025-01-15;2025-02-10;2025-02-28"
+                <label for="milestonedate">Milestone Date</label>
+                <input
+                    type="date"
+                    id="milestonedate"
+                    name="milestonedate"
+                    value="<%= form_values ? form_values.milestonedate : '' %>"
                     required
-                ></textarea>
+                >
             </div>
 
             <!-- Buttons -->
             <div class="form-row" style="margin-top: 20px;">
-                <button type="submit" class="btn btn-primary">Add Milestones</button>
+                <button type="submit" class="btn btn-primary">Add Milestone</button>
             </div>
 
             <div class="form-row" style="margin-top: 10px;">

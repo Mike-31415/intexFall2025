@@ -70,6 +70,7 @@ surveys are about each event and can be edited/deleted by admin/managers.
                     <th>Rating</th>
                     <th>Comments</th>
 
+                    <th>View</th>
                     <!-- Only show Actions column for admins -->
                     <% if (isManager) { %>
                         <th>Edit</th>
@@ -88,6 +89,9 @@ surveys are about each event and can be edited/deleted by admin/managers.
                             <td><%= survey.rating %></td>
                             <td><%= survey.comments %></td>
 
+                            <td>
+                                <a href="/postsurveys/view/<%= survey.surveyid %>" class="btn btn-secondary btn-sm">View</a>
+                            </td>
                             <% if (isManager) { %>
                                 <td>
                                     <a href="/postsurveys/edit/<%= survey.surveyid %>" class="btn btn-primary btn-sm">

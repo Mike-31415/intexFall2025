@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Details</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    <div class="form-card">
+        <h2>Survey Details</h2>
+        <% if (!survey) { %>
+            <div class="error-message">Survey not found.</div>
+        <% } else { %>
+            <div class="form-row">
+                <label>Event</label>
+                <div><%= survey.eventname || 'N/A' %></div>
+            </div>
+            <div class="form-row">
+                <label>Event Date/Time</label>
+                <div><%= survey.eventdatetimestart ? new Date(survey.eventdatetimestart).toLocaleString() : 'N/A' %></div>
+            </div>
+            <div class="form-row">
+                <label>Participant</label>
+                <div><%= survey.participantname || 'N/A' %></div>
+            </div>
+            <div class="form-row">
+                <label>Rating</label>
+                <div><%= survey.rating %></div>
+            </div>
+            <div class="form-row">
+                <label>Recommendation Score</label>
+                <div><%= survey.recommend %></div>
+            </div>
+            <div class="form-row">
+                <label>Satisfaction Score</label>
+                <div><%= survey.satisfaction %></div>
+            </div>
+            <div class="form-row">
+                <label>Usefulness Score</label>
+                <div><%= survey.usefulness %></div>
+            </div>
+            <div class="form-row">
+                <label>Instructor Score</label>
+                <div><%= survey.instructor %></div>
+            </div>
+            <div class="form-row">
+                <label>NPS Bucket</label>
+                <div><%= survey.nps_bucket || 'N/A' %></div>
+            </div>
+            <div class="form-row">
+                <label>Comments</label>
+                <div><%= survey.comments || 'No comments provided.' %></div>
+            </div>
+            <div class="form-row">
+                <label>Submitted</label>
+                <div><%= survey.submitted ? new Date(survey.submitted).toLocaleString() : 'N/A' %></div>
+            </div>
+        <% } %>
+
+        <div class="buttons">
+            <a href="/postsurveys" class="btn btn-secondary">Back to Surveys</a>
+        </div>
+    </div>
+</body>
+</html>
