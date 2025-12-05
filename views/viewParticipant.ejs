@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Participant</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    <div class="card-compact-shell">
+        <div class="card-compact">
+            <div class="card-compact__header">
+                <div>
+                    <p class="card-compact__eyebrow">Participant</p>
+                    <h2><%= (participant.participant_first_name || '') + ' ' + (participant.participant_last_name || '') %></h2>
+                    <p class="card-compact__sub"><%= participant.participant_email || 'No email on file' %></p>
+                </div>
+                <div class="card-compact__meta">
+                    <span class="pill"><%= participant.participant_field_of_interest || 'No interest set' %></span>
+                </div>
+            </div>
+
+            <div class="card-compact__grid">
+                <div class="card-compact__item">
+                    <p class="label">DOB</p>
+                    <p><%= participant.participant_dob || 'N/A' %></p>
+                </div>
+                <div class="card-compact__item">
+                    <p class="label">Phone</p>
+                    <p><%= participant.participant_phone || 'N/A' %></p>
+                </div>
+                <div class="card-compact__item">
+                    <p class="label">City</p>
+                    <p><%= participant.participant_city || 'N/A' %></p>
+                </div>
+                <div class="card-compact__item">
+                    <p class="label">State</p>
+                    <p><%= participant.participant_state || 'N/A' %></p>
+                </div>
+                <div class="card-compact__item">
+                    <p class="label">Zip</p>
+                    <p><%= participant.participant_zip || 'N/A' %></p>
+                </div>
+                <div class="card-compact__item">
+                    <p class="label">School/Employer</p>
+                    <p><%= participant.participant_school_or_employer || 'N/A' %></p>
+                </div>
+            </div>
+
+            <div class="buttons" style="margin-top: 12px;">
+                <a href="/milestones?search=<%= encodeURIComponent((participant.participant_first_name || '') + ' ' + (participant.participant_last_name || '')) %>" class="btn btn-primary">View Milestones</a>
+                <a href="/participants" class="btn btn-secondary">Back to Participants</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

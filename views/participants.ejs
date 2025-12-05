@@ -85,6 +85,7 @@ information (name, DOB, phone, city, etc). Admin/Managers can edit and delete.
                             <th>Zip</th>
                             <th>School or Employer</th>
                             <th>Field of Interest</th>
+                            <th>View</th>
                             
                             <!-- Admin-only columns -->
                             <% if (role === "admin") { %>
@@ -109,6 +110,11 @@ information (name, DOB, phone, city, etc). Admin/Managers can edit and delete.
                                 <td><%= participant.participant_zip %></td>
                                 <td><%= participant.participant_school_or_employer %></td>
                                 <td><%= participant.participant_field_of_interest %></td>
+                                <td>
+                                    <form action="/viewParticipants/<%= participant.participant_id %>" method="GET">
+                                        <button class="btn btn-secondary btn-sm">View</button>
+                                    </form>
+                                </td>
 
                                 <!-- EDIT: Admins only -->
                                 <% if (role === "admin") { %>

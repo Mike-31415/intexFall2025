@@ -479,15 +479,15 @@ app.get("/events/register/:id", async (req, res) => {
 
         if (!event) return res.redirect("/homepage");
 
-        res.render("registerEvent", {
-            event,
-            success_message: "",
-            error_message: "",
-            month,
-            from,
-            anchor,
-            backLink
-        });
+    res.render("registerEvent", {
+        event,
+        success_message: "",
+        error_message: "",
+        month,
+        from,
+        anchor,
+        backLink
+    });
     } catch (err) {
         console.error("Error loading event for registration:", err);
         res.redirect("/homepage");
@@ -1722,30 +1722,46 @@ app.get("/milestones/add", requireManager, async (req, res) => {
                 knex.raw("concat(coalesce(participant_first_name,''),' ', coalesce(participant_last_name,'')) as participantname")
             )
             .orderBy("participant_first_name");
-        res.render("addMilestones", { error_message: "", participants });
+        res.render("addMilestones", { error_message: "", participants, form_values: null });
     } catch (err) {
         console.error("Error loading participants for milestones:", err);
-        res.render("addMilestones", { error_message: "Failed to load participants", participants: [] });
+        res.render("addMilestones", { error_message: "Failed to load participants", participants: [], form_values: null });
     }
 });
 
 // Add Milestones - submit
 app.post("/milestones/add", requireManager, async (req, res) => {
-    const { participantid, milestonetitles, milestonedates } = req.body;
+    const { participantid, milestonetitle, milestonedate } = req.body;
     try {
-        const titles = (milestonetitles || "").split(";").map(s => s.trim()).filter(Boolean);
-        const dates = (milestonedates || "").split(";").map(s => s.trim()).filter(Boolean);
-        if (titles.length !== dates.length) {
-            throw new Error("Titles/dates length mismatch");
+        const participants = await knex("participants")
+            .select(
+                "participant_id as participantid",
+                knex.raw("concat(coalesce(participant_first_name,''),' ', coalesce(participant_last_name,'')) as participantname")
+            )
+            .orderBy("participant_first_name");
+
+        if (!participantid || !milestonetitle || !milestonedate) {
+            return res.render("addMilestones", {
+                error_message: "Please select a participant, enter a title, and choose a date.",
+                participants,
+                form_values: { participantid, milestonetitle, milestonedate }
+            });
         }
-        const rows = titles.map((t, idx) => ({
+
+        const parsedDate = new Date(milestonedate);
+        if (isNaN(parsedDate.getTime())) {
+            return res.render("addMilestones", {
+                error_message: "Please enter a valid milestone date.",
+                participants,
+                form_values: { participantid, milestonetitle, milestonedate }
+            });
+        }
+
+        await knex("milestones").insert({
             participant_id: participantid,
-            milestone_title: t,
-            milestone_date: dates[idx] || null
-        }));
-        if (rows.length > 0) {
-            await knex("milestones").insert(rows);
-        }
+            milestone_title: milestonetitle.trim(),
+            milestone_date: milestonedate
+        });
         res.redirect("/milestones");
     } catch (err) {
         console.error("Error adding milestones:", err);
@@ -1754,7 +1770,7 @@ app.post("/milestones/add", requireManager, async (req, res) => {
                 "participant_id as participantid",
                 knex.raw("concat(coalesce(participant_first_name,''),' ', coalesce(participant_last_name,'')) as participantname")
             );
-        res.render("addMilestones", { error_message: "Failed to add milestones", participants });
+        res.render("addMilestones", { error_message: "Failed to add milestone", participants, form_values: { participantid, milestonetitle, milestonedate } });
     }
 });
 
@@ -1905,6 +1921,23 @@ app.get("/editParticipants/:id", requireManager, async (req, res) => {
         res.render("editParticipants", { error_message: "", participant });
     } catch (err) {
         console.error("Error loading participant:", err);
+        res.redirect("/participants");
+    }
+});
+
+// View Participant - read-only
+app.get("/viewParticipants/:id", requireLogin, async (req, res) => {
+    const id = req.params.id;
+    try {
+        const participant = await knex("participants")
+            .where("participant_id", id)
+            .first();
+        if (!participant) {
+            return res.redirect("/participants");
+        }
+        res.render("viewParticipant", { participant });
+    } catch (err) {
+        console.error("Error loading participant for view:", err);
         res.redirect("/participants");
     }
 });
