@@ -1774,38 +1774,29 @@ app.post("/milestones/add", requireManager, async (req, res) => {
     }
 });
 
-// Edit Milestones - form (by first milestone id, edits all for that participant)
+// Edit Milestones - form (single milestone)
 app.get("/milestones/edit/:id", requireManager, async (req, res) => {
     const id = req.params.id;
     try {
         const target = await knex("milestones").where("milestone_id", id).first();
         if (!target) return res.redirect("/milestones");
 
-        const participantId = target.participant_id;
-        const participant = await knex("participants")
+        const participants = await knex("participants")
             .select(
-                "participant_id",
+                "participant_id as participantid",
                 knex.raw("concat(coalesce(participant_first_name,''),' ', coalesce(participant_last_name,'')) as participantname")
             )
-            .where("participant_id", participantId)
-            .first();
-
-        const rows = await knex("milestones")
-            .where("participant_id", participantId)
-            .orderBy("milestone_date");
-
-        const milestonetitles = rows.map(r => r.milestone_title).join("; ");
-        const milestonedates = rows.map(r => r.milestone_date ? r.milestone_date.toISOString().slice(0,10) : "").join("; ");
+            .orderBy("participant_first_name");
 
         res.render("editMilestones", {
             error_message: "",
             milestone: {
                 milestoneid: id,
-                participantname: participant ? participant.participantname : "",
-                milestonetitles,
-                milestonedates,
-                participant_id: participantId
-            }
+                participant_id: target.participant_id,
+                milestonetitle: target.milestone_title,
+                milestonedate: target.milestone_date ? target.milestone_date.toISOString().slice(0,10) : ""
+            },
+            participants
         });
     } catch (err) {
         console.error("Error loading milestone:", err);
@@ -1813,35 +1804,70 @@ app.get("/milestones/edit/:id", requireManager, async (req, res) => {
     }
 });
 
-// Edit Milestones - submit (rewrite milestones for participant)
+// Edit Milestones - submit (single milestone)
 app.post("/milestones/edit/:id", requireManager, async (req, res) => {
     const id = req.params.id;
-    const { milestonetitles, milestonedates } = req.body;
+    const { participantid, milestonetitle, milestonedate } = req.body;
     try {
-        const target = await knex("milestones").where("milestone_id", id).first();
-        if (!target) return res.redirect("/milestones");
-        const participantId = target.participant_id;
+        const participants = await knex("participants")
+            .select(
+                "participant_id as participantid",
+                knex.raw("concat(coalesce(participant_first_name,''),' ', coalesce(participant_last_name,'')) as participantname")
+            )
+            .orderBy("participant_first_name");
 
-        const titles = (milestonetitles || "").split(";").map(s => s.trim()).filter(Boolean);
-        const dates = (milestonedates || "").split(";").map(s => s.trim()).filter(Boolean);
-        if (titles.length !== dates.length) {
-            throw new Error("Titles/dates length mismatch");
+        if (!participantid || !milestonetitle || !milestonedate) {
+            return res.render("editMilestones", {
+                error_message: "Please select a participant, enter a title, and choose a date.",
+                participants,
+                milestone: {
+                    milestoneid: id,
+                    participant_id: participantid,
+                    milestonetitle,
+                    milestonedate
+                }
+            });
         }
 
-        await knex("milestones").where("participant_id", participantId).del();
-
-        const rows = titles.map((t, idx) => ({
-            participant_id: participantId,
-            milestone_title: t,
-            milestone_date: dates[idx] || null
-        }));
-        if (rows.length > 0) {
-            await knex("milestones").insert(rows);
+        const parsedDate = new Date(milestonedate);
+        if (isNaN(parsedDate.getTime())) {
+            return res.render("editMilestones", {
+                error_message: "Please enter a valid milestone date.",
+                participants,
+                milestone: {
+                    milestoneid: id,
+                    participant_id: participantid,
+                    milestonetitle,
+                    milestonedate
+                }
+            });
         }
+
+        await knex("milestones")
+            .where("milestone_id", id)
+            .update({
+                participant_id: participantid,
+                milestone_title: milestonetitle.trim(),
+                milestone_date: milestonedate
+            });
         res.redirect("/milestones");
     } catch (err) {
         console.error("Error updating milestones:", err);
-        res.redirect("/milestones");
+        const participants = await knex("participants")
+            .select(
+                "participant_id as participantid",
+                knex.raw("concat(coalesce(participant_first_name,''),' ', coalesce(participant_last_name,'')) as participantname")
+            );
+        res.render("editMilestones", {
+            error_message: "Failed to update milestone",
+            participants,
+            milestone: {
+                milestoneid: id,
+                participant_id: participantid,
+                milestonetitle,
+                milestonedate
+            }
+        });
     }
 });
 

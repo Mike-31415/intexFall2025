@@ -18,54 +18,49 @@ for a milestone.
     <%- include('partials/header') %>
 
     <div class="form-card">
-        <h2>Edit Milestones</h2>
+        <h2>Edit Milestone</h2>
 
         <% if (error_message) { %>
             <div class="error-message"><%= error_message %></div>
         <% } %>
 
-        <!--
-            EXPECTED DATA PASSED IN:
-            milestone = {
-                milestoneid,
-                participantname,
-                milestonetitles,
-                milestonedates
-            }
-        -->
-
         <form action="/milestones/edit/<%= milestone.milestoneid %>" method="POST">
 
-            <!-- Participant Name (readonly) -->
+            <!-- Participant dropdown -->
             <div class="form-row">
-                <label>Participant</label>
+                <label for="participantid">Participant</label>
+                <select id="participantid" name="participantid" required>
+                    <option value="">-- Select a participant --</option>
+                    <% participants.forEach(p => { %>
+                        <option value="<%= p.participantid %>" <%= (milestone.participant_id == p.participantid) ? 'selected' : '' %>>
+                            <%= p.participantname %>
+                        </option>
+                    <% }) %>
+                </select>
+            </div>
+
+            <!-- Milestone Title -->
+            <div class="form-row">
+                <label for="milestonetitle">Milestone Title</label>
                 <input 
                     type="text" 
-                    value="<%= milestone.participantname %>" 
-                    readonly
+                    id="milestonetitle" 
+                    name="milestonetitle"
+                    value="<%= milestone.milestonetitle %>"
+                    required
                 >
             </div>
 
-            <!-- Milestone Titles (semicolon separated) -->
+            <!-- Milestone Date -->
             <div class="form-row">
-                <label for="milestonetitles">Milestone Titles (separated by semicolons)</label>
-                <textarea 
-                    id="milestonetitles" 
-                    name="milestonetitles"
-                    rows="3"
+                <label for="milestonedate">Milestone Date</label>
+                <input 
+                    type="date" 
+                    id="milestonedate" 
+                    name="milestonedate"
+                    value="<%= milestone.milestonedate %>"
                     required
-                ><%= milestone.milestonetitles %></textarea>
-            </div>
-
-            <!-- Milestone Dates (semicolon separated) -->
-            <div class="form-row">
-                <label for="milestonedates">Milestone Dates (match title order)</label>
-                <textarea 
-                    id="milestonedates" 
-                    name="milestonedates"
-                    rows="3"
-                    required
-                ><%= milestone.milestonedates %></textarea>
+                >
             </div>
 
             <!-- Save Button -->
